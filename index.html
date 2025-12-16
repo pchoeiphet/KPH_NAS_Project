@@ -348,6 +348,7 @@
             margin-bottom: 8px;
         }
 
+        /* 1. สไตล์พื้นฐานสำหรับ Input และ Select (ใช้ร่วมกัน) */
         input[type="text"],
         select {
             padding: 8px 15px;
@@ -363,6 +364,29 @@
             color: var(--text-main);
         }
 
+        /* 2. เขียนทับเฉพาะ Select เพื่อจัดระเบียบลูกศร */
+        select {
+            /* ลบลูกศรเดิมของ Browser ทิ้ง */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            /* ใส่ลูกศรใหม่ด้วย SVG (สีเทา #6c757d) */
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+            /* จัดตำแหน่งลูกศร */
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            /* ชิดขวา 15px กึ่งกลางแนวตั้ง */
+            background-size: 16px;
+            /* ขนาดลูกศร */
+
+            /* ดันข้อความไม่ให้ทับลูกศร */
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        /* Effect ตอน Focus */
         input[type="text"]:focus,
         select:focus {
             background-color: #fff;
@@ -641,7 +665,7 @@
 
                 <div class="brand-text">
                     <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
+                    <span class="brand-subtitle">Nutrition Assessment System (NAS)</span>
                 </div>
             </a>
         </div>
