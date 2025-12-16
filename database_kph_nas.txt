@@ -1,0 +1,61 @@
+database ของ KPH_NAS
+
+1.ผู้ป่วย
+patients - patients_id, patients_hn, patients_name (ควรแยกนามสกุลกะชื่อไหม?),pateints_dob, patients_id_card, patients_drug_allergy, patients_congenital_disease (โรคประจำตัว), patients_phone, patients_gender
+
+2.Admissions - ข้อมูลการเข้ารักษา
+admissions - admissions_id, admissions_an, patients_id, admit_datetime (วันเวลาที่เข้า), discharge_datetime (วันเวลาที่ออก), ward_id, bed_number, primary_diagnosis, doctor_id (แพทย์เจ้าของไข้ในรอบนี้)
+
+3.สิทธิการรักษา
+health_insurance - health_insurance_id, health_insurance_name (สิทธิบัตรทอง, ประกันสังคม, สิทธิผู้สูงอายุ, สิทธิข้าราชการ, สิทธิ UC)
+
+4.แผนก
+wards - ward_id, ward_name
+
+5.ชื่อหมอ
+doctor - doctor_id, doctor_name, doctor_specialty (อายุรกรรม, ศัลยกรรม)
+
+6.รูปร่างของผู้ป่วย
+patient_shape - patient_shape_id, patient_shape_name, patient_shape_score
+
+7.วิธีชั่งน้ำหนัก
+weight_option - weight_option_id, weight_option_name, weight_option_score
+
+8.น้ำหนักลดลงใน 4 สัปดาห์
+weight_change_4_week -  weight_change_4_week_id, weight_change_4_week_label, weight_change_4_week_score
+
+9.ลักษณะอาหารที่กิน
+food_type - food_type_id, food_type_name, food_type_score
+
+10.ปริมาณอาหารที่กิน
+food_amount - food_amount_id, food_amount_name, food_amount_score
+
+11.การเข้าถึงอาหาร
+food_access - food_access_id, food_access_name, food_access_score
+
+12.อาการที่เป็น
+symptom_problem - symptom_problem_id, symptom_problem_name, symptom_problem_type, symptom_problem_score
+
+13.โรคที่เป็น
+disease - disease_id, disease_name, disease_type, disease_score
+
+14.ประวัติการคัดกรอง
+ืnutrition_screening_history - nutrition_screening_id, admissions_an, patients_hn, assessed_at, ward_id, initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method, q1_weight_loss, 	q2_eat_less, q3_bmi_abnormal, q4_critical, nutrition_screening_result, assessor_name, assessed_at
+
+15.ประวัติการประเมิน
+nutririon_assessment_history - nutririon_assessment_id, patients_hn, received_date, initial_diagnosis, info_source, other_source, height_measure, body_length, arm_span, height_relative, weight, bmi, bmi_score, is_no_weight, lab_method, albumin_val, tlc_val, lab_score, weight_option_id, patient_shape_id , weight_change_4_week_id, food_type_id, food_amount_id, food_access_id, total_score, risk_level, assessor_name, assessed_at, updated_at
+
+16.บันทึกโรคที่เป็น
+disease_assessment - nutririon_assessment_id, disease_id, disease_other_name, disease_type, disease_score
+
+
+17.บันทึกอาการที่เป็น
+symptom_problem_assessment - nutririon_assessment_id, symptom_problem_id, symptom_problem_score
+
+18. ผู้ใช้
+user - user_id, user_name, user_email, user_password, user_role, user_dob, user_phone
+
+
+
+
+
