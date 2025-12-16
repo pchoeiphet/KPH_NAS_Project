@@ -414,7 +414,7 @@
             font-size: 0.9rem;
         }
 
-        /* Badges */
+        /* Badges for Status */
         .status-badge {
             display: inline-block;
             padding: 3px 10px;
@@ -440,7 +440,53 @@
             color: #842029;
         }
 
-        /* --- BUTTON STYLES (Fixed Width, Soft UI) --- */
+        /* Badges for Diet Order */
+        .diet-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .diet-regular {
+            background: #E8F8F5;
+            color: #27AE60;
+            border: 1px solid #D1F2EB;
+        }
+
+        /* อาหารปกติ */
+        .diet-soft {
+            background: #FEF9E7;
+            color: #F1C40F;
+            border: 1px solid #FCF3CF;
+        }
+
+        /* อาหารอ่อน */
+        .diet-bd {
+            background: #F4ECF7;
+            color: #8E44AD;
+            border: 1px solid #E8DAEF;
+        }
+
+        /* อาหารปั่น */
+        .diet-dm {
+            background: #EBF5FB;
+            color: #3498DB;
+            border: 1px solid #D6EAF8;
+        }
+
+        /* เบาหวาน/เฉพาะโรค */
+        .diet-npo {
+            background: #FDEDEC;
+            color: #C0392B;
+            border: 1px solid #FADBD8;
+        }
+
+        /* งดน้ำงดอาหาร */
+
+        /* --- BUTTON STYLES --- */
         .action-cell {
             display: flex;
             justify-content: center;
@@ -464,7 +510,6 @@
             text-decoration: none;
         }
 
-        /* 1. ปุ่มคัดกรอง */
         .btn-screen {
             background-color: #e7f1ff;
             color: #0d6efd;
@@ -478,7 +523,6 @@
             box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
         }
 
-        /* 2. ปุ่มประเมิน */
         .btn-assess {
             background-color: #fff3cd;
             color: #856404;
@@ -492,7 +536,6 @@
             box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
         }
 
-        /* 3. ปุ่มคัดกรองซ้ำ */
         .btn-rescreen {
             background-color: #f3e5f5;
             color: #6f42c1;
@@ -506,7 +549,6 @@
             box-shadow: 0 2px 4px rgba(111, 66, 193, 0.3);
         }
 
-        /* 4. ปุ่มดูข้อมูล */
         .btn-view {
             background-color: #f8f9fa;
             color: #6c757d;
@@ -519,7 +561,6 @@
             border-color: #ced4da;
         }
 
-        /* 5. ปุ่ม Disabled */
         .btn-disabled {
             background-color: #fafafa;
             color: #adb5bd;
@@ -579,7 +620,6 @@
             }
         }
 
-        /* Responsive */
         @media (max-width: 992px) {
             .filter-grid {
                 flex-direction: column;
@@ -678,15 +718,18 @@
                             <th style="width: 3%; text-align: center;">#</th>
                             <th style="width: 5%; text-align: center;">เตียง</th>
                             <th style="width: 7%;">HN</th>
-                            <th style="width: 7%;">AN</th>
                             <th style="width: 12%;">ชื่อ-นามสกุล</th>
                             <th style="width: 4%; text-align: center;">อายุ</th>
-                            <th style="width: 8%;">แผนก</th>
-                            <th style="width: 12%;">แพทย์เจ้าของไข้</th>
-                            <th style="width: 10%;">วันที่ Admit</th>
-                            <th style="width: 10%;">คัดกรองล่าสุด</th>
-                            <th style="width: 10%;">ประเมินล่าสุด</th>
-                            <th style="width: 12%; text-align: center;">จัดการ</th>
+
+                            <th style="width: 12%;">โรคประจำตัว</th>
+
+                            <th style="width: 8%;">อาหาร (Diet)</th>
+                            <th style="width: 11%;">แพทย์เจ้าของไข้</th>
+
+                            <th style="width: 9%;">วันที่ Admit</th>
+                            <th style="width: 8%;">คัดกรองล่าสุด</th>
+                            <th style="width: 8%;">ประเมินล่าสุด</th>
+                            <th style="width: 10%; text-align: center;">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="patientTableBody">
@@ -705,46 +748,56 @@
     <div id="toast-container"></div>
 
     <script>
-        // สมมติว่า "วันนี้" คือวันที่ 25 พ.ย. 67 เพื่อใช้เทียบใน Demo
         const TODAY_MOCK = new Date('2024-11-25');
 
         const patients = [
             {
                 bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
+                // Updated Data: Underlying Disease
+                underlying: 'ความดันโลหิตสูง (HT)',
+                diet: 'Regular',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
-                admitDate: '15 พ.ย. 67 08:30 น.', // เพิ่มเวลา
+                admitDate: '15 พ.ย. 67 08:30 น.',
                 screenDate: '24 พ.ย. 67', assessDate: '-',
                 status: 'normal', scoreVal: 1, nafScore: null
             },
             {
                 bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
+                // Updated Data: Underlying Disease
+                underlying: 'เบาหวาน (DM), โรคไต (CKD)',
+                diet: 'DM 1200 kcal',
                 doctor: 'พญ. ใจดี มีเมตตา',
-                admitDate: '25 พ.ย. 67 10:15 น.', // เพิ่มเวลา
+                admitDate: '25 พ.ย. 67 10:15 น.',
                 screenDate: '-', assessDate: '-',
                 status: 'wait_screen', scoreVal: null, nafScore: null
             },
             {
                 bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
+                // Updated Data: Underlying Disease
+                underlying: 'ไขมันในเลือดสูง (DLP)',
+                diet: 'BD (1:1)',
                 doctor: 'นพ. เก่งกาจ วิชาการ',
-                admitDate: '18 พ.ย. 67 14:20 น.', // เพิ่มเวลา
+                admitDate: '18 พ.ย. 67 14:20 น.',
                 screenDate: '20 พ.ย. 67', assessDate: '-',
                 status: 'wait_assess', scoreVal: 3, nafScore: null
             },
             {
                 bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
                 hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
+                // Updated Data: Underlying Disease
+                underlying: 'ปฏิเสธโรคประจำตัว',
+                diet: 'NPO',
                 doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
-                admitDate: '10 พ.ย. 67 20:45 น.', // เพิ่มเวลา
+                admitDate: '10 พ.ย. 67 20:45 น.',
                 screenDate: '15 พ.ย. 67', assessDate: '-',
                 status: 'normal', scoreVal: 0, nafScore: null
             }
         ];
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Toggle Dropdown Code
             const userTrigger = document.getElementById('userDropdownTrigger');
             const userMenu = document.getElementById('dropdownMenu');
             if (userTrigger && userMenu) {
@@ -754,27 +807,31 @@
             renderTable(patients);
         });
 
-        // ฟังก์ชันแปลงวันที่ไทยเป็น Date Object
         function parseThaiDate(dateStr) {
             if (!dateStr || dateStr === '-') return null;
             const months = { 'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5, 'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11 };
             const parts = dateStr.split(' ');
             if (parts.length < 3) return null;
-
             const day = parseInt(parts[0]);
             const month = months[parts[1]];
             const year = parseInt(parts[2]) + 2500 - 543;
-
             return new Date(year, month, day);
         }
 
-        // ฟังก์ชันคำนวณระยะห่างวัน
         function getDaysDiff(dateStr) {
             const lastDate = parseThaiDate(dateStr);
             if (!lastDate) return 0;
             const diffTime = Math.abs(TODAY_MOCK - lastDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function getDietBadgeClass(dietStr) {
+            dietStr = dietStr.toLowerCase();
+            if (dietStr.includes('npo')) return 'diet-npo';
+            if (dietStr.includes('bd') || dietStr.includes('blenderized')) return 'diet-bd';
+            if (dietStr.includes('dm') || dietStr.includes('low salt')) return 'diet-dm';
+            if (dietStr.includes('soft')) return 'diet-soft';
+            return 'diet-regular';
         }
 
         function renderTable(data) {
@@ -793,34 +850,23 @@
                 let assessmentHTML = '';
                 let actionBtn = '';
 
-                // --- Format Admit Date & Time ---
-                // แยกวันที่และเวลาออกจากกัน (สมมติ format: "15 พ.ย. 67 08:30 น.")
-                // ถ้าไม่มีเวลาให้แสดงแค่วันที่
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
-
                 const splitAdmit = p.admitDate.split(' ');
                 if (splitAdmit.length > 3) {
-                    admitDateShow = splitAdmit.slice(0, 3).join(' '); // 15 พ.ย. 67
-                    admitTimeShow = splitAdmit.slice(3).join(' '); // 08:30 น.
+                    admitDateShow = splitAdmit.slice(0, 3).join(' ');
+                    admitTimeShow = splitAdmit.slice(3).join(' ');
                 }
 
-                // --- Logic คำนวณวันที่ ---
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const isOverdue = daysSinceScreen >= 7;
 
-                // --- 1. Screening Status ---
                 if (p.status === 'wait_screen') {
                     screeningHTML = `<div class="text-muted text-center">-</div>`;
                 } else {
                     let badgeClass = (p.scoreVal >= 2) ? 'status-risk' : 'status-normal';
                     let badgeText = (p.scoreVal >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
-
-                    let overdueLabel = '';
-                    if (p.status === 'normal' && isOverdue) {
-                        overdueLabel = `<div style="font-size:0.75rem; color:#d63384; margin-top:2px;"><i class="fas fa-clock"></i> ครบ 7 วันแล้ว</div>`;
-                    }
-
+                    let overdueLabel = (p.status === 'normal' && isOverdue) ? `<div style="font-size:0.75rem; color:#d63384; margin-top:2px;"><i class="fas fa-clock"></i> ครบ 7 วันแล้ว</div>` : '';
                     screeningHTML = `
                         <div class="date-highlight">${p.screenDate}</div>
                         <div style="margin-top:2px;">
@@ -830,7 +876,6 @@
                     `;
                 }
 
-                // --- 2. Assessment Status ---
                 if (p.status === 'wait_assess') {
                     assessmentHTML = `<span class="status-badge status-risk" style="background:#fff3cd; color:#856404;">รอประเมิน NAF</span>`;
                 } else if (p.nafScore !== null) {
@@ -839,52 +884,38 @@
                     assessmentHTML = `<div class="text-muted text-center">-</div>`;
                 }
 
-                // --- 3. Smart Action Button ---
                 if (p.status === 'wait_screen') {
-                    actionBtn = `
-                        <button class="btn-action btn-screen" onclick="showToast('เริ่มคัดกรอง: ${p.name}')">
-                            <i class="fas fa-clipboard-check"></i> คัดกรอง
-                        </button>`;
-                }
-                else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
-                    actionBtn = `
-                        <button class="btn-action btn-assess" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')">
-                            <i class="fas fa-user-md"></i> ประเมิน
-                        </button>`;
-                }
-                else if (p.status === 'normal') {
+                    actionBtn = `<button class="btn-action btn-screen" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
+                } else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
+                    actionBtn = `<button class="btn-action btn-assess" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
+                } else if (p.status === 'normal') {
                     if (isOverdue) {
-                        actionBtn = `
-                            <button class="btn-action btn-rescreen" onclick="showToast('Re-screen: ${p.name}')">
-                                <i class="fas fa-redo"></i> คัดกรองซ้ำ
-                            </button>`;
+                        actionBtn = `<button class="btn-action btn-rescreen" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> คัดกรองซ้ำ</button>`;
                     } else {
-                        actionBtn = `
-                            <button class="btn-action btn-disabled" disabled>
-                                <i class="fas fa-check"></i> เรียบร้อย
-                            </button>`;
+                        actionBtn = `<button class="btn-action btn-disabled" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
                     }
+                } else {
+                    actionBtn = `<button class="btn-action btn-view" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
-                else {
-                    actionBtn = `
-                        <button class="btn-action btn-view" onclick="showToast('ดูแผนการรักษา: ${p.name}')">
-                            <i class="fas fa-search"></i> ดูข้อมูล
-                        </button>`;
-                }
+
+                const dietClass = getDietBadgeClass(p.diet);
 
                 const row = `
                     <tr>
                         <td style="text-align: center; color: #6c757d;">${index + 1}</td>
                         <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
                         <td><div class="text-strong">${p.hn}</div></td>
-                        <td><div class="text-muted">${p.an}</div></td>
                         <td>
                             <a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a>
                         </td>
                         <td style="text-align: center;">${p.age} ปี</td>
-                        <td><div class="text-muted" style="font-size:0.9rem;">${p.departmentText}</div></td>
-                        <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
                         
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
+
+                        <td><span class="diet-badge ${dietClass}">${p.diet}</span></td>
+                        
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
+
                         <td>
                             <div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div>
                             <div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div>
@@ -899,14 +930,14 @@
             });
         }
 
-        // Filter Function
         function filterPatients() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const ward = document.getElementById('wardFilter').value;
             const doctor = document.getElementById('doctorFilter').value;
 
             const filtered = patients.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm);
+                // Also search in underlying disease
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
                 const matchesWard = ward === 'all' || p.ward === ward;
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
