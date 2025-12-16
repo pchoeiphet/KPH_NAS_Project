@@ -5,10 +5,10 @@
   --primary-dark: #1a252f;        /* Darker Blue: Hover states */
   --secondary-color: #27AE60;     /* Fresh Green: สถานะผ่าน, ไอคอนสำเร็จ */
   --accent-color: #3498DB;        /* Soft Blue: ลิงก์, Focus input */
-  --bg-body: #F4F6F9;             /* Off-White: พื้นหลังเว็บ */
+  --bg-body: #ffffff;             /* White: ปรับพื้นหลังเว็บเป็นสีขาวตามสไตล์ Clean */
   --text-main: #333333;           /* Dark Grey: ตัวหนังสือหลัก */
-  --text-muted: #7F8C8D;          /* Slate Grey: ตัวหนังสือรอง */
-  --border-color: #DCE1E4;        /* Light Grey: เส้นขอบ */
+  --text-muted: #6c757d;          /* Slate Grey: ตัวหนังสือรอง */
+  --border-color: #dee2e6;        /* Light Grey: เส้นขอบ */
 }
 
 * {
@@ -21,6 +21,7 @@ body {
   font-family: "Sarabun", sans-serif;
   background-color: var(--bg-body);
   color: var(--text-main);
+  font-size: 16px;
 }
 
 /* --- Navbar --- */
@@ -31,7 +32,6 @@ body {
   background-color: white;
   padding: 0 20px;
   height: 60px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -51,10 +51,10 @@ body {
 }
 
 .brand-icon-fallback {
-  display: none;
+  display: none; /* ซ่อนไว้ถ้ารูปโหลดได้ */
   width: 40px;
   height: 40px;
-  background: #E8F6F3; /* พื้นหลังเขียวอ่อนจางๆ */
+  background: #E8F6F3;
   color: var(--secondary-color);
   border-radius: 8px;
   align-items: center;
@@ -71,7 +71,7 @@ body {
 .brand-title {
   font-weight: 700;
   font-size: 1.1rem;
-  color: var(--primary-color); /* Deep Blue */
+  color: var(--primary-color);
   line-height: 1.2;
 }
 
@@ -91,13 +91,13 @@ body {
 }
 
 .user-profile:hover {
-  background-color: #ECF0F1;
+  background-color: #f8f9fa;
 }
 
 .user-avatar {
   width: 32px;
   height: 32px;
-  background: var(--primary-color); /* Deep Blue */
+  background: var(--primary-color);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -135,6 +135,7 @@ body {
   display: none;
   flex-direction: column;
   overflow: hidden;
+  z-index: 1001;
 }
 
 .dropdown-menu.show {
@@ -164,7 +165,7 @@ body {
 }
 
 .dropdown-item:hover {
-  background: #EBF5FB; /* ฟ้าอ่อน */
+  background: #EBF5FB;
   color: var(--primary-color);
 }
 
@@ -185,9 +186,9 @@ body {
 
 /* --- Layout --- */
 .main-container {
-  max-width: 1400px;
-  margin: 30px auto;
-  padding: 0 20px;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 30px; /* เพิ่ม padding ด้านข้างให้ดูไม่ชิดขอบจอเกินไป */
 }
 
 .page-header {
@@ -197,46 +198,46 @@ body {
 }
 
 .header-icon {
-  width: 50px;
-  height: 50px;
-  background: white;
+  width: 45px;
+  height: 45px;
+  background: #f8f9fa; /* ปรับพื้นหลังไอคอนให้อ่อนลงเพื่อให้เข้ากับพื้นขาว */
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: var(--primary-color); /* Deep Blue */
+  font-size: 1.4rem;
+  color: var(--primary-color);
   margin-right: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+  /* เอาเงาออกเพื่อให้ดู Flat */
 }
 
 .header-text h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--primary-color);
 }
 
 .header-text p {
   margin: 2px 0 0;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
-/* --- Filter Card --- */
-.filter-card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+/* --- Filter Section (ปรับปรุงใหม่: เอา Card ออก) --- */
+.filter-section {
   margin-bottom: 20px;
-  border: 1px solid var(--border-color);
+  /* เอา background, shadow, border ออกทั้งหมด */
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .filter-grid {
   display: flex;
-  gap: 15px;
+  gap: 20px; /* เพิ่มช่องว่างระหว่าง input */
   flex-wrap: wrap;
+  align-items: flex-end; /* จัดให้ input อยู่แนวเดียวกันด้านล่าง */
 }
 
 .filter-item {
@@ -247,32 +248,37 @@ body {
 }
 
 .filter-item.item-search {
-  flex: 1.5;
+  flex: 2; /* ช่องค้นหากว้างกว่าช่องอื่น */
+  min-width: 300px;
 }
 
 .filter-item label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
-  margin-bottom: 6px;
+  color: #495057; /* สีเข้มขึ้นนิดนึงให้อ่านง่ายบนพื้นขาว */
+  margin-bottom: 8px;
 }
 
+/* Input Styles - ปรับให้ดูดีบนพื้นขาว */
 input[type="text"],
 select {
-  padding: 8px 12px;
+  padding: 8px 15px;
   border: 1px solid #ced4da;
-  border-radius: 6px;
+  background-color: #f8f9fa; /* พื้นหลังเทาจางๆ เพื่อให้เห็นขอบเขตชัดเจน */
+  border-radius: 8px;        /* มุมมนขึ้น */
   font-size: 0.95rem;
   font-family: "Sarabun", sans-serif;
-  height: 40px;
+  height: 42px;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
+  color: var(--text-main);
 }
 
 input[type="text"]:focus,
 select:focus {
-  border-color: var(--accent-color); /* Focus สีฟ้าสด */
+  background-color: #fff;
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
@@ -282,77 +288,91 @@ select:focus {
 
 .search-box i {
   position: absolute;
-  left: 12px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #adb5bd;
 }
 
 .search-box input {
-  padding-left: 35px;
+  padding-left: 40px; /* เว้นที่ให้ไอคอน */
 }
 
-/* --- Table --- */
+/* --- Table Card (ยังคงไว้เพื่อตีกรอบข้อมูล) --- */
 .table-card {
   background: white;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 12px; /* มุมมนขึ้น */
+  border: 1px solid #f0f0f0; /* ขอบจางๆ */
+  /* เงาเฉพาะส่วนตาราง */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+  padding: 5px; /* padding เล็กน้อย */
+}
+
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
 }
 
 .custom-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* เพื่อให้ border-radius ทำงานได้ดี */
+  border-spacing: 0;
   font-size: 0.95rem;
 }
 
 .custom-table thead {
-  background-color: var(--primary-color); /* Deep Blue */
-  color: white;
+  background-color: transparent; /* เอาพื้นหลังส่วนหัวออก หรือใช้สีขาว */
 }
 
 .custom-table thead th {
-  padding: 12px 12px;
-  font-weight: 500;
+  background-color: #fff; /* หรือใช้สีอ่อนมากๆ */
+  color: var(--primary-color);
+  padding: 15px 10px;
+  font-weight: 600;
   text-align: left;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid #f0f0f0; /* เส้นใต้หนาหน่อย */
   white-space: nowrap;
 }
 
 .custom-table tbody tr {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f8f9fa;
   transition: background 0.1s;
 }
 
+.custom-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .custom-table tbody tr:hover {
-  background-color: #F8F9F9; /* พื้นหลัง Hover สีเทาอ่อนมากๆ */
+  background-color: #fcfcfc;
 }
 
 .custom-table tbody td {
-  padding: 12px 12px;
-  vertical-align: top;
+  padding: 14px 10px;
+  vertical-align: middle; /* จัดกึ่งกลางแนวตั้ง */
   color: #495057;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 /* Elements inside Table */
 .bed-badge {
-  background: #F2F4F4;
-  border: 1px solid #dcdcdc;
-  font-weight: 700;
-  border-radius: 6px;
-  padding: 4px 8px;
+  background: #e3f2fd;
+  color: #0d47a1;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 10px;
   display: inline-block;
-  min-width: 40px;
+  min-width: 45px;
   text-align: center;
-  color: var(--primary-color);
+  font-size: 0.85rem;
 }
 
 .patient-link {
-  color: #2980b9; /* ลิงก์สีฟ้าเข้ม อ่านง่าย */
-  font-weight: 700;
+  color: #0d6efd;
+  font-weight: 600;
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 
 .patient-link:hover {
@@ -375,54 +395,34 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* Date Highlight Style */
 .date-highlight {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-main);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 /* Badges */
 .status-badge {
   display: inline-block;
-  padding: 3px 8px;
-  border-radius: 4px; /* ปรับให้ดูเหลี่ยมขึ้นเล็กน้อย แบบ Medical */
+  padding: 3px 10px;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
-  min-width: 80px;
   text-align: center;
   white-space: nowrap;
-}
-
-/* ปรับสี Badge ให้เข้าธีม */
-.status-normal {
-  background-color: #E8F6F3; /* เขียวจาง */
-  color: #1E8449;           /* เขียวเข้ม */
-  border: 1px solid #A2D9CE;
-}
-
-.status-risk {
-  background-color: #FEF9E7; /* เหลืองจาง */
-  color: #9C640C;           /* เหลืองน้ำตาลเข้ม */
-  border: 1px solid #F9E79F;
-}
-
-.status-wait {
-  background-color: #EBEDEF; /* เทาจาง */
-  color: #5D6D7E;           /* เทาเข้ม */
-  border: 1px solid #D6DBDF;
 }
 
 /* Buttons */
 .btn {
   border: none;
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
   font-family: "Sarabun";
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   transition: 0.2s;
   white-space: nowrap;
@@ -434,56 +434,46 @@ select:focus {
 }
 
 .btn-primary {
-  background: var(--primary-color); /* Deep Blue */
+  background: #0d6efd;
   color: white;
 }
-
-.btn-primary:hover {
-  background: var(--primary-dark);
-}
+.btn-primary:hover { background: #0b5ed7; }
 
 .btn-outline-secondary {
-  background: white;
-  border: 1px solid #BDC3C7;
-  color: #7F8C8D;
+  background: transparent;
+  border: 1px solid #dee2e6;
+  color: #6c757d;
 }
-
 .btn-outline-secondary:hover {
-  background: #F4F6F6;
-  border-color: #95A5A6;
-  color: #2C3E50;
+  background: #f8f9fa;
+  color: #212529;
+  border-color: #cdd4da;
 }
 
 .btn-warning {
-  background: #F39C12; /* ส้ม */
-  color: white;
+  background: #ffc107;
+  color: #000;
 }
-
-.btn-warning:hover {
-  background: #D68910;
-}
+.btn-warning:hover { background: #ffca2c; }
 
 .btn-info {
-  background: #3498DB; /* ฟ้าสดใส */
+  background: #17a2b8;
   color: white;
 }
+.btn-info:hover { background: #138496; }
 
-.btn-info:hover {
-  background: #2980B9;
-}
 
 /* States */
 .no-results {
   text-align: center;
-  padding: 40px;
+  padding: 50px 20px;
   color: var(--text-muted);
 }
 
 .no-results i {
   font-size: 3rem;
-  margin-bottom: 10px;
-  opacity: 0.5;
-  color: var(--primary-color);
+  margin-bottom: 15px;
+  color: #dee2e6;
 }
 
 /* Toast */
@@ -491,11 +481,11 @@ select:focus {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: white;
-  border-left: 5px solid var(--secondary-color); /* แถบสีเขียว */
-  padding: 15px 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  background: #333;
+  color: white;
+  padding: 12px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -504,26 +494,23 @@ select:focus {
 }
 
 .toast-msg i {
-  color: var(--secondary-color); /* ไอคอนสีเขียว */
-  font-size: 1.2rem;
+  color: #2ecc71; /* สีเขียวสว่าง */
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateY(100px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* Responsive */
 @media (max-width: 992px) {
   .filter-grid {
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
   }
-  .table-responsive {
-    overflow-x: auto;
+  .filter-item, .filter-item.item-search {
+    width: 100%;
+    min-width: 100%;
+    flex: none;
   }
 }
