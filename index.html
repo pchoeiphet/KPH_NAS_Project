@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- Reset & Global Variables --- */
+        /* --- 1. Global Variables & Reset --- */
         :root {
             --primary-color: #2C3E50;
             --secondary-color: #27AE60;
@@ -35,7 +35,7 @@
             font-size: 16px;
         }
 
-        /* --- Navbar --- */
+        /* --- 2. Navbar --- */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -57,21 +57,10 @@
         }
 
         .brand-logo {
-            height: 40px;
-            margin-right: 10px;
-        }
-
-        .brand-icon-fallback {
-            display: none;
-            width: 40px;
-            height: 40px;
-            background: #E8F6F3;
-            color: var(--secondary-color);
-            border-radius: 8px;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            font-size: 1.2rem;
+            height: 45px;
+            width: auto;
+            margin-right: 12px;
+            object-fit: contain;
         }
 
         .brand-text {
@@ -81,46 +70,55 @@
 
         .brand-title {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--primary-color);
             line-height: 1.2;
         }
 
         .brand-subtitle {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        /* User Profile */
+        /* --- User Profile  --- */
         .user-profile {
             display: flex;
             align-items: center;
             cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 6px;
-            transition: 0.2s;
+            padding: 12px 50px 12px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 1px solid #f0f0f0;
+            background-color: white;
+            gap: 12px;
+            position: relative;
+            /* เพิ่มเพื่อให้ dropdown อ้างอิงได้ถูกต้อง */
         }
 
         .user-profile:hover {
             background-color: #f8f9fa;
+            border-color: #e2e6ea;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             background: var(--primary-color);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 8px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
 
         .user-info {
             display: flex;
             flex-direction: column;
-            text-align: right;
+            text-align: left;
+            line-height: 1.3;
         }
 
         .user-name {
@@ -134,14 +132,30 @@
             color: var(--text-muted);
         }
 
+        /* Class สำหรับลูกศร */
+        .user-arrow {
+            font-size: 0.85rem;
+            color: #adb5bd;
+            transition: transform 0.3s ease;
+            position: absolute;
+            right: 15px;
+        }
+
+        /* สั่งหมุนเมื่อมี class active */
+        .user-profile.active .user-arrow {
+            transform: rotate(180deg);
+            color: var(--primary-color);
+        }
+
+        /* --- Dropdown Menu --- */
         .dropdown-menu {
             position: absolute;
-            top: 65px;
+            top: 75px;
             right: 20px;
             background: white;
-            width: 220px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 230px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             display: none;
             flex-direction: column;
@@ -151,6 +165,19 @@
 
         .dropdown-menu.show {
             display: flex;
+            animation: fadeInDown 0.2s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .dropdown-user-header {
@@ -161,27 +188,36 @@
         }
 
         .dropdown-item {
-            padding: 10px 15px;
+            padding: 12px 20px;
             text-decoration: none;
             color: var(--text-main);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: 0.2s;
             display: flex;
             align-items: center;
         }
 
         .dropdown-item i {
-            width: 25px;
+            width: 30px;
             color: var(--text-muted);
+            font-size: 1.1rem;
         }
 
         .dropdown-item:hover {
-            background: #EBF5FB;
-            color: var(--primary-color);
+            background: #f1f8ff;
+            color: var(--accent-color);
+        }
+
+        .dropdown-item:hover i {
+            color: var(--accent-color);
         }
 
         .dropdown-item.text-danger:hover {
             background: #fff5f5;
+            color: #dc3545;
+        }
+
+        .dropdown-item.text-danger:hover i {
             color: #dc3545;
         }
 
@@ -191,7 +227,59 @@
             margin: 4px 0;
         }
 
-        /* --- Layout --- */
+        /* --- 4. Responsive --- */
+        @media (max-width: 768px) {
+
+            .user-info,
+            .user-profile .fa-chevron-down {
+                display: none !important;
+            }
+
+            .user-profile {
+                padding: 0;
+                border: none;
+                background: transparent;
+                gap: 0;
+                width: 40px;
+                /* Fix width for mobile */
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Hide arrow in mobile specifically to avoid layout issues */
+            .user-arrow {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .brand-title {
+                font-size: 1rem;
+            }
+
+            .brand-subtitle {
+                display: none;
+            }
+
+            .filter-grid {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filter-item,
+            .filter-item.item-search {
+                width: 100%;
+                min-width: 100%;
+                flex: none;
+            }
+        }
+
+        /* --- 5. Layout & Content --- */
         .main-container {
             max-width: 98% !important;
             margin: 0;
@@ -229,7 +317,7 @@
             font-size: 0.95rem;
         }
 
-        /* --- Filter Section --- */
+        /* Filter Section */
         .filter-section {
             margin-bottom: 20px;
         }
@@ -298,10 +386,9 @@
             padding-left: 40px;
         }
 
-        /* --- Table --- */
+        /* Table */
         .table-card {
             background: white;
-            /* เปลี่ยน border-radius เป็น 0 เพื่อให้เป็นเหลี่ยม */
             border-radius: 0;
             border: 1px solid #f0f0f0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -315,17 +402,17 @@
             width: 100%;
         }
 
-        .custom-table th,
-        .custom-table td {
-            white-space: nowrap;
-            vertical-align: middle;
-        }
-
         .custom-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             font-size: 0.95rem;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            white-space: nowrap;
+            vertical-align: middle;
         }
 
         .custom-table thead th {
@@ -335,16 +422,6 @@
             font-weight: 500;
             text-align: left;
             border-bottom: none;
-            white-space: nowrap;
-        }
-
-        /* ลบ border-radius ที่หัวตารางซ้าย-ขวา */
-        .custom-table thead th:first-child {
-            border-top-left-radius: 0;
-        }
-
-        .custom-table thead th:last-child {
-            border-top-right-radius: 0;
         }
 
         .custom-table tbody tr {
@@ -363,7 +440,7 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
-        /* Elements inside Table */
+        /* Badges & Text */
         .bed-badge {
             background: #e3f2fd;
             color: #0d47a1;
@@ -403,7 +480,6 @@
             font-size: 0.9rem;
         }
 
-        /* Badges */
         .status-badge {
             display: inline-block;
             padding: 3px 10px;
@@ -411,7 +487,6 @@
             font-size: 0.75rem;
             font-weight: 600;
             text-align: center;
-            white-space: nowrap;
         }
 
         .status-wait {
@@ -513,6 +588,7 @@
             text-align: center;
             padding: 50px 20px;
             color: var(--text-muted);
+            display: none;
         }
 
         .no-results i {
@@ -553,20 +629,6 @@
                 opacity: 1;
             }
         }
-
-        @media (max-width: 992px) {
-            .filter-grid {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .filter-item,
-            .filter-item.item-search {
-                width: 100%;
-                min-width: 100%;
-                flex: none;
-            }
-        }
     </style>
 </head>
 
@@ -575,31 +637,38 @@
     <nav class="navbar">
         <div class="navbar-left">
             <a class="navbar-brand" href="#">
-                <img src="img/logo_kph.jpg" class="brand-logo" alt="Logo" onerror="this.style.display='none'">
-                <div class="brand-icon-fallback"><i class="fa-solid fa-heart-pulse"></i></div>
+                <img src="img/logo_kph.jpg" class="brand-logo" alt="Hospital Logo" onerror="this.style.display='none';">
+
                 <div class="brand-text">
                     <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Assessment System (NAS)</span>
+                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
                 </div>
             </a>
         </div>
+
         <div class="navbar-right">
             <div class="user-profile" id="userDropdownTrigger">
-                <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                <div class="user-avatar">
+                    <i class="fa-solid fa-user-doctor"></i>
+                </div>
                 <div class="user-info">
                     <span class="user-name">เพชรลดา เชยเพ็ชร</span>
-                    <span class="user-role">พยาบาลวิชาชีพ</span>
+                    <span class="user-role">นักโภชนาการ</span>
                 </div>
-                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
+                <i class="fa-solid fa-chevron-down user-arrow"></i>
             </div>
+
             <div class="dropdown-menu" id="dropdownMenu">
-                <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
+                <div class="dropdown-user-header">
+                    <small>ผู้ใช้งานระบบ</small><br>
+                    <strong>เพชรลดา เชยเพ็ชร</strong>
                 </div>
                 <a href="#" class="dropdown-item"><i class="fa-regular fa-id-card"></i> ข้อมูลผู้ใช้งาน</a>
                 <a href="#" class="dropdown-item"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ</a>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
-                    ออกจากระบบ</a>
+                <a href="#" class="dropdown-item text-danger">
+                    <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
+                </a>
             </div>
         </div>
     </nav>
@@ -655,7 +724,7 @@
                             <th style="width: 6%;">AN</th>
                             <th style="width: 6%;">HN</th>
 
-                            <th style="width: 12%;">ชื่อ-นามสกุล</th>
+                            <th style="width: 14%;">ชื่อ-นามสกุล</th>
                             <th style="width: 4%; text-align: center;">อายุ</th>
                             <th style="width: 14%;">โรคประจำตัว</th>
 
@@ -666,12 +735,11 @@
                             <th style="width: 10%; text-align: center;">จัดการ</th>
                         </tr>
                     </thead>
-                    <tbody id="patientTableBody">
-                    </tbody>
+                    <tbody id="patientTableBody"></tbody>
                 </table>
             </div>
 
-            <div id="noResults" class="no-results" style="display: none;">
+            <div id="noResults" class="no-results">
                 <i class="fas fa-search"></i>
                 <p>ไม่พบข้อมูลผู้ป่วยที่ค้นหา</p>
             </div>
@@ -692,7 +760,7 @@
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
                 admitDate: '15 พ.ย. 67 08:30 น.',
                 screenDate: '24 พ.ย. 67',
-                screenCount: 2, // เพิ่มตัวแปรจำนวนครั้ง
+                screenCount: 2,
                 assessDate: '-',
                 status: 'normal', scoreVal: 1, nafScore: null
             },
@@ -703,7 +771,7 @@
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '25 พ.ย. 67 10:15 น.',
                 screenDate: '-',
-                screenCount: 0, // ยังไม่เคยทำ
+                screenCount: 0,
                 assessDate: '-',
                 status: 'wait_screen', scoreVal: null, nafScore: null
             },
@@ -732,13 +800,35 @@
         ];
 
         document.addEventListener('DOMContentLoaded', function () {
+            // 1. Setup Dropdown & Arrow Rotation
             const userTrigger = document.getElementById('userDropdownTrigger');
             const userMenu = document.getElementById('dropdownMenu');
+
             if (userTrigger && userMenu) {
-                userTrigger.addEventListener('click', (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); });
-                window.addEventListener('click', (e) => { if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) { userMenu.classList.remove('show'); } });
+                userTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                    userTrigger.classList.toggle('active'); // หมุนลูกศร
+                });
+
+                window.addEventListener('click', (e) => {
+                    if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
+                        userMenu.classList.remove('show');
+                        userTrigger.classList.remove('active'); // หมุนลูกศรกลับ
+                    }
+                });
             }
+
+            // 2. Render Table
             renderTable(patients);
+
+            // 3. Setup Filters
+            ['searchInput', 'wardFilter', 'doctorFilter'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener(id === 'searchInput' ? 'input' : 'change', filterPatients);
+                }
+            });
         });
 
         function parseThaiDate(dateStr) {
@@ -775,7 +865,6 @@
                 let assessmentHTML = '';
                 let actionBtn = '';
 
-                // จัดการวันที่ Admit (ตัดวินาทีออก ถ้ามี)
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
                 const splitAdmit = p.admitDate.split(' ');
@@ -787,27 +876,23 @@
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const isOverdue = daysSinceScreen >= 7;
 
-                // --- 1. Logic การแสดงผล Screening (เพิ่มครั้งที่) ---
                 if (p.status === 'wait_screen') {
                     screeningHTML = `<div class="text-muted text-center">-</div>`;
                 } else {
                     let badgeClass = (p.scoreVal >= 2) ? 'status-risk' : 'status-normal';
                     let badgeText = (p.scoreVal >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
                     let overdueLabel = (p.status === 'normal' && isOverdue) ? `<div style="font-size:0.75rem; color:#d63384; margin-top:2px;"><i class="fas fa-clock"></i> ครบ 7 วันแล้ว</div>` : '';
-
-                    // [จุดที่เพิ่ม] แสดงครั้งที่แบบตัวเล็กๆ สีเทา
                     let countLabel = `<span style="font-size: 0.75rem; color: #999; margin-left: 4px;">(ครั้งที่ ${p.screenCount})</span>`;
 
                     screeningHTML = `
-                            <div class="date-highlight">${p.screenDate} ${countLabel}</div>
-                            <div style="margin-top:2px;">
-                                <span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span>
-                            </div>
-                            ${overdueLabel}
-                        `;
+                        <div class="date-highlight">${p.screenDate} ${countLabel}</div>
+                        <div style="margin-top:2px;">
+                            <span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span>
+                        </div>
+                        ${overdueLabel}
+                    `;
                 }
 
-                // --- 2. Assessment ---
                 if (p.status === 'wait_assess') {
                     assessmentHTML = `<span class="status-badge status-risk" style="background:#fff3cd; color:#856404;">รอประเมิน NAF</span>`;
                 } else if (p.nafScore !== null) {
@@ -816,7 +901,6 @@
                     assessmentHTML = `<div class="text-muted text-center">-</div>`;
                 }
 
-                // --- 3. Buttons ---
                 if (p.status === 'wait_screen') {
                     actionBtn = `<button class="btn-action btn-screen" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 } else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
@@ -832,24 +916,24 @@
                 }
 
                 const row = `
-                        <tr>
-                            <td style="text-align: center; color: #6c757d;">${index + 1}</td>
-                            <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
-                            
-                            <td><div class="text-muted">${p.an}</div></td>
-                            <td><div class="text-strong">${p.hn}</div></td>
-                            
-                            <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
-                            <td style="text-align: center;">${p.age} ปี</td>
-                            <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
-                            
-                            <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
-                            <td><div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div><div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div></td>
-                            <td>${screeningHTML}</td>
-                            <td>${assessmentHTML}</td>
-                            <td class="action-cell">${actionBtn}</td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td style="text-align: center; color: #6c757d;">${index + 1}</td>
+                        <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
+                        
+                        <td><div class="text-muted">${p.an}</div></td>
+                        <td><div class="text-strong">${p.hn}</div></td>
+                        
+                        <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
+                        <td style="text-align: center;">${p.age} ปี</td>
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
+                        
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
+                        <td><div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div><div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div></td>
+                        <td>${screeningHTML}</td>
+                        <td>${assessmentHTML}</td>
+                        <td class="action-cell">${actionBtn}</td>
+                    </tr>
+                `;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         }
@@ -866,9 +950,6 @@
             });
             renderTable(filtered);
         }
-        ['searchInput', 'wardFilter', 'doctorFilter'].forEach(id => {
-            document.getElementById(id).addEventListener(id === 'searchInput' ? 'input' : 'change', filterPatients);
-        });
 
         function showToast(message) {
             const container = document.getElementById('toast-container');
