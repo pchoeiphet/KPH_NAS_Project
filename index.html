@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายชื่อผู้ป่วยใน | โรงพยาบาลกำแพงเพชร</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="css/index.css">
+
+    <style>
+        .main-container {
+            max-width: 100% !important;
+            /* ขยายให้กว้างเกือบเต็มจอ (จากเดิมมักจะล็อคไว้ที่ 1200px) */
+            padding: 0 20px;
+        }
+
+        /* ปรับขนาดตัวอักษรในตารางเล็กน้อยเพื่อให้แสดงผลได้สวยงามในจอ Wide */
+        .custom-table th,
+        .custom-table td {
+            white-space: nowrap;
+            /* ป้องกันข้อความขึ้นบรรทัดใหม่ถ้ารกเกินไป */
+            vertical-align: middle;
+        }
+
+        /* ปรับช่องว่างในตาราง */
+        .table-responsive {
+            overflow-x: auto;
+            /* ให้เลื่อนแนวนอนได้ถ้าจอเล็ก */
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a class="navbar-brand" href="#">
+                <img src="img/logo_kph.jpg" class="brand-logo" alt="Logo" onerror="this.style.display='none'">
+                <div class="brand-icon-fallback"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="brand-text">
+                    <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
+                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
+                </div>
+            </a>
+        </div>
+        <div class="navbar-right">
+            <div class="user-profile" id="userDropdownTrigger">
+                <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                <div class="user-info">
+                    <span class="user-name">เพชรลดา เชยเพ็ชร</span>
+                    <span class="user-role">พยาบาลวิชาชีพ</span>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
+                </div>
+                <a href="#" class="dropdown-item"><i class="fa-regular fa-id-card"></i> ข้อมูลผู้ใช้งาน</a>
+                <a href="#" class="dropdown-item"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i>
+                    ออกจากระบบ</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+
+        <div class="page-header">
+            <div class="header-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <div class="header-text">
+                <h1>รายชื่อผู้ป่วยใน (In-patients)</h1>
+                <p>ค้นหาและจัดการข้อมูลการคัดกรองภาวะโภชนาการ</p>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-grid">
+                <div class="filter-item item-search">
+                    <label>ค้นหาผู้ป่วย</label>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="ชื่อ-สกุล, HN, AN...">
+                    </div>
+                </div>
+                <div class="filter-item">
+                    <label><i class="fa-regular fa-building"></i> แผนก/หอผู้ป่วย</label>
+                    <select id="wardFilter">
+                        <option value="all" selected>ทั้งหมด</option>
+                        <option value="1">อายุรกรรมชาย</option>
+                        <option value="2">อายุรกรรมหญิง</option>
+                        <option value="3">ศัลยกรรมกระดูก</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-user-md"></i> แพทย์เจ้าของไข้</label>
+                    <select id="doctorFilter">
+                        <option value="all" selected>ทั้งหมด</option>
+                        <option value="นพ. สมศักดิ์ รักษาดี">นพ. สมศักดิ์ รักษาดี</option>
+                        <option value="พญ. ใจดี มีเมตตา">พญ. ใจดี มีเมตตา</option>
+                        <option value="นพ. เก่งกาจ วิชาการ">นพ. เก่งกาจ วิชาการ</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 3%; text-align: center;">#</th>
+                            <th style="width: 5%; text-align: center;">เตียง</th>
+                            <th style="width: 7%;">HN</th>
+                            <th style="width: 7%;">AN</th>
+                            <th style="width: 12%;">ชื่อ-นามสกุล</th>
+                            <th style="width: 4%; text-align: center;">อายุ</th>
+                            <th style="width: 8%;">แผนก</th>
+                            <th style="width: 12%;">แพทย์เจ้าของไข้</th>
+                            <th style="width: 10%;">วันที่ Admit</th>
+                            <th style="width: 10%;">คัดกรองล่าสุด</th>
+                            <th style="width: 10%;">ประเมินล่าสุด</th>
+                            <th style="width: 12%; text-align: center;">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <p>ไม่พบข้อมูลผู้ป่วยที่ค้นหา</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        const patients = [
+            {
+                bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
+                hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
+                doctor: 'นพ. สมศักดิ์ รักษาดี',
+                admitDate: '15 พ.ย. 67 08:30 น.',
+                screenDate: '25 พ.ย. 67', assessDate: '-',
+                status: 'normal', scoreVal: 1, nafScore: null
+            },
+            {
+                bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
+                hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
+                doctor: 'พญ. ใจดี มีเมตตา',
+                admitDate: '20 พ.ย. 67 10:15 น.',
+                screenDate: '-', assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null
+            },
+            {
+                bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
+                hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
+                doctor: 'นพ. เก่งกาจ วิชาการ',
+                admitDate: '18 พ.ย. 67 14:20 น.',
+                screenDate: '20 พ.ย. 67', assessDate: '-',
+                status: 'wait_assess', scoreVal: 3, nafScore: null
+            },
+            {
+                bed: '104', ward: '2', departmentText: 'อายุรกรรมหญิง',
+                hn: '6608901', an: '6700201', name: 'นางสาวกานดา มีสุข', age: 38,
+                doctor: 'พญ. สุดสวย รวยเสน่ห์',
+                admitDate: '22 พ.ย. 67 09:00 น.',
+                screenDate: '23 พ.ย. 67', assessDate: '24 พ.ย. 67',
+                status: 'risk_high', scoreVal: 3, nafScore: 14
+            },
+            {
+                bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
+                hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
+                doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
+                admitDate: '24 พ.ย. 67 20:45 น.',
+                screenDate: '24 พ.ย. 67', assessDate: '25 พ.ย. 67',
+                status: 'risk_mod', scoreVal: 3, nafScore: 8
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const userTrigger = document.getElementById('userDropdownTrigger');
+            const userMenu = document.getElementById('dropdownMenu');
+
+            if (userTrigger && userMenu) {
+                userTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                });
+                window.addEventListener('click', (e) => {
+                    if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
+                        userMenu.classList.remove('show');
+                    }
+                });
+            }
+            renderTable(patients);
+        });
+
+        function renderTable(data) {
+            const tbody = document.getElementById('patientTableBody');
+            const noResults = document.getElementById('noResults');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            data.forEach((p, index) => {
+                let actionBtn = '';
+                let screeningHTML = '';
+                let assessmentHTML = '';
+
+                // --- 1. Screening Status ---
+                if (p.status === 'wait_screen') {
+                    screeningHTML = `
+                        <div class="text-muted text-center">-</div>
+                        <div style="margin-top:2px;"><span class="status-badge status-wait">รอคัดกรอง</span></div>
+                    `;
+                } else {
+                    let badgeClass = (p.scoreVal >= 2) ? 'status-risk' : 'status-normal';
+                    let badgeText = (p.scoreVal >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
+
+                    if (p.status === 'wait_assess') {
+                        badgeClass = 'status-risk';
+                        badgeText = 'มีความเสี่ยง';
+                    }
+
+                    screeningHTML = `
+                        <div class="date-highlight">${p.screenDate}</div>
+                        <div style="margin-top:4px;">
+                            <span class="status-badge ${badgeClass}">${badgeText} (Score: ${p.scoreVal})</span>
+                        </div>
+                    `;
+                }
+
+                // --- 2. Assessment Status ---
+                if (p.status === 'wait_screen' || p.status === 'normal') {
+                    assessmentHTML = `<div class="text-muted text-center">-</div>`;
+                } else if (p.status === 'wait_assess') {
+                    assessmentHTML = `
+                        <div class="text-muted text-center">-</div>
+                        <div style="margin-top:2px;"><span class="status-badge status-risk" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">รอประเมิน NAF</span></div>
+                    `;
+                } else {
+                    let riskText = '';
+                    let riskClass = '';
+                    if (p.status === 'risk_low') { riskText = 'เสี่ยงต่ำ'; riskClass = 'text-success'; }
+                    else if (p.status === 'risk_mod') { riskText = 'เสี่ยงปานกลาง'; riskClass = 'text-warning'; }
+                    else if (p.status === 'risk_high') { riskText = 'เสี่ยงสูง'; riskClass = 'text-danger'; }
+
+                    assessmentHTML = `
+                        <div class="date-highlight">${p.assessDate}</div>
+                        <div class="${riskClass}" style="font-weight:700; font-size:0.85rem; margin-top:2px;">
+                            ${riskText} (NAF: ${p.nafScore})
+                        </div>
+                    `;
+                }
+
+                // --- 3. Buttons ---
+                let mainBtn = '';
+
+                if (p.status === 'wait_screen') {
+                    mainBtn = `<button class="btn btn-primary btn-sm" onclick="showToast('เริ่มคัดกรอง ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
+                }
+                else if (p.status === 'normal') {
+                    mainBtn = `<button class="btn btn-outline-secondary btn-sm" onclick="showToast('คัดกรองซ้ำ ${p.name}')"><i class="fas fa-redo"></i> Re-screen</button>`;
+                }
+                else if (p.status === 'wait_assess') {
+                    mainBtn = `<button class="btn btn-warning btn-sm" onclick="showToast('ทำแบบประเมิน NAF ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
+                }
+                else {
+                    mainBtn = `<button class="btn btn-info btn-sm text-white" onclick="showToast('จัดการแผนการรักษา ${p.name}')"><i class="fas fa-file-medical-alt"></i> Care Plan</button>`;
+                }
+
+                const historyBtn = `
+                    <button class="btn btn-outline-secondary btn-sm" style="width:32px; padding: 4px 0; justify-content: center;" onclick="showToast('ดูประวัติย้อนหลัง: ${p.name}')" title="ประวัติ">
+                        <i class="fas fa-history"></i>
+                    </button>
+                `;
+
+                actionBtn = `<div style="display:flex; gap:6px; justify-content:center;">${mainBtn} ${historyBtn}</div>`;
+
+                const row = `
+                    <tr>
+                        <td style="text-align: center; font-weight: 500; color: #6c757d;">${index + 1}</td>
+                        <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
+                        <td><div class="text-strong">${p.hn}</div></td>
+                        <td><div class="text-muted">${p.an}</div></td>
+                        <td>
+                            <a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a>
+                            <div class="sub-text">Los: 3 วัน</div>
+                        </td>
+                        <td style="text-align: center;">${p.age}</td>
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.departmentText}</div></td>
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
+                        <td><div class="text-muted" style="font-size:0.9rem;">${p.admitDate}</div></td>
+                        <td>${screeningHTML}</td>
+                        <td>${assessmentHTML}</td>
+                        <td style="text-align: center;">${actionBtn}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function filterPatients() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const ward = document.getElementById('wardFilter').value;
+            const doctor = document.getElementById('doctorFilter').value;
+
+            const filtered = patients.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm);
+                const matchesWard = ward === 'all' || p.ward === ward;
+                const matchesDoctor = doctor === 'all' || p.doctor === doctor;
+
+                return matchesSearch && matchesWard && matchesDoctor;
+            });
+
+            renderTable(filtered);
+        }
+
+        ['searchInput', 'wardFilter', 'doctorFilter'].forEach(id => {
+            document.getElementById(id).addEventListener(id === 'searchInput' ? 'input' : 'change', filterPatients);
+        });
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินภาวะโภชนาการ | โรงพยาบาลกำแพงเพชร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/nutrition_alert_form.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a class="navbar-brand" href="index.php">
+                <img src="img/logo_kph.jpg" class="brand-logo" alt="KPH Logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
+                    <span class="brand-subtitle">Nutrition Alert Form - โรงพยาบาลกำแพงเพชร</span>
+                </div>
+            </a>
+        </div>
+        <div class="navbar-right">
+            <div class="user-profile" id="userDropdownTrigger">
+                <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                <div class="user-info">
+                    <span class="user-name">เพชรลดา เชยเพ็ชร</span>
+                    <span class="user-role">นักโภชนาการ</span>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
+                </div>
+                <a href="#" class="dropdown-item"><i class="fa-regular fa-id-card"></i> ข้อมูลผู้ใช้งาน</a>
+                <a href="#" class="dropdown-item"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item text-danger" onclick="confirmLogout()"><i
+                        class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="patient-banner">
+        <div class="patient-container">
+            <div class="patient-icon-box"><i class="fa-solid fa-user"></i></div>
+            <div class="patient-details">
+                <div class="section-header"><i class="fa-solid fa-hospital-user"></i> ข้อมูลผู้ป่วย</div>
+                <div class="patient-grid">
+                    <div class="info-item"><span class="info-label">HN</span><span class="info-value">6612345</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">AN</span><span class="info-value">6700891</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">ชื่อ - นามสกุล</span><span
+                            class="info-value">นายสมชาย รักสุขภาพ</span></div>
+                    <div class="info-item"><span class="info-label">อายุ</span><span class="info-value">54 ปี 6
+                            เดือน</span></div>
+                    <div class="info-item"><span class="info-label">สิทธิการรักษา</span><span
+                            class="info-value">ประกันสุขภาพถ้วนหน้า</span></div>
+                    <div class="info-item"><span class="info-label">หอผู้ป่วย / เตียง</span><span
+                            class="info-value">อายุรกรรมชาย 1 / <strong>เตียง 12</strong></span></div>
+                    <div class="info-item"><span class="info-label">วันที่ Admit</span><span class="info-value">10 ต.ค.
+                            2566</span></div>
+                    <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span
+                            class="info-value">081-234-5678</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <a href="patient_profile.php" class="btn-back">
+            <i class="fa-solid fa-chevron-left"></i> ย้อนกลับ
+        </a>
+        <div class="page-title-inline">แบบคัดกรองภาวะโภชนาการ (SPENT Nutrition Screening Tool)</div>
+    </div>
+
+    <div class="main-content" style="padding: 0 20px 40px 20px; max-width: 1200px; margin: 0 auto;">
+
+        <form class="form-card" id="screeningForm">
+            <div class="form-row">
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">วันที่ประเมิน</label><input type="date"
+                            class="form-control screen-input" value="<?php echo date('Y-m-d'); ?>"></div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">HN</label><input type="text" class="form-control"
+                            value="6612345" readonly></div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">AN</label><input type="text" class="form-control"
+                            value="6700891" readonly></div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">รับไว้ใน รพ. เมื่อ</label><input type="date"
+                            class="form-control" value="2023-10-10" readonly></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-6">
+                    <div class="form-group"><label class="form-label">ชื่อ - นามสกุล</label><input type="text"
+                            class="form-control" value="นายสมชาย รักสุขภาพ" readonly></div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group"><label class="form-label">อายุ (ปี)</label><input type="text"
+                            class="form-control" value="54" readonly></div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group"><label class="form-label">หอผู้ป่วย</label><input type="text"
+                            class="form-control" value="อายุรกรรมชาย 1" readonly></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-12">
+                    <div class="form-group"><label class="form-label">การวินิจฉัยโรค (Diagnosis)</label><input
+                            type="text" class="form-control screen-input" placeholder="ระบุการวินิจฉัยโรคเบื้องต้น..."
+                            value="Pneumonia"></div>
+                </div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="section-title"><i class="fa-solid fa-weight-scale"></i> ข้อมูลสัดส่วนร่างกาย</div>
+            <div class="form-row">
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">น้ำหนักปัจจุบัน (กก.)</label><input type="number"
+                            step="0.1" class="form-control screen-input" id="currentWeight" placeholder="0.0"
+                            oninput="calculateBMI()"></div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">น้ำหนักปกติ (กก.)</label><input type="number"
+                            step="0.1" class="form-control screen-input" placeholder="0.0"></div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">ส่วนสูง (ซม.)</label><input type="number"
+                            class="form-control screen-input" id="heightVal" placeholder="0" oninput="calculateBMI()">
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group"><label class="form-label">ดัชนีมวลกาย (BMI)</label><input type="text"
+                            class="form-control bmi-box" id="bmiVal" placeholder="รอน้ำหนัก/ส่วนสูง" readonly></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-12">
+                    <div class="form-group"><label class="form-label">ประเมินน้ำหนักโดย</label>
+                        <div class="radio-group-container">
+                            <div class="radio-wrapper"><label class="radio-label"><input type="radio"
+                                        name="weightMethod" class="screen-input" checked> ชั่ง</label><label
+                                    class="radio-label"><input type="radio" name="weightMethod" class="screen-input">
+                                    ซักถาม</label><label class="radio-label"><input type="radio" name="weightMethod"
+                                        class="screen-input"> กะประมาณ</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="section-title"><i class="fa-solid fa-list-check"></i> แบบคัดกรอง (Screening Questions)</div>
+            <div class="form-row">
+                <div class="col-12">
+                    <table class="screening-table">
+                        <thead>
+                            <tr>
+                                <th>หัวข้อการคัดกรอง</th>
+                                <th class="text-center" style="width: 100px;">ใช่</th>
+                                <th class="text-center" style="width: 100px;">ไม่ใช่</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="screening-row">
+                                <td>1. ผู้ป่วยมีน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจในช่วง 6 เดือนที่ผ่านมาหรือไม่</td>
+                                <td class="text-center"><input type="radio" name="q1" class="table-radio screen-input"
+                                        value="yes"></td>
+                                <td class="text-center"><input type="radio" name="q1" class="table-radio screen-input"
+                                        value="no" checked></td>
+                            </tr>
+                            <tr class="screening-row">
+                                <td>2. ผู้ป่วยได้รับอาหารน้อยกว่าที่เคยได้ (> 7 วัน)</td>
+                                <td class="text-center"><input type="radio" name="q2" class="table-radio screen-input"
+                                        value="yes"></td>
+                                <td class="text-center"><input type="radio" name="q2" class="table-radio screen-input"
+                                        value="no" checked></td>
+                            </tr>
+                            <tr class="screening-row">
+                                <td>3. BMI < 18.5 หรือ>= 25.0 กก./ม.² หรือไม่</td>
+                                <td class="text-center"><input type="radio" name="q3" class="table-radio screen-input"
+                                        value="yes"></td>
+                                <td class="text-center"><input type="radio" name="q3" class="table-radio screen-input"
+                                        value="no" checked></td>
+                            </tr>
+                            <tr class="screening-row">
+                                <td>4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต หรือไม่</td>
+                                <td class="text-center"><input type="radio" name="q4" class="table-radio screen-input"
+                                        value="yes"></td>
+                                <td class="text-center"><input type="radio" name="q4" class="table-radio screen-input"
+                                        value="no" checked></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-row" id="saveScreeningRow">
+                <div class="col-12" style="text-align: right;"><button type="button" class="btn-submit"
+                        onclick="saveScreening()"><i class="fa-solid fa-floppy-disk"></i> บันทึกผลคัดกรอง</button></div>
+            </div>
+            <div id="resultBox" class="result-box">
+                <div class="result-title" id="resultTitle"></div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div id="highRiskOptions">
+                    <div style="margin-top:20px; margin-bottom:10px; color:#555; font-size:0.95rem; font-weight:500;">
+                        ผู้ป่วยมีความเสี่ยง ท่านต้องการดำเนินการอย่างไร?</div>
+                    <div class="options-container" style="display: flex; gap: 15px; justify-content: center;"><button
+                            type="button" class="btn-outline" onclick="saveLater()"><i class="fa-regular fa-clock"></i>
+                            บันทึกไว้ก่อน (ทำแบบประเมินทีหลัง)</button><button type="button" class="btn-submit"
+                            onclick="openAssessment()"><i class="fa-solid fa-play"></i> ทำแบบประเมินทันที</button></div>
+                </div>
+            </div>
+        </form>
+    </div>

@@ -1,0 +1,525 @@
+:root {
+  --primary-color: #2196f3;
+  --primary-dark: #1565c0;
+  --text-color: #263238;
+  --text-muted: #546e7a;
+  --bg-light: #f4f7f6;
+  --white: #ffffff;
+  --border-color: #cfd8dc;
+  --input-border: #cccccc;
+
+  --risk-high-bg: #ffebee;
+  --risk-high-text: #c62828;
+  --risk-med-bg: #fff8e1;
+  --risk-med-text: #f57c00;
+  --risk-low-bg: #e8f5e9;
+  --risk-low-text: #2e7d32;
+}
+
+body {
+  font-family: "Sarabun", sans-serif;
+  background-color: var(--bg-light);
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+}
+
+/* Navbar & Layout */
+.navbar {
+  background-color: var(--white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0 20px;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+.brand-logo {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  margin-right: 12px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0d47a1;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+}
+
+.user-profile:hover {
+  background-color: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.user-info {
+  text-align: left;
+  display: none;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: block;
+  color: var(--text-color);
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 600px) {
+  .user-info {
+    display: block;
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  right: 20px;
+  background-color: white;
+  width: 210px;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-user-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  background: #fcfcfc;
+  border-radius: 6px 6px 0 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #444;
+  font-size: 0.9rem;
+  transition: background 0.1s;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f7ff;
+  color: var(--primary-color);
+}
+
+.dropdown-item i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+  color: #78909c;
+}
+
+.text-danger {
+  color: #d32f2f !important;
+}
+
+.patient-banner {
+  margin-top: 70px;
+  background-color: #fff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 24px 20px;
+}
+
+.patient-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+.patient-icon-box {
+  flex-shrink: 0;
+  width: 120px;
+  height: 140px;
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  border: 1px solid #bbdefb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.patient-details {
+  flex-grow: 1;
+  width: 100%;
+}
+
+.section-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0d47a1;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #eef2f5;
+  padding-bottom: 5px;
+  display: inline-block;
+}
+
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px 25px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.info-value {
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+/* จัดระยะห่างของแถบปุ่ม */
+.action-bar-section {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Flexbox เพื่อดันปุ่มไปคนละฝั่ง */
+.action-bar-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+/* ดีไซน์ปุ่มพื้นฐาน */
+.btn {
+  padding: 10px 50px;
+  /* ปรับความกว้างให้พอดีสวยงาม */
+  border-radius: 5px;
+  /* ปรับให้มนกลม แบบ Pill Shape ดูทันสมัยกว่า */
+  font-family: "Sarabun", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  /* เตรียมเส้นขอบไว้ */
+  font-weight: 600;
+  /* เพิ่มความหนาตัวอักษรนิดนึง */
+  /* ลบ transition ออกตามที่ขอ */
+}
+
+/* ปุ่มย้อนกลับ (ปรับใหม่: สไตล์ Outline) */
+.btn-secondary {
+  background-color: #ffffff;
+  /* พื้นหลังขาว */
+  color: #0d47a1;
+  /* ตัวหนังสือสีม่วงธีมเดียวกับปุ่มขวา */
+  border: 2px solid #0d47a1;
+  /* เส้นขอบสีม่วงหนานิดนึง */
+}
+
+.btn-secondary:hover {
+  background-color: #0d47a1;
+  /* Hover แล้วถมสีม่วง */
+  color: #ffffff;
+  /* ตัวหนังสือเปลี่ยนเป็นขาว */
+  /* ไม่มีการเด้ง (Transform) */
+}
+
+/* ปุ่มเพิ่มไฟล์ (สีม่วงเข้ม) */
+.btn-success {
+  background-color: #0d47a1;
+  color: white;
+  border: 2px solid #0d47a1;
+  /* ใส่ขอบสีเดียวกันเพื่อให้ขนาดเท่าปุ่มซ้าย */
+  box-shadow: 0 4px 6px rgba(62, 51, 125, 0.2);
+  /* เพิ่มเงาให้ดูเด่นกว่าปุ่มซ้าย */
+}
+
+.btn-success:hover {
+  background-color: #083474;
+  /* เข้มขึ้นเมื่อ Hover */
+  border-color: #083474;
+  box-shadow: 0 4px 8px rgba(62, 51, 125, 0.3);
+}
+
+/* --- ส่วนของ Dropdown --- */
+.action-dropdown {
+  position: relative;
+}
+
+.action-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  /* ปรับให้ติดกับปุ่มมากขึ้น */
+  margin-top: 5px;
+  right: 0;
+  width: 250px;
+  /* ขยายความกว้างเล็กน้อยให้อ่านง่าย */
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid #eee;
+  z-index: 100;
+  overflow: hidden;
+  /* ลบ animation slideDown ออก ถ้าต้องการให้มันโผล่มาเลยแบบไม่มีลูกเล่น */
+}
+
+.action-menu.show {
+  display: block;
+}
+
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.action-item:last-child {
+  border-bottom: none;
+}
+
+.action-item:hover {
+  background-color: #f8fff9;
+}
+
+.action-item .icon-box {
+  width: 35px;
+  font-size: 1.2rem;
+  color: #083474;
+  padding-top: 2px;
+}
+
+.action-item .text-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-item .text-box strong {
+  font-size: 0.95rem;
+  color: #083474;
+}
+
+.action-item .text-box span {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* --- Styles เพิ่มเติมสำหรับตารางแบบทางการ --- */
+.history-section {
+  margin-bottom: 60px;
+}
+
+.table-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  overflow: hidden;
+  /* width: 100%; หากต้องการจำกัดความกว้างให้ใส่ max-width: 1200px; ตรงนี้ */
+  width: 100%;
+  max-width: 100%;
+}
+
+.section-title {
+  padding: 20px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2c3e50;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Sarabun", sans-serif;
+  font-size: 0.95rem;
+}
+
+.custom-table thead {
+  background-color: #3e337d;
+  color: white;
+}
+
+.custom-table thead th {
+  padding: 12px 10px;
+  font-weight: 600;
+  text-align: left;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.custom-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f0f4ff;
+}
+
+.custom-table tbody td {
+  padding: 12px 10px;
+  vertical-align: middle;
+  color: #495057;
+}
+
+/* ลิงก์ชื่อรายการ */
+.doc-link {
+  color: #3e337d;
+  font-weight: 700;
+  text-decoration: none;
+  display: block;
+  transition: color 0.2s;
+}
+
+.doc-link:hover {
+  color: #1a1340;
+  text-decoration: underline;
+}
+
+.doc-subtext {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+/* Badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-normal {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-risk {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status-severe {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-wait {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* ปุ่ม PDF */
+.btn-icon-pdf {
+  color: #dc3545;
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.btn-icon-pdf:hover {
+  color: #a71d2a;
+  transform: scale(1.1);
+}
+
+.datetime-box {
+  line-height: 1.2;
+}
+
+.time-small {
+  font-size: 0.8rem;
+  color: #888;
+}

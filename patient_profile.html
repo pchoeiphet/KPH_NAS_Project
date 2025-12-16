@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินภาวะโภชนาการ | โรงพยาบาลกำแพงเพชร</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/patient_profile.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a class="navbar-brand" href="index.php">
+                <img src="img/logo_kph.jpg" class="brand-logo" alt="KPH Logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
+                    <span class="brand-subtitle">Nutrition Alert Form - โรงพยาบาลกำแพงเพชร</span>
+                </div>
+            </a>
+        </div>
+        <div class="navbar-right">
+            <div class="user-profile" id="userDropdownTrigger">
+                <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                <div class="user-info">
+                    <span class="user-name">เพชรลดา เชยเพ็ชร</span>
+                    <span class="user-role">นักโภชนาการ</span>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
+                </div>
+                <a href="#" class="dropdown-item"><i class="fa-regular fa-id-card"></i> ข้อมูลผู้ใช้งาน</a>
+                <a href="#" class="dropdown-item"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item text-danger" onclick="confirmLogout()"><i
+                        class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="patient-banner">
+        <div class="patient-container">
+            <div class="patient-icon-box"><i class="fa-solid fa-user"></i></div>
+            <div class="patient-details">
+                <div class="section-header"><i class="fa-solid fa-hospital-user"></i> ข้อมูลผู้ป่วย</div>
+                <div class="patient-grid">
+                    <div class="info-item"><span class="info-label">HN</span><span class="info-value">6612345</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">AN</span><span class="info-value">6700891</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">ชื่อ - นามสกุล</span><span
+                            class="info-value">นายสมชาย รักสุขภาพ</span></div>
+                    <div class="info-item"><span class="info-label">อายุ</span><span class="info-value">54 ปี 6
+                            เดือน</span></div>
+                    <div class="info-item"><span class="info-label">สิทธิการรักษา</span><span
+                            class="info-value">ประกันสุขภาพถ้วนหน้า</span></div>
+                    <div class="info-item"><span class="info-label">หอผู้ป่วย / เตียง</span><span
+                            class="info-value">อายุรกรรมชาย 1 / <strong>เตียง 12</strong></span></div>
+                    <div class="info-item"><span class="info-label">วันที่ Admit</span><span class="info-value">10 ต.ค.
+                            2566</span></div>
+                    <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span
+                            class="info-value">081-234-5678</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar-section">
+        <div class="patient-container action-bar-flex">
+
+            <a href="index.php" class="btn btn-secondary">
+                <i class="fa-solid fa-chevron-left"></i> กลับหน้าหลัก
+            </a>
+
+            <div class="action-dropdown">
+                <button class="btn btn-success" id="addFileBtn">
+                    <i class="fa-solid fa-folder-plus"></i> เพิ่มไฟล์เอกสาร
+                    <i class="fa-solid fa-caret-down" style="margin-left: 5px;"></i>
+                </button>
+
+                <div class="action-menu" id="addFileMenu">
+                    <a href="nutrition_screening_form.html" class="action-item">
+                        <div class="icon-box"><i class="fa-solid fa-file-medical"></i></div>
+                        <div class="text-box">
+                            <strong>แบบคัดกรองภาวะโภชนาการ</strong>
+                            <span>(SPENT Nutrition Screening Tool)</span>
+                        </div>
+                    </a>
+                    <a href="nutrition_alert_form.html" class="action-item">
+                        <div class="icon-box"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div class="text-box">
+                            <strong>แบบประเมินภาวะโภชนาการ</strong>
+                            <span>(Nutrition Alert Form)</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="history-section">
+        <div class="patient-container">
+            <div class="table-card">
+                <div class="section-title">
+                    <i class="fa-solid fa-list-check"></i> ประวัติการบันทึกข้อมูลทั้งหมด
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">รายการบันทึก</th>
+                                <th style="width: 10%;">ประเภท</th>
+                                <th style="width: 5%; text-align: center;">คะแนน</th>
+                                <th style="width: 12%;">ผลการคัดกรอง</th>
+                                <th style="width: 12%;">ผลการประเมิน</th>
+                                <th style="width: 13%;">ผู้ประเมิน</th>
+                                <th style="width: 10%;">วัน/เวลาที่บันทึก</th>
+                                <th style="width: 10%;">วัน/เวลาที่แก้ไข</th>
+                                <th style="width: 5%; text-align: center;">เอกสาร</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a href="screening_detail.php?id=3" class="doc-link">แบบคัดกรองภาวะโภชนาการ ครั้งที่
+                                        2</a>
+                                    <div class="doc-subtext">Ref: SP-661012-003</div>
+                                </td>
+                                <td>SPENT</td>
+                                <td style="text-align: center;">3</td>
+                                <td><span class="status-badge status-risk">มีความเสี่ยง</span></td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td class="recorder-name">รอโหลดข้อมูล...</td>
+                                <td>
+                                    <div class="datetime-box">12 ต.ค. 66<br><span class="time-small">08:00 น.</span>
+                                    </div>
+                                </td>
+                                <td>-</td>
+                                <td style="text-align: center;">
+                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a href="assessment_detail.php?id=2" class="doc-link">แบบประเมินภาวะโภชนาการ
+                                        ครั้งที่ 1</a>
+                                    <div class="doc-subtext">Ref: NAF-661011-002</div>
+                                </td>
+                                <td>NAF</td>
+                                <td style="text-align: center;">12</td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td><span class="status-badge status-severe">รุนแรง (Severe)</span></td>
+                                <td class="recorder-name">รอโหลดข้อมูล...</td>
+                                <td>
+                                    <div class="datetime-box">11 ต.ค. 66<br><span class="time-small">09:15 น.</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="datetime-box">11 ต.ค. 66<br><span class="time-small">14:00 น.</span>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a href="screening_detail.php?id=1" class="doc-link">แบบคัดกรองภาวะโภชนาการ ครั้งที่
+                                        1</a>
+                                    <div class="doc-subtext">Ref: SP-661010-001</div>
+                                </td>
+                                <td>SPENT</td>
+                                <td style="text-align: center;">0</td>
+                                <td><span class="status-badge status-normal">ปกติ</span></td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td class="recorder-name">รอโหลดข้อมูล...</td>
+                                <td>
+                                    <div class="datetime-box">10 ต.ค. 66<br><span class="time-small">10:30 น.</span>
+                                    </div>
+                                </td>
+                                <td>-</td>
+                                <td style="text-align: center;">
+                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. จัดการ Dropdown
+            const userTrigger = document.getElementById('userDropdownTrigger');
+            const userMenu = document.getElementById('dropdownMenu');
+            const addFileBtn = document.getElementById('addFileBtn');
+            const addFileMenu = document.getElementById('addFileMenu');
+
+            if (userTrigger && userMenu) {
+                userTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                    if (addFileMenu) addFileMenu.classList.remove('show');
+                });
+            }
+
+            if (addFileBtn && addFileMenu) {
+                addFileBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addFileMenu.classList.toggle('show');
+                    if (userMenu) userMenu.classList.remove('show');
+                });
+            }
+
+            window.addEventListener('click', (e) => {
+                if (userMenu && !userMenu.contains(e.target) && !userTrigger.contains(e.target)) userMenu.classList.remove('show');
+                if (addFileMenu && !addFileMenu.contains(e.target) && !addFileBtn.contains(e.target)) addFileMenu.classList.remove('show');
+            });
+
+            // 2. ฟังก์ชันซิงค์ชื่อผู้ใช้งานลงตาราง (Auto Sync Name)
+            syncUserToTable();
+        });
+
+        function syncUserToTable() {
+            // ดึงชื่อจาก Navbar
+            const navbarNameEl = document.querySelector('.user-name');
+            if (navbarNameEl) {
+                const currentUserName = navbarNameEl.innerText.trim();
+
+                // ค้นหาช่องที่มี class 'recorder-name' ในตารางและแทนที่ข้อความ
+                const cells = document.querySelectorAll('.recorder-name');
+                cells.forEach(cell => {
+                    cell.innerText = currentUserName;
+                });
+            }
+        }
+
+        function confirmLogout() {
+            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'logout.php';
+        }
+    </script>
+</body>
+
+</html>
