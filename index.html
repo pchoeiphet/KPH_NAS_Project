@@ -13,9 +13,7 @@
     <style>
         /* --- Reset & Global Variables --- */
         :root {
-            /* Theme: Medical Nature */
             --primary-color: #2C3E50;
-            --primary-dark: #1a252f;
             --secondary-color: #27AE60;
             --accent-color: #3498DB;
             --bg-body: #ffffff;
@@ -93,7 +91,7 @@
             color: var(--text-muted);
         }
 
-        /* User Profile & Dropdown */
+        /* User Profile */
         .user-profile {
             display: flex;
             align-items: center;
@@ -187,10 +185,6 @@
             color: #dc3545;
         }
 
-        .dropdown-item.text-danger i {
-            color: #dc3545;
-        }
-
         .dropdown-divider {
             height: 1px;
             background: var(--border-color);
@@ -238,10 +232,6 @@
         /* --- Filter Section --- */
         .filter-section {
             margin-bottom: 20px;
-            background: transparent;
-            padding: 0;
-            border: none;
-            box-shadow: none;
         }
 
         .filter-grid {
@@ -270,7 +260,6 @@
             margin-bottom: 8px;
         }
 
-        /* Input Styles */
         input[type="text"],
         select {
             padding: 8px 15px;
@@ -309,7 +298,7 @@
             padding-left: 40px;
         }
 
-        /* --- Table Card --- */
+        /* --- Table --- */
         .table-card {
             background: white;
             border-radius: 12px;
@@ -330,10 +319,6 @@
             border-collapse: separate;
             border-spacing: 0;
             font-size: 0.95rem;
-        }
-
-        .custom-table thead {
-            background-color: transparent;
         }
 
         .custom-table thead th {
@@ -357,10 +342,6 @@
         .custom-table tbody tr {
             border-bottom: 1px solid #f8f9fa;
             transition: background 0.1s;
-        }
-
-        .custom-table tbody tr:last-child td {
-            border-bottom: none;
         }
 
         .custom-table tbody tr:hover {
@@ -414,7 +395,7 @@
             font-size: 0.9rem;
         }
 
-        /* Badges for Status */
+        /* Badges */
         .status-badge {
             display: inline-block;
             padding: 3px 10px;
@@ -440,7 +421,6 @@
             color: #842029;
         }
 
-        /* Badges for Diet Order */
         .diet-badge {
             display: inline-block;
             padding: 3px 8px;
@@ -456,37 +436,31 @@
             border: 1px solid #D1F2EB;
         }
 
-        /* อาหารปกติ */
         .diet-soft {
             background: #FEF9E7;
             color: #F1C40F;
             border: 1px solid #FCF3CF;
         }
 
-        /* อาหารอ่อน */
         .diet-bd {
             background: #F4ECF7;
             color: #8E44AD;
             border: 1px solid #E8DAEF;
         }
 
-        /* อาหารปั่น */
         .diet-dm {
             background: #EBF5FB;
             color: #3498DB;
             border: 1px solid #D6EAF8;
         }
 
-        /* เบาหวาน/เฉพาะโรค */
         .diet-npo {
             background: #FDEDEC;
             color: #C0392B;
             border: 1px solid #FADBD8;
         }
 
-        /* งดน้ำงดอาหาร */
-
-        /* --- BUTTON STYLES --- */
+        /* Buttons */
         .action-cell {
             display: flex;
             justify-content: center;
@@ -520,7 +494,6 @@
             background-color: #0d6efd;
             color: white;
             border-color: #0d6efd;
-            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
         }
 
         .btn-assess {
@@ -533,7 +506,6 @@
             background-color: #ffc107;
             color: #212529;
             border-color: #ffc107;
-            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
         }
 
         .btn-rescreen {
@@ -546,7 +518,6 @@
             background-color: #6f42c1;
             color: white;
             border-color: #6f42c1;
-            box-shadow: 0 2px 4px rgba(111, 66, 193, 0.3);
         }
 
         .btn-view {
@@ -569,12 +540,6 @@
             opacity: 0.9;
         }
 
-        .btn-disabled:hover {
-            background-color: #fafafa;
-            box-shadow: none;
-        }
-
-        /* --- States --- */
         .no-results {
             text-align: center;
             padding: 50px 20px;
@@ -587,7 +552,7 @@
             color: #dee2e6;
         }
 
-        /* --- Toast --- */
+        /* Toast */
         .toast-msg {
             position: fixed;
             bottom: 20px;
@@ -717,15 +682,15 @@
                         <tr>
                             <th style="width: 3%; text-align: center;">#</th>
                             <th style="width: 5%; text-align: center;">เตียง</th>
-                            <th style="width: 7%;">HN</th>
+
+                            <th style="width: 6%;">AN</th>
+                            <th style="width: 6%;">HN</th>
+
                             <th style="width: 12%;">ชื่อ-นามสกุล</th>
                             <th style="width: 4%; text-align: center;">อายุ</th>
-
                             <th style="width: 12%;">โรคประจำตัว</th>
-
                             <th style="width: 8%;">อาหาร (Diet)</th>
-                            <th style="width: 11%;">แพทย์เจ้าของไข้</th>
-
+                            <th style="width: 10%;">แพทย์เจ้าของไข้</th>
                             <th style="width: 9%;">วันที่ Admit</th>
                             <th style="width: 8%;">คัดกรองล่าสุด</th>
                             <th style="width: 8%;">ประเมินล่าสุด</th>
@@ -754,7 +719,6 @@
             {
                 bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
-                // Updated Data: Underlying Disease
                 underlying: 'ความดันโลหิตสูง (HT)',
                 diet: 'Regular',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
@@ -765,7 +729,6 @@
             {
                 bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
-                // Updated Data: Underlying Disease
                 underlying: 'เบาหวาน (DM), โรคไต (CKD)',
                 diet: 'DM 1200 kcal',
                 doctor: 'พญ. ใจดี มีเมตตา',
@@ -776,7 +739,6 @@
             {
                 bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
-                // Updated Data: Underlying Disease
                 underlying: 'ไขมันในเลือดสูง (DLP)',
                 diet: 'BD (1:1)',
                 doctor: 'นพ. เก่งกาจ วิชาการ',
@@ -787,7 +749,6 @@
             {
                 bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
                 hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
-                // Updated Data: Underlying Disease
                 underlying: 'ปฏิเสธโรคประจำตัว',
                 diet: 'NPO',
                 doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
@@ -867,13 +828,7 @@
                     let badgeClass = (p.scoreVal >= 2) ? 'status-risk' : 'status-normal';
                     let badgeText = (p.scoreVal >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
                     let overdueLabel = (p.status === 'normal' && isOverdue) ? `<div style="font-size:0.75rem; color:#d63384; margin-top:2px;"><i class="fas fa-clock"></i> ครบ 7 วันแล้ว</div>` : '';
-                    screeningHTML = `
-                        <div class="date-highlight">${p.screenDate}</div>
-                        <div style="margin-top:2px;">
-                            <span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span>
-                        </div>
-                        ${overdueLabel}
-                    `;
+                    screeningHTML = `<div class="date-highlight">${p.screenDate}</div><div style="margin-top:2px;"><span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span></div>${overdueLabel}`;
                 }
 
                 if (p.status === 'wait_assess') {
@@ -904,23 +859,16 @@
                     <tr>
                         <td style="text-align: center; color: #6c757d;">${index + 1}</td>
                         <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
+                        
+                        <td><div class="text-muted">${p.an}</div></td>
                         <td><div class="text-strong">${p.hn}</div></td>
-                        <td>
-                            <a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a>
-                        </td>
+                        
+                        <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
                         <td style="text-align: center;">${p.age} ปี</td>
-                        
                         <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
-
                         <td><span class="diet-badge ${dietClass}">${p.diet}</span></td>
-                        
                         <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
-
-                        <td>
-                            <div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div>
-                            <div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div>
-                        </td>
-
+                        <td><div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div><div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div></td>
                         <td>${screeningHTML}</td>
                         <td>${assessmentHTML}</td>
                         <td class="action-cell">${actionBtn}</td>
@@ -934,10 +882,8 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const ward = document.getElementById('wardFilter').value;
             const doctor = document.getElementById('doctorFilter').value;
-
             const filtered = patients.filter(p => {
-                // Also search in underlying disease
-                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
                 const matchesWard = ward === 'all' || p.ward === ward;
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
