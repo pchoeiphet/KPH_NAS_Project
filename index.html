@@ -42,7 +42,7 @@
             align-items: center;
             background-color: white;
             padding: 0 20px;
-            height: 60px;
+            height: 80px;
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
@@ -193,9 +193,9 @@
 
         /* --- Layout --- */
         .main-container {
-            max-width: 100%;
+            max-width: 98% !important;
             margin: 0;
-            padding: 20px 30px;
+            padding: 20px 20px;
         }
 
         .page-header {
@@ -301,7 +301,8 @@
         /* --- Table --- */
         .table-card {
             background: white;
-            border-radius: 12px;
+            /* เปลี่ยน border-radius เป็น 0 เพื่อให้เป็นเหลี่ยม */
+            border-radius: 0;
             border: 1px solid #f0f0f0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             overflow: hidden;
@@ -312,6 +313,12 @@
         .table-responsive {
             overflow-x: auto;
             width: 100%;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            white-space: nowrap;
+            vertical-align: middle;
         }
 
         .custom-table {
@@ -331,12 +338,13 @@
             white-space: nowrap;
         }
 
+        /* ลบ border-radius ที่หัวตารางซ้าย-ขวา */
         .custom-table thead th:first-child {
-            border-top-left-radius: 10px;
+            border-top-left-radius: 0;
         }
 
         .custom-table thead th:last-child {
-            border-top-right-radius: 10px;
+            border-top-right-radius: 0;
         }
 
         .custom-table tbody tr {
@@ -419,45 +427,6 @@
         .status-risk {
             background: #f8d7da;
             color: #842029;
-        }
-
-        .diet-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .diet-regular {
-            background: #E8F8F5;
-            color: #27AE60;
-            border: 1px solid #D1F2EB;
-        }
-
-        .diet-soft {
-            background: #FEF9E7;
-            color: #F1C40F;
-            border: 1px solid #FCF3CF;
-        }
-
-        .diet-bd {
-            background: #F4ECF7;
-            color: #8E44AD;
-            border: 1px solid #E8DAEF;
-        }
-
-        .diet-dm {
-            background: #EBF5FB;
-            color: #3498DB;
-            border: 1px solid #D6EAF8;
-        }
-
-        .diet-npo {
-            background: #FDEDEC;
-            color: #C0392B;
-            border: 1px solid #FADBD8;
         }
 
         /* Buttons */
@@ -610,7 +579,7 @@
                 <div class="brand-icon-fallback"><i class="fa-solid fa-heart-pulse"></i></div>
                 <div class="brand-text">
                     <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
+                    <span class="brand-subtitle">Nutrition Assessment System (NAS)</span>
                 </div>
             </a>
         </div>
@@ -688,10 +657,10 @@
 
                             <th style="width: 12%;">ชื่อ-นามสกุล</th>
                             <th style="width: 4%; text-align: center;">อายุ</th>
-                            <th style="width: 12%;">โรคประจำตัว</th>
-                            <th style="width: 8%;">อาหาร (Diet)</th>
-                            <th style="width: 10%;">แพทย์เจ้าของไข้</th>
-                            <th style="width: 9%;">วันที่ Admit</th>
+                            <th style="width: 14%;">โรคประจำตัว</th>
+
+                            <th style="width: 12%;">แพทย์เจ้าของไข้</th>
+                            <th style="width: 10%;">วันที่ Admit</th>
                             <th style="width: 8%;">คัดกรองล่าสุด</th>
                             <th style="width: 8%;">ประเมินล่าสุด</th>
                             <th style="width: 10%; text-align: center;">จัดการ</th>
@@ -720,40 +689,44 @@
                 bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
                 underlying: 'ความดันโลหิตสูง (HT)',
-                diet: 'Regular',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
                 admitDate: '15 พ.ย. 67 08:30 น.',
-                screenDate: '24 พ.ย. 67', assessDate: '-',
+                screenDate: '24 พ.ย. 67',
+                screenCount: 2, // เพิ่มตัวแปรจำนวนครั้ง
+                assessDate: '-',
                 status: 'normal', scoreVal: 1, nafScore: null
             },
             {
                 bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
                 underlying: 'เบาหวาน (DM), โรคไต (CKD)',
-                diet: 'DM 1200 kcal',
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '25 พ.ย. 67 10:15 น.',
-                screenDate: '-', assessDate: '-',
+                screenDate: '-',
+                screenCount: 0, // ยังไม่เคยทำ
+                assessDate: '-',
                 status: 'wait_screen', scoreVal: null, nafScore: null
             },
             {
                 bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
                 underlying: 'ไขมันในเลือดสูง (DLP)',
-                diet: 'BD (1:1)',
                 doctor: 'นพ. เก่งกาจ วิชาการ',
                 admitDate: '18 พ.ย. 67 14:20 น.',
-                screenDate: '20 พ.ย. 67', assessDate: '-',
+                screenDate: '20 พ.ย. 67',
+                screenCount: 1,
+                assessDate: '-',
                 status: 'wait_assess', scoreVal: 3, nafScore: null
             },
             {
                 bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
                 hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
                 underlying: 'ปฏิเสธโรคประจำตัว',
-                diet: 'NPO',
                 doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
                 admitDate: '10 พ.ย. 67 20:45 น.',
-                screenDate: '15 พ.ย. 67', assessDate: '-',
+                screenDate: '15 พ.ย. 67',
+                screenCount: 1,
+                assessDate: '-',
                 status: 'normal', scoreVal: 0, nafScore: null
             }
         ];
@@ -786,15 +759,6 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        function getDietBadgeClass(dietStr) {
-            dietStr = dietStr.toLowerCase();
-            if (dietStr.includes('npo')) return 'diet-npo';
-            if (dietStr.includes('bd') || dietStr.includes('blenderized')) return 'diet-bd';
-            if (dietStr.includes('dm') || dietStr.includes('low salt')) return 'diet-dm';
-            if (dietStr.includes('soft')) return 'diet-soft';
-            return 'diet-regular';
-        }
-
         function renderTable(data) {
             const tbody = document.getElementById('patientTableBody');
             const noResults = document.getElementById('noResults');
@@ -811,6 +775,7 @@
                 let assessmentHTML = '';
                 let actionBtn = '';
 
+                // จัดการวันที่ Admit (ตัดวินาทีออก ถ้ามี)
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
                 const splitAdmit = p.admitDate.split(' ');
@@ -822,15 +787,27 @@
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const isOverdue = daysSinceScreen >= 7;
 
+                // --- 1. Logic การแสดงผล Screening (เพิ่มครั้งที่) ---
                 if (p.status === 'wait_screen') {
                     screeningHTML = `<div class="text-muted text-center">-</div>`;
                 } else {
                     let badgeClass = (p.scoreVal >= 2) ? 'status-risk' : 'status-normal';
                     let badgeText = (p.scoreVal >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
                     let overdueLabel = (p.status === 'normal' && isOverdue) ? `<div style="font-size:0.75rem; color:#d63384; margin-top:2px;"><i class="fas fa-clock"></i> ครบ 7 วันแล้ว</div>` : '';
-                    screeningHTML = `<div class="date-highlight">${p.screenDate}</div><div style="margin-top:2px;"><span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span></div>${overdueLabel}`;
+
+                    // [จุดที่เพิ่ม] แสดงครั้งที่แบบตัวเล็กๆ สีเทา
+                    let countLabel = `<span style="font-size: 0.75rem; color: #999; margin-left: 4px;">(ครั้งที่ ${p.screenCount})</span>`;
+
+                    screeningHTML = `
+                            <div class="date-highlight">${p.screenDate} ${countLabel}</div>
+                            <div style="margin-top:2px;">
+                                <span class="status-badge ${badgeClass}">${badgeText} (${p.scoreVal})</span>
+                            </div>
+                            ${overdueLabel}
+                        `;
                 }
 
+                // --- 2. Assessment ---
                 if (p.status === 'wait_assess') {
                     assessmentHTML = `<span class="status-badge status-risk" style="background:#fff3cd; color:#856404;">รอประเมิน NAF</span>`;
                 } else if (p.nafScore !== null) {
@@ -839,6 +816,7 @@
                     assessmentHTML = `<div class="text-muted text-center">-</div>`;
                 }
 
+                // --- 3. Buttons ---
                 if (p.status === 'wait_screen') {
                     actionBtn = `<button class="btn-action btn-screen" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 } else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
@@ -853,27 +831,25 @@
                     actionBtn = `<button class="btn-action btn-view" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
-                const dietClass = getDietBadgeClass(p.diet);
-
                 const row = `
-                    <tr>
-                        <td style="text-align: center; color: #6c757d;">${index + 1}</td>
-                        <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
-                        
-                        <td><div class="text-muted">${p.an}</div></td>
-                        <td><div class="text-strong">${p.hn}</div></td>
-                        
-                        <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
-                        <td style="text-align: center;">${p.age} ปี</td>
-                        <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
-                        <td><span class="diet-badge ${dietClass}">${p.diet}</span></td>
-                        <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
-                        <td><div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div><div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div></td>
-                        <td>${screeningHTML}</td>
-                        <td>${assessmentHTML}</td>
-                        <td class="action-cell">${actionBtn}</td>
-                    </tr>
-                `;
+                        <tr>
+                            <td style="text-align: center; color: #6c757d;">${index + 1}</td>
+                            <td style="text-align: center;"><div class="bed-badge">${p.bed}</div></td>
+                            
+                            <td><div class="text-muted">${p.an}</div></td>
+                            <td><div class="text-strong">${p.hn}</div></td>
+                            
+                            <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
+                            <td style="text-align: center;">${p.age} ปี</td>
+                            <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
+                            
+                            <td><div class="text-muted" style="font-size:0.9rem;">${p.doctor}</div></td>
+                            <td><div class="text-muted" style="font-size:0.9rem;">${admitDateShow}</div><div style="font-size:0.75rem; color:#adb5bd;">${admitTimeShow}</div></td>
+                            <td>${screeningHTML}</td>
+                            <td>${assessmentHTML}</td>
+                            <td class="action-cell">${actionBtn}</td>
+                        </tr>
+                    `;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         }
