@@ -524,6 +524,50 @@
             background-color: #f9f9f9;
         }
 
+        .section-title {
+            justify-content: space-between;
+            /* ดันข้อความไปซ้าย ดัน Filter ไปขวา */
+            flex-wrap: wrap;
+            /* รองรับมือถือ */
+        }
+
+        .filter-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .custom-select {
+            padding: 6px 30px 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-family: "Sarabun", sans-serif;
+            color: var(--text-main);
+            background-color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            /* Custom Arrow styling (optional but looks better) */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            min-width: 150px;
+        }
+
+        .custom-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
         .doc-link {
             color: var(--accent-color);
             font-weight: 600;
@@ -700,7 +744,18 @@
         <div class="patient-container">
             <div class="table-card">
                 <div class="section-title">
-                    <i class="fa-solid fa-clock-rotate-left"></i> ประวัติการบันทึกข้อมูลทั้งหมด
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-clock-rotate-left"></i> ประวัติการบันทึกข้อมูลทั้งหมด
+                    </div>
+
+                    <div class="filter-wrapper">
+                        <label class="filter-label"><i class="fa-solid fa-filter"></i> กรองข้อมูล:</label>
+                        <select id="typeFilter" class="custom-select" onchange="filterTable()">
+                            <option value="all">ทั้งหมด (All)</option>
+                            <option value="NAF">แบบประเมิน (NAF)</option>
+                            <option value="SPENT">แบบคัดกรอง (SPENT)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="table-responsive">
@@ -719,13 +774,60 @@
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
-                            <tr>
+                            <tr data-type="NAF">
+                                <td>
+                                    <a href="#" class="doc-link">แบบประเมินภาวะโภชนาการ (ครั้งที่ 3)</a>
+                                    <div class="doc-subtext">Ref: NAF-661101-003</div>
+                                </td>
+                                <td style="text-align: center;"><span class="status-badge"
+                                        style="background:#e3f2fd; color:#0d47a1;">NAF</span>
+                                </td>
+                                <td style="text-align: center; font-weight:bold;">4</td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td><span class="status-badge status-normal">ปกติ (Normal)</span></td>
+                                <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
+                                <td>
+                                    <div class="datetime-box">1 พ.ย. 66<br><span class="time-small">09:00 น.</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-muted text-center">-</div>
+                                </td>
+                                <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
+                                            class="fa-solid fa-file-pdf"></i></a></td>
+                            </tr>
+
+                            <tr data-type="NAF">
+                                <td>
+                                    <a href="#" class="doc-link">แบบประเมินภาวะโภชนาการ (ครั้งที่ 2)</a>
+                                    <div class="doc-subtext">Ref: NAF-661020-002</div>
+                                </td>
+                                <td style="text-align: center;"><span class="status-badge"
+                                        style="background:#e3f2fd; color:#0d47a1;">NAF</span>
+                                </td>
+                                <td style="text-align: center; font-weight:bold;">9</td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td><span class="status-badge status-risk">ปานกลาง (Moderate)</span></td>
+                                <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
+                                <td>
+                                    <div class="datetime-box">20 ต.ค. 66<br><span class="time-small">10:30 น.</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-muted text-center">-</div>
+                                </td>
+                                <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
+                                            class="fa-solid fa-file-pdf"></i></a></td>
+                            </tr>
+
+                            <tr data-type="NAF">
                                 <td>
                                     <a href="#" class="doc-link">แบบประเมินภาวะโภชนาการ (ครั้งที่ 1)</a>
                                     <div class="doc-subtext">Ref: NAF-661012-001</div>
                                 </td>
                                 <td style="text-align: center;"><span class="status-badge"
-                                        style="background:#e3f2fd; color:#0d47a1;">NAF</span></td>
+                                        style="background:#e3f2fd; color:#0d47a1;">NAF</span>
+                                </td>
                                 <td style="text-align: center; font-weight:bold;">12</td>
                                 <td><span class="status-badge status-wait">-</span></td>
                                 <td><span class="status-badge status-severe">รุนแรง (Severe)</span></td>
@@ -741,7 +843,8 @@
                                 <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
                                             class="fa-solid fa-file-pdf"></i></a></td>
                             </tr>
-                            <tr>
+
+                            <tr data-type="SPENT">
                                 <td>
                                     <a href="#" class="doc-link">แบบคัดกรองภาวะโภชนาการ (ครั้งที่ 2)</a>
                                     <div class="doc-subtext">Ref: SP-661010-002</div>
@@ -754,6 +857,28 @@
                                 <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
                                 <td>
                                     <div class="datetime-box">10 ต.ค. 66<br><span class="time-small">14:15 น.</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-muted text-center">-</div>
+                                </td>
+                                <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
+                                            class="fa-solid fa-file-pdf"></i></a></td>
+                            </tr>
+
+                            <tr data-type="SPENT">
+                                <td>
+                                    <a href="#" class="doc-link">แบบคัดกรองภาวะโภชนาการ (ครั้งที่ 1)</a>
+                                    <div class="doc-subtext">Ref: SP-661001-001</div>
+                                </td>
+                                <td style="text-align: center;"><span class="status-badge"
+                                        style="background:#f3e5f5; color:#7b1fa2;">SPENT</span></td>
+                                <td style="text-align: center; font-weight:bold;">0</td>
+                                <td><span class="status-badge status-normal">ปกติ</span></td>
+                                <td><span class="status-badge status-wait">-</span></td>
+                                <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
+                                <td>
+                                    <div class="datetime-box">1 ต.ค. 66<br><span class="time-small">08:00 น.</span>
                                     </div>
                                 </td>
                                 <td>
@@ -874,6 +999,31 @@
 
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
+        }
+
+        function filterTable() {
+            // 1. รับค่าจาก Dropdown
+            const filterValue = document.getElementById('typeFilter').value;
+
+            // 2. ดึงแถวข้อมูลทั้งหมดในตาราง
+            const rows = document.querySelectorAll('#historyTableBody tr');
+
+            // 3. วนลูปเช็คทีละแถว
+            rows.forEach(row => {
+                const rowType = row.getAttribute('data-type'); // ดึงค่า data-type ที่เราใส่ไว้ใน HTML
+
+                if (filterValue === 'all') {
+                    // ถ้าเลือก "ทั้งหมด" ให้แสดงทุกแถว
+                    row.style.display = '';
+                } else {
+                    // ถ้าเลือกประเภทเฉพาะ ให้เช็คว่าตรงกันไหม
+                    if (rowType === filterValue) {
+                        row.style.display = ''; // ตรงกัน -> แสดง
+                    } else {
+                        row.style.display = 'none'; // ไม่ตรง -> ซ่อน
+                    }
+                }
+            });
         }
     </script>
 </body>
