@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "kph_naf_db";
+$dbname = "kph_nas_db";
 
 try {
     // ต้องเป็นบรรทัดนี้

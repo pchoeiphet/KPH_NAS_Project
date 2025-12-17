@@ -80,7 +80,7 @@
             color: var(--text-muted);
         }
 
-        /* --- User Profile  --- */
+        /* --- User Profile --- */
         .user-profile {
             display: flex;
             align-items: center;
@@ -92,7 +92,6 @@
             background-color: white;
             gap: 12px;
             position: relative;
-            /* เพิ่มเพื่อให้ dropdown อ้างอิงได้ถูกต้อง */
         }
 
         .user-profile:hover {
@@ -132,7 +131,6 @@
             color: var(--text-muted);
         }
 
-        /* Class สำหรับลูกศร */
         .user-arrow {
             font-size: 0.85rem;
             color: #adb5bd;
@@ -141,7 +139,6 @@
             right: 15px;
         }
 
-        /* สั่งหมุนเมื่อมี class active */
         .user-profile.active .user-arrow {
             transform: rotate(180deg);
             color: var(--primary-color);
@@ -153,7 +150,7 @@
             top: 75px;
             right: 20px;
             background: white;
-            width: 230px;
+            width: 250px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
@@ -241,7 +238,6 @@
                 background: transparent;
                 gap: 0;
                 width: 40px;
-                /* Fix width for mobile */
             }
 
             .user-avatar {
@@ -249,7 +245,6 @@
                 height: 40px;
             }
 
-            /* Hide arrow in mobile specifically to avoid layout issues */
             .user-arrow {
                 display: none;
             }
@@ -348,7 +343,6 @@
             margin-bottom: 8px;
         }
 
-        /* 1. สไตล์พื้นฐานสำหรับ Input และ Select (ใช้ร่วมกัน) */
         input[type="text"],
         select {
             padding: 8px 15px;
@@ -364,29 +358,18 @@
             color: var(--text-main);
         }
 
-        /* 2. เขียนทับเฉพาะ Select เพื่อจัดระเบียบลูกศร */
         select {
-            /* ลบลูกศรเดิมของ Browser ทิ้ง */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-
-            /* ใส่ลูกศรใหม่ด้วย SVG (สีเทา #6c757d) */
             background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-
-            /* จัดตำแหน่งลูกศร */
             background-repeat: no-repeat;
             background-position: right 15px center;
-            /* ชิดขวา 15px กึ่งกลางแนวตั้ง */
             background-size: 16px;
-            /* ขนาดลูกศร */
-
-            /* ดันข้อความไม่ให้ทับลูกศร */
             padding-right: 40px;
             cursor: pointer;
         }
 
-        /* Effect ตอน Focus */
         input[type="text"]:focus,
         select:focus {
             background-color: #fff;
@@ -439,6 +422,7 @@
             vertical-align: middle;
         }
 
+        /* [แก้ไข] ส่วนหัวตารางให้คลิกได้ */
         .custom-table thead th {
             background-color: var(--primary-color);
             color: #ffffff;
@@ -446,6 +430,31 @@
             font-weight: 500;
             text-align: left;
             border-bottom: none;
+            cursor: pointer;
+            /* เปลี่ยนเมาส์เป็นรูปมือ */
+            user-select: none;
+            /* ห้ามลากคลุมดำ */
+            transition: background 0.2s;
+        }
+
+        .custom-table thead th:hover {
+            background-color: #34495e;
+            /* สีเข้มขึ้นตอนเอาเมาส์ชี้ */
+        }
+
+        /* ไอคอนเรียงลำดับในหัวตาราง */
+        .sort-icon {
+            font-size: 0.75rem;
+            margin-left: 5px;
+            opacity: 0.5;
+            /* จางๆ ไว้ก่อน */
+        }
+
+        .custom-table thead th.active-sort .sort-icon {
+            opacity: 1;
+            /* ชัดขึ้นเมื่อถูกเลือก */
+            color: #3498DB;
+            /* เปลี่ยนสีไอคอน */
         }
 
         .custom-table tbody tr {
@@ -665,7 +674,7 @@
 
                 <div class="brand-text">
                     <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Assessment System (NAS)</span>
+                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
                 </div>
             </a>
         </div>
@@ -743,19 +752,29 @@
                     <thead>
                         <tr>
                             <th style="width: 3%; text-align: center;">#</th>
-                            <th style="width: 5%; text-align: center;">เตียง</th>
+                            <th style="width: 5%; text-align: center;" onclick="handleSort('bed')">เตียง <i
+                                    class="fas fa-sort sort-icon" id="sort-bed"></i></th>
 
-                            <th style="width: 6%;">AN</th>
-                            <th style="width: 6%;">HN</th>
+                            <th style="width: 6%;" onclick="handleSort('an')">AN <i class="fas fa-sort sort-icon"
+                                    id="sort-an"></i></th>
+                            <th style="width: 6%;" onclick="handleSort('hn')">HN <i class="fas fa-sort sort-icon"
+                                    id="sort-hn"></i></th>
 
-                            <th style="width: 14%;">ชื่อ-นามสกุล</th>
-                            <th style="width: 4%; text-align: center;">อายุ</th>
-                            <th style="width: 14%;">โรคประจำตัว</th>
+                            <th style="width: 14%;" onclick="handleSort('name')">ชื่อ-นามสกุล <i
+                                    class="fas fa-sort sort-icon" id="sort-name"></i></th>
+                            <th style="width: 4%; text-align: center;" onclick="handleSort('age')">อายุ <i
+                                    class="fas fa-sort sort-icon" id="sort-age"></i></th>
+                            <th style="width: 14%;" onclick="handleSort('underlying')">โรคประจำตัว <i
+                                    class="fas fa-sort sort-icon" id="sort-underlying"></i></th>
 
-                            <th style="width: 12%;">แพทย์เจ้าของไข้</th>
-                            <th style="width: 10%;">วันที่ Admit</th>
-                            <th style="width: 8%;">คัดกรองล่าสุด</th>
-                            <th style="width: 8%;">ประเมินล่าสุด</th>
+                            <th style="width: 12%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i
+                                    class="fas fa-sort sort-icon" id="sort-doctor"></i></th>
+                            <th style="width: 10%;" onclick="handleSort('admitDate')">วันที่ Admit <i
+                                    class="fas fa-sort sort-icon" id="sort-admitDate"></i></th>
+                            <th style="width: 8%;" onclick="handleSort('screenDate')">คัดกรองล่าสุด <i
+                                    class="fas fa-sort sort-icon" id="sort-screenDate"></i></th>
+                            <th style="width: 8%;" onclick="handleSort('assessDate')">ประเมินล่าสุด <i
+                                    class="fas fa-sort sort-icon" id="sort-assessDate"></i></th>
                             <th style="width: 10%; text-align: center;">จัดการ</th>
                         </tr>
                     </thead>
@@ -823,8 +842,14 @@
             }
         ];
 
+        // --- 1. State สำหรับการเรียงลำดับ ---
+        let currentSort = {
+            column: null,
+            direction: 'asc' // 'asc' หรือ 'desc'
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
-            // 1. Setup Dropdown & Arrow Rotation
+            // Setup Dropdown
             const userTrigger = document.getElementById('userDropdownTrigger');
             const userMenu = document.getElementById('dropdownMenu');
 
@@ -832,21 +857,21 @@
                 userTrigger.addEventListener('click', (e) => {
                     e.stopPropagation();
                     userMenu.classList.toggle('show');
-                    userTrigger.classList.toggle('active'); // หมุนลูกศร
+                    userTrigger.classList.toggle('active');
                 });
 
                 window.addEventListener('click', (e) => {
                     if (!userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
                         userMenu.classList.remove('show');
-                        userTrigger.classList.remove('active'); // หมุนลูกศรกลับ
+                        userTrigger.classList.remove('active');
                     }
                 });
             }
 
-            // 2. Render Table
+            // Render First Load
             renderTable(patients);
 
-            // 3. Setup Filters
+            // Setup Filters
             ['searchInput', 'wardFilter', 'doctorFilter'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -854,6 +879,67 @@
                 }
             });
         });
+
+        // --- 2. ฟังก์ชันเรียงลำดับ (Sorting Logic) ---
+        function handleSort(column) {
+            // สลับทิศทางถ้ากดคอลัมน์เดิม
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc'; // เริ่มต้นที่น้อยไปมากเสมอ
+            }
+
+            // อัปเดตไอคอน
+            updateSortIcons(column, currentSort.direction);
+
+            // เรียก filterPatients ใหม่เพื่อให้มันเรียงและกรองข้อมูลล่าสุด
+            filterPatients();
+        }
+
+        function updateSortIcons(activeColumn, direction) {
+            // รีเซ็ตไอคอนทั้งหมดเป็นขีดๆ (fa-sort)
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+                icon.parentElement.classList.remove('active-sort');
+            });
+
+            // เปลี่ยนไอคอนคอลัมน์ที่เลือก
+            const targetIcon = document.getElementById(`sort-${activeColumn}`);
+            if (targetIcon) {
+                targetIcon.className = direction === 'asc' ? 'fas fa-sort-up sort-icon' : 'fas fa-sort-down sort-icon';
+                targetIcon.parentElement.classList.add('active-sort');
+            }
+        }
+
+        // Helper แปลงวันที่ไทยให้เป็น Object Date เพื่อการเปรียบเทียบ (รองรับทั้งแบบมีเวลาและไม่มีเวลา)
+        function parseThaiDateForSort(dateStr) {
+            if (!dateStr || dateStr === '-' || dateStr === '') return 0; // ค่าว่างให้เป็น 0 (น้อยสุด)
+
+            // ลบ 'น.' และช่องว่างส่วนเกินออก
+            dateStr = dateStr.replace(' น.', '').trim();
+
+            const parts = dateStr.split(' ');
+            // parts[0] = วันที่, parts[1] = เดือน, parts[2] = ปี (อาจมีเวลาติดมาด้วย)
+
+            if (parts.length < 3) return 0;
+
+            const months = { 'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5, 'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11 };
+
+            const day = parseInt(parts[0]);
+            const month = months[parts[1]];
+
+            // แยกปี และ เวลา (ถ้ามี)
+            // เช่น "67" หรือ "67 08:30"
+            let yearStr = parts[2];
+            let timeStr = parts.length > 3 ? parts[3] : "00:00"; // ถ้ามีเวลาอยู่ array ช่องถัดไป
+
+            const year = parseInt(yearStr) + 2500 - 543;
+
+            const [hours, minutes] = timeStr.split(':').map(Number);
+
+            return new Date(year, month, day, hours || 0, minutes || 0).getTime();
+        }
 
         function parseThaiDate(dateStr) {
             if (!dateStr || dateStr === '-') return null;
@@ -962,17 +1048,50 @@
             });
         }
 
+        // [แก้ไข] รวม Filter และ Sorting ไว้ด้วยกัน
         function filterPatients() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const ward = document.getElementById('wardFilter').value;
             const doctor = document.getElementById('doctorFilter').value;
-            const filtered = patients.filter(p => {
+
+            // 1. กรองข้อมูล (Filter)
+            let result = patients.filter(p => {
                 const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
                 const matchesWard = ward === 'all' || p.ward === ward;
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
             });
-            renderTable(filtered);
+
+            // 2. เรียงลำดับข้อมูล (Sort)
+            if (currentSort.column) {
+                result.sort((a, b) => {
+                    let valA = a[currentSort.column];
+                    let valB = b[currentSort.column];
+
+                    // กรณีเรียงวันที่ (ต้องแปลงสตริงไทยเป็น Timestamp ก่อนเทียบ)
+                    if (['admitDate', 'screenDate', 'assessDate'].includes(currentSort.column)) {
+                        valA = parseThaiDateForSort(valA);
+                        valB = parseThaiDateForSort(valB);
+                    }
+
+                    // กรณีเรียงตัวเลข (อายุ)
+                    else if (['age'].includes(currentSort.column)) {
+                        valA = Number(valA);
+                        valB = Number(valB);
+                    }
+                    // กรณีเรียงสตริง (ชื่อ, HN, AN, หมอ)
+                    else {
+                        valA = valA ? valA.toString().toLowerCase() : '';
+                        valB = valB ? valB.toString().toLowerCase() : '';
+                    }
+
+                    if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            renderTable(result);
         }
 
         function showToast(message) {
