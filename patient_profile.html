@@ -392,15 +392,17 @@
         }
 
         .btn-success {
-            background-color: var(--secondary-color);
+            background-color: #0d47a1;
+            /* สีน้ำเงินเข้ม */
             color: white;
-            border: 1px solid var(--secondary-color);
-            box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
+            border: 1px solid #0d47a1;
+            box-shadow: 0 2px 4px rgba(13, 71, 161, 0.2);
         }
 
         .btn-success:hover {
-            background-color: #219150;
-            border-color: #219150;
+            background-color: #083474;
+            /* สีตอนชี้ (เข้มขึ้น) */
+            border-color: #083474;
             transform: translateY(-1px);
         }
 
@@ -470,6 +472,13 @@
         .action-item .text-box span {
             font-size: 0.8rem;
             color: var(--text-muted);
+        }
+
+        #addFileBtn {
+            min-width: 280px;
+            /* กำหนดความกว้างขั้นต่ำที่ต้องการ */
+            justify-content: center;
+            /* จัดข้อความให้อยู่ตรงกลาง */
         }
 
         /* Table Section */
