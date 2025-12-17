@@ -97,7 +97,6 @@
             background-color: white;
             gap: 12px;
             position: relative;
-            /* เพิ่มเพื่อให้ dropdown อ้างอิงได้ถูกต้อง */
         }
 
         .user-profile:hover {
@@ -137,7 +136,6 @@
             color: var(--text-muted);
         }
 
-        /* Class สำหรับลูกศร */
         .user-arrow {
             font-size: 0.85rem;
             color: #adb5bd;
@@ -146,7 +144,6 @@
             right: 15px;
         }
 
-        /* สั่งหมุนเมื่อมี class active */
         .user-profile.active .user-arrow {
             transform: rotate(180deg);
             color: var(--primary-color);
@@ -246,7 +243,6 @@
                 background: transparent;
                 gap: 0;
                 width: 40px;
-                /* Fix width for mobile */
             }
 
             .user-avatar {
@@ -254,7 +250,6 @@
                 height: 40px;
             }
 
-            /* Hide arrow in mobile specifically to avoid layout issues */
             .user-arrow {
                 display: none;
             }
@@ -292,8 +287,9 @@
             padding: 24px 20px;
         }
 
+        /* Container 90% */
         .patient-container {
-            max-width: 1200px;
+            max-width: 90%;
             margin: 0 auto;
             display: flex;
             gap: 25px;
@@ -377,7 +373,6 @@
             align-items: center;
             gap: 8px;
             font-weight: 600;
-            transition: all 0.2s;
         }
 
         .btn-secondary {
@@ -393,7 +388,6 @@
 
         .btn-success {
             background-color: #0d47a1;
-            /* สีน้ำเงินเข้ม */
             color: white;
             border: 1px solid #0d47a1;
             box-shadow: 0 2px 4px rgba(13, 71, 161, 0.2);
@@ -401,7 +395,6 @@
 
         .btn-success:hover {
             background-color: #083474;
-            /* สีตอนชี้ (เข้มขึ้น) */
             border-color: #083474;
             transform: translateY(-1px);
         }
@@ -476,9 +469,7 @@
 
         #addFileBtn {
             min-width: 280px;
-            /* กำหนดความกว้างขั้นต่ำที่ต้องการ */
             justify-content: center;
-            /* จัดข้อความให้อยู่ตรงกลาง */
         }
 
         /* Table Section */
@@ -486,9 +477,11 @@
             margin-bottom: 60px;
         }
 
+        /* [แก้ไข] เพิ่ม width 100% ตรงนี้เพื่อให้ตารางกว้างเต็มจอ */
         .table-card {
+            width: 100%;
             background: white;
-            border-radius: 12px;
+            border-radius: 0;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
             overflow: hidden;
@@ -722,13 +715,13 @@
                                 <th style="width: 13%;">ผู้ประเมิน</th>
                                 <th style="width: 10%;">วัน/เวลาที่บันทึก</th>
                                 <th style="width: 10%;">วัน/เวลาที่แก้ไข</th>
-                                <th style="width: 5%; text-align: center;">PDF</th>
+                                <th style="width: 5%; text-align: center;">เอกสาร</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
                             <tr>
                                 <td>
-                                    <a href="#" class="doc-link">แบบประเมิน NAF (ครั้งที่ 1)</a>
+                                    <a href="#" class="doc-link">แบบประเมินภาวะโภชนาการ (ครั้งที่ 1)</a>
                                     <div class="doc-subtext">Ref: NAF-661012-001</div>
                                 </td>
                                 <td style="text-align: center;"><span class="status-badge"
@@ -750,7 +743,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="#" class="doc-link">แบบคัดกรอง SPENT (ครั้งที่ 2)</a>
+                                    <a href="#" class="doc-link">แบบคัดกรองภาวะโภชนาการ (ครั้งที่ 2)</a>
                                     <div class="doc-subtext">Ref: SP-661010-002</div>
                                 </td>
                                 <td style="text-align: center;"><span class="status-badge"
