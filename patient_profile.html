@@ -4,25 +4,611 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประเมินภาวะโภชนาการ | โรงพยาบาลกำแพงเพชร</title>
+    <title>ข้อมูลผู้ป่วย | โรงพยาบาลกำแพงเพชร</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/patient_profile.css">
+
+    <style>
+        /* --- 1. Global Variables --- */
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #27AE60;
+            --accent-color: #3498DB;
+            --bg-body: #ffffff;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+
+            /* Status Colors */
+            --risk-high-bg: #ffebee;
+            --risk-high-text: #c62828;
+            --risk-med-bg: #fff8e1;
+            --risk-med-text: #f57c00;
+            --risk-low-bg: #e8f5e9;
+            --risk-low-text: #2e7d32;
+        }
+
+        body {
+            font-family: "Sarabun", sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+        }
+
+        /* --- 2. Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 0 20px;
+            height: 80px;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo {
+            height: 45px;
+            width: auto;
+            margin-right: 12px;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- User Profile  --- */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 50px 12px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 1px solid #f0f0f0;
+            background-color: white;
+            gap: 12px;
+            position: relative;
+            /* เพิ่มเพื่อให้ dropdown อ้างอิงได้ถูกต้อง */
+        }
+
+        .user-profile:hover {
+            background-color: #f8f9fa;
+            border-color: #e2e6ea;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Class สำหรับลูกศร */
+        .user-arrow {
+            font-size: 0.85rem;
+            color: #adb5bd;
+            transition: transform 0.3s ease;
+            position: absolute;
+            right: 15px;
+        }
+
+        /* สั่งหมุนเมื่อมี class active */
+        .user-profile.active .user-arrow {
+            transform: rotate(180deg);
+            color: var(--primary-color);
+        }
+
+        /* --- Dropdown Menu --- */
+        .dropdown-menu {
+            position: absolute;
+            top: 75px;
+            right: 20px;
+            background: white;
+            width: 230px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+        }
+
+        .dropdown-menu.show {
+            display: flex;
+            animation: fadeInDown 0.2s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-user-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            color: #444;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item i {
+            width: 30px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f1f8ff;
+            color: var(--accent-color);
+        }
+
+        .dropdown-item:hover i {
+            color: var(--accent-color);
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: #fff5f5;
+            color: #dc3545;
+        }
+
+        .dropdown-item.text-danger:hover i {
+            color: #dc3545;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 4px 0;
+        }
+
+        /* --- 4. Responsive --- */
+        @media (max-width: 768px) {
+
+            .user-info,
+            .user-profile .fa-chevron-down {
+                display: none !important;
+            }
+
+            .user-profile {
+                padding: 0;
+                border: none;
+                background: transparent;
+                gap: 0;
+                width: 40px;
+                /* Fix width for mobile */
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Hide arrow in mobile specifically to avoid layout issues */
+            .user-arrow {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .brand-title {
+                font-size: 1rem;
+            }
+
+            .brand-subtitle {
+                display: none;
+            }
+
+            .filter-grid {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filter-item,
+            .filter-item.item-search {
+                width: 100%;
+                min-width: 100%;
+                flex: none;
+            }
+        }
+
+        /* --- 5. Content Layout --- */
+        .patient-banner {
+            margin-top: 80px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 24px 20px;
+        }
+
+        .patient-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+        }
+
+        .patient-icon-box {
+            flex-shrink: 0;
+            width: 120px;
+            height: 140px;
+            background-color: #e3f2fd;
+            color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            border: 1px solid #bbdefb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .patient-details {
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .section-header {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eef2f5;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px 25px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Action Bar */
+        .action-bar-section {
+            margin: 25px 0;
+        }
+
+        .action-bar-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-family: "Sarabun", sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #cbd5e0;
+        }
+
+        .btn-success {
+            background-color: var(--secondary-color);
+            color: white;
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: #219150;
+            border-color: #219150;
+            transform: translateY(-1px);
+        }
+
+        /* Add File Dropdown */
+        .action-dropdown {
+            position: relative;
+        }
+
+        .action-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            margin-top: 8px;
+            right: 0;
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .action-menu.show {
+            display: block;
+            animation: fadeInDown 0.2s;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            text-decoration: none;
+            color: var(--text-main);
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.1s;
+        }
+
+        .action-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-item .icon-box {
+            width: 40px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            padding-top: 2px;
+        }
+
+        .action-item .text-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .action-item .text-box strong {
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        .action-item .text-box span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Table Section */
+        .history-section {
+            margin-bottom: 60px;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .section-title {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            background-color: #fcfcfc;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .custom-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .custom-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+            color: #444;
+        }
+
+        .custom-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .doc-link {
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .doc-link:hover {
+            text-decoration: underline;
+        }
+
+        .doc-subtext {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-normal {
+            background: var(--risk-low-bg);
+            color: var(--risk-low-text);
+        }
+
+        .status-risk {
+            background: var(--risk-med-bg);
+            color: var(--risk-med-text);
+        }
+
+        .status-severe {
+            background: var(--risk-high-bg);
+            color: var(--risk-high-text);
+        }
+
+        .status-wait {
+            background: #eee;
+            color: #666;
+        }
+
+        .btn-icon-pdf {
+            color: #e74c3c;
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+
+        .btn-icon-pdf:hover {
+            transform: scale(1.1);
+            color: #c0392b;
+        }
+
+        .datetime-box {
+            line-height: 1.2;
+            font-weight: 500;
+        }
+
+        .time-small {
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+    </style>
 </head>
 
 <body>
 
     <nav class="navbar">
         <div class="navbar-left">
-            <a class="navbar-brand" href="index.php">
-                <img src="img/logo_kph.jpg" class="brand-logo" alt="KPH Logo" onerror="this.style.display='none'">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/logo_kph.jpg" class="brand-logo" alt="Logo" onerror="this.style.display='none'">
                 <div class="brand-text">
                     <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Alert Form - โรงพยาบาลกำแพงเพชร</span>
+                    <span class="brand-subtitle">Nutrition Alert System (NAS)</span>
                 </div>
             </a>
         </div>
+
         <div class="navbar-right">
             <div class="user-profile" id="userDropdownTrigger">
                 <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
@@ -30,8 +616,9 @@
                     <span class="user-name">เพชรลดา เชยเพ็ชร</span>
                     <span class="user-role">นักโภชนาการ</span>
                 </div>
-                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
+                <i class="fa-solid fa-chevron-down user-arrow"></i>
             </div>
+
             <div class="dropdown-menu" id="dropdownMenu">
                 <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
                 </div>
@@ -46,26 +633,30 @@
 
     <div class="patient-banner">
         <div class="patient-container">
-            <div class="patient-icon-box"><i class="fa-solid fa-user"></i></div>
+            <div class="patient-icon-box"><i class="fa-solid fa-user-injured"></i></div>
             <div class="patient-details">
                 <div class="section-header"><i class="fa-solid fa-hospital-user"></i> ข้อมูลผู้ป่วย</div>
                 <div class="patient-grid">
-                    <div class="info-item"><span class="info-label">HN</span><span class="info-value">6612345</span>
+                    <div class="info-item"><span class="info-label">HN</span><span class="info-value" id="p_hn">-</span>
                     </div>
-                    <div class="info-item"><span class="info-label">AN</span><span class="info-value">6700891</span>
+                    <div class="info-item"><span class="info-label">AN</span><span class="info-value" id="p_an">-</span>
                     </div>
-                    <div class="info-item"><span class="info-label">ชื่อ - นามสกุล</span><span
-                            class="info-value">นายสมชาย รักสุขภาพ</span></div>
-                    <div class="info-item"><span class="info-label">อายุ</span><span class="info-value">54 ปี 6
-                            เดือน</span></div>
-                    <div class="info-item"><span class="info-label">สิทธิการรักษา</span><span
-                            class="info-value">ประกันสุขภาพถ้วนหน้า</span></div>
-                    <div class="info-item"><span class="info-label">หอผู้ป่วย / เตียง</span><span
-                            class="info-value">อายุรกรรมชาย 1 / <strong>เตียง 12</strong></span></div>
-                    <div class="info-item"><span class="info-label">วันที่ Admit</span><span class="info-value">10 ต.ค.
-                            2566</span></div>
-                    <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span
-                            class="info-value">081-234-5678</span></div>
+                    <div class="info-item"><span class="info-label">ชื่อ - นามสกุล</span><span class="info-value"
+                            id="p_name">-</span></div>
+                    <div class="info-item"><span class="info-label">อายุ</span><span class="info-value"
+                            id="p_age">-</span></div>
+                    <div class="info-item"><span class="info-label">สิทธิการรักษา</span><span class="info-value"
+                            id="p_rights">-</span></div>
+                    <div class="info-item"><span class="info-label">แพทย์เจ้าของไข้</span><span class="info-value"
+                            id="p_doctor">-</span></div>
+                    <div class="info-item"><span class="info-label">หอผู้ป่วย / เตียง</span><span class="info-value"
+                            id="p_ward">-</span></div>
+                    <div class="info-item"><span class="info-label">วันที่ Admit</span><span class="info-value"
+                            id="p_admit">-</span></div>
+                    <div class="info-item"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value"
+                            id="p_phone">-</span></div>
+                    <div class="info-item"><span class="info-label">โรคประจำตัว</span><span
+                            class="info-value text-danger" id="p_underlying">-</span></div>
                 </div>
             </div>
         </div>
@@ -73,8 +664,7 @@
 
     <div class="action-bar-section">
         <div class="patient-container action-bar-flex">
-
-            <a href="index.php" class="btn btn-secondary">
+            <a href="index.html" class="btn btn-secondary">
                 <i class="fa-solid fa-chevron-left"></i> กลับหน้าหลัก
             </a>
 
@@ -101,7 +691,6 @@
                     </a>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -109,7 +698,7 @@
         <div class="patient-container">
             <div class="table-card">
                 <div class="section-title">
-                    <i class="fa-solid fa-list-check"></i> ประวัติการบันทึกข้อมูลทั้งหมด
+                    <i class="fa-solid fa-clock-rotate-left"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                 </div>
 
                 <div class="table-responsive">
@@ -117,81 +706,59 @@
                         <thead>
                             <tr>
                                 <th style="width: 25%;">รายการบันทึก</th>
-                                <th style="width: 10%;">ประเภท</th>
-                                <th style="width: 5%; text-align: center;">คะแนน</th>
+                                <th style="width: 10%; text-align:center;">ประเภท</th>
+                                <th style="width: 5%; text-align:center;">คะแนน</th>
                                 <th style="width: 12%;">ผลการคัดกรอง</th>
                                 <th style="width: 12%;">ผลการประเมิน</th>
                                 <th style="width: 13%;">ผู้ประเมิน</th>
                                 <th style="width: 10%;">วัน/เวลาที่บันทึก</th>
                                 <th style="width: 10%;">วัน/เวลาที่แก้ไข</th>
-                                <th style="width: 5%; text-align: center;">เอกสาร</th>
+                                <th style="width: 5%; text-align: center;">PDF</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="historyTableBody">
                             <tr>
                                 <td>
-                                    <a href="screening_detail.php?id=3" class="doc-link">แบบคัดกรองภาวะโภชนาการ ครั้งที่
-                                        2</a>
-                                    <div class="doc-subtext">Ref: SP-661012-003</div>
+                                    <a href="#" class="doc-link">แบบประเมิน NAF (ครั้งที่ 1)</a>
+                                    <div class="doc-subtext">Ref: NAF-661012-001</div>
                                 </td>
-                                <td>SPENT</td>
-                                <td style="text-align: center;">3</td>
-                                <td><span class="status-badge status-risk">มีความเสี่ยง</span></td>
-                                <td><span class="status-badge status-wait">-</span></td>
-                                <td class="recorder-name">รอโหลดข้อมูล...</td>
-                                <td>
-                                    <div class="datetime-box">12 ต.ค. 66<br><span class="time-small">08:00 น.</span>
-                                    </div>
-                                </td>
-                                <td>-</td>
-                                <td style="text-align: center;">
-                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <a href="assessment_detail.php?id=2" class="doc-link">แบบประเมินภาวะโภชนาการ
-                                        ครั้งที่ 1</a>
-                                    <div class="doc-subtext">Ref: NAF-661011-002</div>
-                                </td>
-                                <td>NAF</td>
-                                <td style="text-align: center;">12</td>
+                                <td style="text-align: center;"><span class="status-badge"
+                                        style="background:#e3f2fd; color:#0d47a1;">NAF</span></td>
+                                <td style="text-align: center; font-weight:bold;">12</td>
                                 <td><span class="status-badge status-wait">-</span></td>
                                 <td><span class="status-badge status-severe">รุนแรง (Severe)</span></td>
-                                <td class="recorder-name">รอโหลดข้อมูล...</td>
+                                <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
                                 <td>
-                                    <div class="datetime-box">11 ต.ค. 66<br><span class="time-small">09:15 น.</span>
+                                    <div class="datetime-box">12 ต.ค. 66<br><span class="time-small">09:30 น.</span>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="datetime-box">11 ต.ค. 66<br><span class="time-small">14:00 น.</span>
+                                    <div class="datetime-box">12 ต.ค. 66<br><span class="time-small">10:00 น.</span>
                                     </div>
                                 </td>
-                                <td style="text-align: center;">
-                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
-                                </td>
+                                <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
+                                            class="fa-solid fa-file-pdf"></i></a></td>
                             </tr>
-
                             <tr>
                                 <td>
-                                    <a href="screening_detail.php?id=1" class="doc-link">แบบคัดกรองภาวะโภชนาการ ครั้งที่
-                                        1</a>
-                                    <div class="doc-subtext">Ref: SP-661010-001</div>
+                                    <a href="#" class="doc-link">แบบคัดกรอง SPENT (ครั้งที่ 2)</a>
+                                    <div class="doc-subtext">Ref: SP-661010-002</div>
                                 </td>
-                                <td>SPENT</td>
-                                <td style="text-align: center;">0</td>
-                                <td><span class="status-badge status-normal">ปกติ</span></td>
+                                <td style="text-align: center;"><span class="status-badge"
+                                        style="background:#f3e5f5; color:#7b1fa2;">SPENT</span></td>
+                                <td style="text-align: center; font-weight:bold;">3</td>
+                                <td><span class="status-badge status-risk">มีความเสี่ยง</span></td>
                                 <td><span class="status-badge status-wait">-</span></td>
-                                <td class="recorder-name">รอโหลดข้อมูล...</td>
+                                <td class="recorder-name">เพชรลดา เชยเพ็ชร</td>
                                 <td>
-                                    <div class="datetime-box">10 ต.ค. 66<br><span class="time-small">10:30 น.</span>
+                                    <div class="datetime-box">10 ต.ค. 66<br><span class="time-small">14:15 น.</span>
                                     </div>
                                 </td>
-                                <td>-</td>
-                                <td style="text-align: center;">
-                                    <a href="#" class="btn-icon-pdf"><i class="fa-solid fa-file-pdf"></i></a>
+                                <td>
+                                    <div class="text-muted text-center">-</div>
                                 </td>
+                                <td style="text-align: center;"><a href="#" class="btn-icon-pdf"><i
+                                            class="fa-solid fa-file-pdf"></i></a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -201,8 +768,72 @@
     </div>
 
     <script>
+        const mockPatients = [
+            {
+                hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
+                underlying: 'ความดันโลหิตสูง (HT)',
+                doctor: 'นพ. สมศักดิ์ รักษาดี',
+                ward: 'อายุรกรรมชาย 1', bed: '101',
+                admitDate: '15 พ.ย. 67 08:30 น.',
+                rights: 'บัตรทอง', phone: '081-111-1111'
+            },
+            {
+                hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
+                underlying: 'เบาหวาน (DM), โรคไต (CKD)',
+                doctor: 'พญ. ใจดี มีเมตตา',
+                ward: 'อายุรกรรมหญิง 2', bed: '102',
+                admitDate: '25 พ.ย. 67 10:15 น.',
+                rights: 'ข้าราชการ', phone: '082-222-2222'
+            },
+            {
+                hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
+                underlying: 'ไขมันในเลือดสูง (DLP)',
+                doctor: 'นพ. เก่งกาจ วิชาการ',
+                ward: 'อายุรกรรมชาย 1', bed: '103',
+                admitDate: '18 พ.ย. 67 14:20 น.',
+                rights: 'ประกันสังคม', phone: '083-333-3333'
+            },
+            {
+                hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
+                underlying: 'ปฏิเสธโรคประจำตัว',
+                doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
+                ward: 'ศัลยกรรมกระดูก 3', bed: '105',
+                admitDate: '10 พ.ย. 67 20:45 น.',
+                rights: 'ชำระเงินเอง', phone: '084-444-4444'
+            }
+        ];
+
         document.addEventListener('DOMContentLoaded', function () {
-            // 1. จัดการ Dropdown
+            const urlParams = new URLSearchParams(window.location.search);
+            const hn = urlParams.get('hn');
+
+            if (hn) {
+                const patient = mockPatients.find(p => p.hn === hn);
+                if (patient) {
+                    document.getElementById('p_hn').innerText = patient.hn;
+                    document.getElementById('p_an').innerText = patient.an;
+                    document.getElementById('p_name').innerText = patient.name;
+                    document.getElementById('p_age').innerText = patient.age + " ปี";
+                    document.getElementById('p_doctor').innerText = patient.doctor;
+                    document.getElementById('p_ward').innerHTML = `${patient.ward} / <strong>เตียง ${patient.bed}</strong>`;
+                    document.getElementById('p_admit').innerText = patient.admitDate;
+                    document.getElementById('p_underlying').innerText = patient.underlying;
+
+                    const rightsEl = document.getElementById('p_rights');
+                    const phoneEl = document.getElementById('p_phone');
+
+                    if (rightsEl) rightsEl.innerText = patient.rights || '-';
+                    if (phoneEl) phoneEl.innerText = patient.phone || '-';
+                } else {
+                    document.getElementById('p_name').innerText = "ไม่พบข้อมูลผู้ป่วย";
+                    document.getElementById('p_name').style.color = "red";
+                }
+            }
+
+            setupUI();
+        });
+
+        function setupUI() {
             const userTrigger = document.getElementById('userDropdownTrigger');
             const userMenu = document.getElementById('dropdownMenu');
             const addFileBtn = document.getElementById('addFileBtn');
@@ -212,6 +843,7 @@
                 userTrigger.addEventListener('click', (e) => {
                     e.stopPropagation();
                     userMenu.classList.toggle('show');
+                    userTrigger.classList.toggle('active');
                     if (addFileMenu) addFileMenu.classList.remove('show');
                 });
             }
@@ -220,35 +852,26 @@
                 addFileBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     addFileMenu.classList.toggle('show');
-                    if (userMenu) userMenu.classList.remove('show');
+                    if (userMenu) {
+                        userMenu.classList.remove('show');
+                        userTrigger.classList.remove('active');
+                    }
                 });
             }
 
             window.addEventListener('click', (e) => {
-                if (userMenu && !userMenu.contains(e.target) && !userTrigger.contains(e.target)) userMenu.classList.remove('show');
-                if (addFileMenu && !addFileMenu.contains(e.target) && !addFileBtn.contains(e.target)) addFileMenu.classList.remove('show');
+                if (userMenu && !userMenu.contains(e.target) && !userTrigger.contains(e.target)) {
+                    userMenu.classList.remove('show');
+                    userTrigger.classList.remove('active');
+                }
+                if (addFileMenu && !addFileMenu.contains(e.target) && !addFileBtn.contains(e.target)) {
+                    addFileMenu.classList.remove('show');
+                }
             });
-
-            // 2. ฟังก์ชันซิงค์ชื่อผู้ใช้งานลงตาราง (Auto Sync Name)
-            syncUserToTable();
-        });
-
-        function syncUserToTable() {
-            // ดึงชื่อจาก Navbar
-            const navbarNameEl = document.querySelector('.user-name');
-            if (navbarNameEl) {
-                const currentUserName = navbarNameEl.innerText.trim();
-
-                // ค้นหาช่องที่มี class 'recorder-name' ในตารางและแทนที่ข้อความ
-                const cells = document.querySelectorAll('.recorder-name');
-                cells.forEach(cell => {
-                    cell.innerText = currentUserName;
-                });
-            }
         }
 
         function confirmLogout() {
-            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'logout.php';
+            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
         }
     </script>
 </body>

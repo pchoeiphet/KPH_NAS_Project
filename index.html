@@ -80,7 +80,7 @@
             color: var(--text-muted);
         }
 
-        /* --- User Profile --- */
+        /* --- User Profile  --- */
         .user-profile {
             display: flex;
             align-items: center;
@@ -92,6 +92,7 @@
             background-color: white;
             gap: 12px;
             position: relative;
+            /* เพิ่มเพื่อให้ dropdown อ้างอิงได้ถูกต้อง */
         }
 
         .user-profile:hover {
@@ -131,6 +132,7 @@
             color: var(--text-muted);
         }
 
+        /* Class สำหรับลูกศร */
         .user-arrow {
             font-size: 0.85rem;
             color: #adb5bd;
@@ -139,6 +141,7 @@
             right: 15px;
         }
 
+        /* สั่งหมุนเมื่อมี class active */
         .user-profile.active .user-arrow {
             transform: rotate(180deg);
             color: var(--primary-color);
@@ -150,7 +153,7 @@
             top: 75px;
             right: 20px;
             background: white;
-            width: 250px;
+            width: 230px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
@@ -238,6 +241,7 @@
                 background: transparent;
                 gap: 0;
                 width: 40px;
+                /* Fix width for mobile */
             }
 
             .user-avatar {
@@ -245,6 +249,7 @@
                 height: 40px;
             }
 
+            /* Hide arrow in mobile specifically to avoid layout issues */
             .user-arrow {
                 display: none;
             }
@@ -669,7 +674,7 @@
 
     <nav class="navbar">
         <div class="navbar-left">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="index.html">
                 <img src="img/logo_kph.jpg" class="brand-logo" alt="Hospital Logo" onerror="this.style.display='none';">
 
                 <div class="brand-text">
@@ -1033,7 +1038,8 @@
                         <td><div class="text-muted">${p.an}</div></td>
                         <td><div class="text-strong">${p.hn}</div></td>
                         
-                        <td><a href="#" class="patient-link" onclick="showToast('ไปหน้าโปรไฟล์: ${p.name}')">${p.name}</a></td>
+                        <td><a href="patient_profile.html?hn=${p.hn}" class="patient-link">${p.name}</a></td>
+                        
                         <td style="text-align: center;">${p.age} ปี</td>
                         <td><div class="text-muted" style="font-size:0.9rem;">${p.underlying}</div></td>
                         
