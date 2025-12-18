@@ -375,7 +375,7 @@
                                         class="fas fa-search text-muted"></i></span>
                             </div>
                             <input type="text" class="form-control border-left-0" id="searchInput"
-                                placeholder="ชื่อ-สกุล, HN, AN...">
+                                placeholder="ชื่อ-สกุล, HN และ AN">
                         </div>
                     </div>
                     <div class="col-6 col-lg-3 mb-0">
@@ -670,7 +670,7 @@
             const doctor = document.getElementById('doctorFilter').value;
 
             let result = patients.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm);
                 const matchesWard = ward === 'all' || p.ward === ward;
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
