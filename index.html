@@ -354,68 +354,13 @@
 
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
-        <div class="d-flex align-items-center mb-4 flex-wrap">
+        <!-- <div class="d-flex align-items-center mb-4 flex-wrap">
             <div class="bg-light p-3 rounded mr-3 text-secondary mb-2 mb-md-0">
                 <i class="fa-solid fa-hospital-user fa-2x"></i>
             </div>
             <div>
                 <h4 class="font-weight-bold text-dark mb-0">รายการผู้ป่วยใน</h4>
                 <p class="text-muted mb-0 small">ค้นหาและจัดการข้อมูลการคัดกรองภาวะโภชนาการ</p>
-            </div>
-        </div>
-
-        <!-- <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="card border-0 shadow-sm bg-primary text-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <div class="small opacity-75">ผู้ป่วยใหม่ (ยังไม่คัดกรอง)</div>
-                                <div class="h3 mb-0 font-weight-bold">5</div>
-                            </div>
-                            <i class="fa-solid fa-user-plus fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card border-0 shadow-sm bg-danger text-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <div class="small opacity-75">กลุ่มเสี่ยง (ต้องทำ NAF)</div>
-                                <div class="h3 mb-0 font-weight-bold">3</div>
-                            </div>
-                            <i class="fa-solid fa-triangle-exclamation fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card border-0 shadow-sm bg-warning text-dark">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <div class="small opacity-75">ต้อง Re-screen (ครบ 7 วัน)</div>
-                                <div class="h3 mb-0 font-weight-bold">2</div>
-                            </div>
-                            <i class="fa-solid fa-clock-rotate-left fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card border-0 shadow-sm bg-success text-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <div class="small opacity-75">ดูแลแล้ววันนี้</div>
-                                <div class="h3 mb-0 font-weight-bold">12</div>
-                            </div>
-                            <i class="fa-solid fa-circle-check fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div> -->
 
@@ -677,23 +622,21 @@
                     assessmentHTML = `<div class="text-muted text-center">-</div>`;
                 }
 
-                // ในฟังก์ชัน renderTable(data) ปรับตรง Action Button Logic
+                // Action Button Logic
                 if (p.status === 'wait_screen') {
-                    // กรณี Admit ใหม่ (ปุ่มสีฟ้าเด่น)
-                    actionBtn = `<button class="btn btn-sm btn-primary shadow-sm w-100" onclick="showToast('เริ่มคัดกรอง: ${p.name}')">
-                    <i class="fas fa-edit"></i> คัดกรอง
-                 </button>`;
-                } else if (p.status === 'wait_assess') {
-                    // กรณีเสี่ยง (ปุ่มสีส้มกะพริบหรือสีส้มเข้ม)
-                    actionBtn = `<button class="btn btn-sm btn-warning shadow-sm w-100" onclick="showToast('ทำ NAF: ${p.name}')">
-                    <i class="fas fa-exclamation-circle"></i> ประเมิน NAF
-                 </button>`;
-                } else if (isOverdue) {
-                    // กรณีครบ 7 วัน (ปุ่มสีแดงขอบแดง)
-                    actionBtn = `<button class="btn btn-sm btn-outline-danger shadow-sm w-100" onclick="showToast('Re-screen: ${p.name}')">
-                    <i class="fas fa-sync"></i> Re-screen
-                 </button>`;
+                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 90px;" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
+                } else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
+                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 90px;" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
+                } else if (p.status === 'normal') {
+                    if (isOverdue) {
+                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> ซ้ำ</button>`;
+                    } else {
+                        actionBtn = `<button class="btn btn-sm btn-light text-muted" style="min-width: 90px;" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
+                    }
+                } else {
+                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
+
 
                 // Updated Row Structure with Data-Label for Mobile
                 const row = `
