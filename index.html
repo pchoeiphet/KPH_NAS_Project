@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>รายการผู้ป่วยใน | โรงพยาบาลกำแพงเพชร</title>
+    <title>รายชื่อผู้ป่วยใน | โรงพยาบาลกำแพงเพชร</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <style>
@@ -17,23 +19,17 @@
             background-color: #f4f7f6;
             color: #333;
             padding-top: 80px;
-            /* Default desktop padding */
         }
 
         /* Navbar Styling */
         .navbar-custom {
-            min-height: 80px;
-            /* เพิ่มจาก 70px */
+            height: 80px;
             background-color: white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .04);
-            padding-top: 10px;
-            /* เพิ่มระยะบน */
-            padding-bottom: 10px;
-            /* เพิ่มระยะล่าง */
         }
 
         .brand-logo {
-            height: 40px;
+            height: 45px;
             width: auto;
         }
 
@@ -41,10 +37,8 @@
             font-size: 1.2rem;
             font-weight: 700;
             color: #2C3E50;
-            margin-bottom: 2px;
-            line-height: 1.4;
-            padding-top: 4px;
-            /* ดันลงมานิดนึงไม่ให้ชิดขอบบน */
+            margin-bottom: 0;
+            line-height: 1.2;
         }
 
         .brand-text small {
@@ -56,42 +50,48 @@
         .user-profile-btn {
             display: flex;
             align-items: center;
-            padding: 4px 10px 4px 4px;
+            padding: 5px 15px 5px 5px;
             border: 1px solid #eee;
-            border-radius: 20px;
+            border-radius: 50px;
             background-color: #fff;
             transition: all 0.2s ease;
             cursor: pointer;
         }
 
+        .user-profile-btn:hover,
+        .show>.user-profile-btn {
+            background-color: #f8f9fa;
+            border-color: #e2e6ea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
         .user-avatar {
-            width: 35px;
-            height: 35px;
+            width: 38px;
+            height: 38px;
             background-color: #2C3E50;
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
+            font-size: 1.1rem;
         }
 
         .user-info {
             margin-left: 10px;
-            margin-right: 10px;
+            margin-right: 15px;
             line-height: 1.2;
             text-align: left;
         }
 
         .user-name {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #333;
         }
 
         .user-role {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #888;
         }
 
@@ -99,7 +99,7 @@
             display: none;
         }
 
-        /* Table & Badges Default (Desktop) */
+        /* Table & Badges */
         .table th {
             background-color: #2C3E50;
             color: white;
@@ -110,36 +110,92 @@
             user-select: none;
         }
 
+        .table th:hover {
+            background-color: #34495e;
+        }
+
         .table td {
             vertical-align: middle;
+        }
+
+        /* Filter Row Styling */
+        .filter-row th {
+            background-color: #f8f9fa !important;
+            padding: 8px !important;
+        }
+
+        .column-filter {
+            font-size: 0.8rem;
+            height: 30px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            width: 100%;
+        }
+
+        .sort-icon {
+            font-size: 0.8em;
+            opacity: 0.5;
+            margin-left: 5px;
+        }
+
+        .active-sort .sort-icon {
+            opacity: 1;
+            color: #3498DB;
         }
 
         .bed-badge {
             background: #e3f2fd;
             color: #0d47a1;
             font-weight: 600;
-            border-radius: 12px;
-            padding: 4px 8px;
+            border-radius: 4px;
+            /* ปรับให้เหลี่ยมขึ้นเล็กน้อยดูทางการ */
+            padding: 4px 10px;
             display: inline-block;
-            min-width: 40px;
+            min-width: 45px;
             text-align: center;
-            font-size: 0.9rem;
         }
 
-        /* Status Colors */
-        .badge-risk-high {
-            background-color: #ffebee;
-            color: #c62828;
+        /* Status Badges (Formal Style) */
+        .badge-formal {
+            font-weight: 500;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
         }
 
-        .badge-risk-med {
-            background-color: #fff8e1;
-            color: #f57c00;
+        .badge-formal-wait {
+            background-color: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
         }
 
-        .badge-normal {
-            background-color: #e8f5e9;
-            color: #2e7d32;
+        .badge-formal-risk {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .badge-formal-normal {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .text-action-urgent {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .text-action-normal {
+            color: #495057;
+        }
+
+        .text-action-muted {
+            color: #adb5bd;
         }
 
         .patient-link {
@@ -148,160 +204,40 @@
             text-decoration: none;
         }
 
-        /* --- RESPONSIVE TABLE STYLES (Mobile Card View) --- */
-        @media screen and (max-width: 991px) {
-            body {
-                padding-top: 90px;
-                /* Adjust for mobile navbar height */
-            }
-
-            .container-fluid {
-                padding-left: 15px !important;
-                padding-right: 15px !important;
-            }
-
-            /* Hide Table Header */
-            .table thead {
-                display: none;
-            }
-
-            /* Make Rows look like Cards */
-            .table tbody tr {
-                display: block;
-                margin-bottom: 1.25rem;
-                background-color: #fff;
-                border: 1px solid #e0e0e0;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-                overflow: hidden;
-            }
-
-            /* Make Cells look like list items */
-            .table tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid #f0f0f0;
-                padding: 0.75rem 1rem;
-                text-align: right;
-            }
-
-            .table tbody td:last-child {
-                border-bottom: none;
-                justify-content: center;
-                padding-top: 1rem;
-                padding-bottom: 1rem;
-                background-color: #fafafa;
-            }
-
-            /* Use data-label to show headers */
-            .table tbody td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: #6c757d;
-                font-size: 0.9rem;
-                margin-right: 1rem;
-                text-align: left;
-                flex-shrink: 0;
-            }
-
-            /* Specific adjustments for mobile content */
-            .user-info {
-                display: none !important;
-            }
-
-            /* Hide user name on small mobile, show only avatar */
-
-            /* Action button full width on mobile */
-            .table tbody td button {
-                width: 100%;
-                margin-top: 0;
-            }
+        .patient-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
         }
 
-        @media screen and (min-width: 576px) and (max-width: 991px) {
-            .user-info {
-                display: block !important;
-            }
-        }
-
-        /* ปรับแต่งปุ่ม User ในหน้าจอมือถือ */
-        @media screen and (max-width: 767px) {
-
-            /* 1. ลบกรอบสี่เหลี่ยมและพื้นหลังออก ให้เหลือแค่รูป */
-            .user-profile-btn {
-                border: none !important;
-                background-color: transparent !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-            }
-
-            /* 2. ซ่อนลูกศรหัวลง (Chevron) เพราะกินที่ */
-            .user-profile-btn .fa-chevron-down {
-                display: none;
-            }
-
-            /* 3. ปรับขนาดรูป Avatar ให้พอดีนิ้วกด */
-            .user-avatar {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-
-            /* 4. ปรับตำแหน่ง Dropdown ไม่ให้ชิดขอบจอเกินไป */
-            .dropdown-menu-right {
-                right: -10px !important;
-                /* ขยับให้ตรงกับนิ้วโป้งขวา */
-                width: 280px;
-                /* ขยายให้กว้างเต็มตา */
-            }
-        }
-
-        /* บังคับให้เมนู Dropdown อยู่ขวาสุดเสมอไม่ว่าจอจะเล็กแค่ไหน */
-        .navbar-nav .dropdown-menu {
-            position: absolute !important;
-            float: none !important;
-            right: 0 !important;
-            left: auto !important;
-        }
-
-        /* ปรับระยะห่าง Navbar ในมือถือ */
-        @media screen and (max-width: 767px) {
-            .navbar-custom {
-                padding-left: 5px;
-                padding-right: 5px;
-            }
-
-            .brand-text h1 {
-                font-size: 0.95rem !important;
-                /* ลดขนาดตัวอักษรชื่อระบบในมือถือ */
-            }
+        /* Toast Notification */
+        .toast-custom {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-light fixed-top navbar-custom border-bottom">
-        <div class="container-fluid px-2 px-md-4 d-flex align-items-center justify-content-between">
-
-            <a class="navbar-brand d-flex align-items-center m-0" href="index.html" style="max-width: 80%;">
-                <div class="mr-2" style="width:40px; height:40px; flex-shrink:0;">
-                    <img src="img/logo_kph.jpg" alt="โลโก้โรงพยาบาล" class="img-fluid" style="object-fit: contain;">
-                </div>
-                <div class="brand-text" style="overflow: hidden;">
-                    <h1 style="font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ระบบประเมินภาวะโภชนาการ</h1>
-                    <small class="d-none d-sm-block">Nutrition Alert System (NAS)</small>
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
+                    onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>ระบบประเมินภาวะโภชนาการ</h1>
+                    <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
 
-            <ul class="navbar-nav flex-row align-items-center">
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
-                        <div class="user-profile-btn border-0">
+                        <div class="user-profile-btn">
                             <div class="user-avatar">
                                 <i class="fa-solid fa-user-doctor"></i>
                             </div>
@@ -309,65 +245,86 @@
                                 <div class="user-name">เพชรลดา เชยเพ็ชร</div>
                                 <div class="user-role">นักโภชนาการ</div>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-muted ml-2 d-none d-md-block"
-                                style="font-size: 0.7rem;"></i>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
-                        style="border-radius: 12px; max-width: 250px; position: absolute;">
-                        <div class="dropdown-header bg-light border-bottom">
-                            <small class="text-muted">ผู้ใช้งานระบบ</small><br>
-                            <strong class="text-dark">เพชรลดา เชยเพ็ชร</strong>
+                        style="border-radius: 12px; min-width: 280px;">
+
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
                         </div>
-                    
-                        <a class="dropdown-item py-2" href="#">
-                            <i class="fa-solid fa-house-medical-flag mr-2 text-muted"></i> วอร์ดที่ดูแลประจำ
-                        </a>
-                        <a class="dropdown-item py-2" href="#">
-                            <i class="fa-solid fa-file-invoice mr-2 text-muted"></i> รายงานสรุปวันนี้
-                            <span class="badge badge-danger badge-pill ml-1">3</span>
-                        </a>
-                        <a class="dropdown-item py-2" href="#">
-                            <i class="fa-solid fa-book-medical mr-2 text-muted"></i> แนวทางประเมินโภชนาการ
-                        </a>
-                    
-                        <div class="dropdown-divider"></div>
-                    
-                        <a class="dropdown-item py-2" href="#">
-                            <i class="fa-regular fa-id-card mr-2 text-muted"></i> ข้อมูลผู้ใช้งาน
-                        </a>
-                        <a class="dropdown-item py-2" href="#">
-                            <i class="fa-solid fa-key mr-2 text-muted"></i> เปลี่ยนรหัสผ่าน
-                        </a>
-                    
-                        <div class="dropdown-divider"></div>
-                    
-                        <a class="dropdown-item py-2 text-danger" href="#">
-                            <i class="fa-solid fa-right-from-bracket mr-2"></i> ออกจากระบบ
-                        </a>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i> ออกจากระบบ
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>
-
         </div>
     </nav>
 
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
-        <!-- <div class="d-flex align-items-center mb-4 flex-wrap">
-            <div class="bg-light p-3 rounded mr-3 text-secondary mb-2 mb-md-0">
+        <div class="d-flex align-items-center mb-4">
+            <div class="bg-light p-3 rounded mr-3 text-secondary">
                 <i class="fa-solid fa-hospital-user fa-2x"></i>
             </div>
             <div>
-                <h4 class="font-weight-bold text-dark mb-0">รายการผู้ป่วยใน</h4>
+                <h4 class="font-weight-bold text-dark mb-0">รายชื่อผู้ป่วยใน (In-patients)</h4>
                 <p class="text-muted mb-0 small">ค้นหาและจัดการข้อมูลการคัดกรองภาวะโภชนาการ</p>
             </div>
-        </div> -->
+        </div>
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <div class="form-row align-items-end">
-                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
                         <label class="font-weight-bold small text-muted">ค้นหาผู้ป่วย</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -375,12 +332,12 @@
                                         class="fas fa-search text-muted"></i></span>
                             </div>
                             <input type="text" class="form-control border-left-0" id="searchInput"
-                                placeholder="ชื่อ-สกุล, HN และ AN">
+                                placeholder="ชื่อ-สกุล, HN, AN...">
                         </div>
                     </div>
-                    <div class="col-6 col-lg-3 mb-0">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
                         <label class="font-weight-bold small text-muted"><i class="fa-regular fa-building"></i>
-                            แผนก</label>
+                            แผนก/หอผู้ป่วย</label>
                         <select class="custom-select" id="wardFilter">
                             <option value="all" selected>ทั้งหมด</option>
                             <option value="1">อายุรกรรมชาย</option>
@@ -388,8 +345,9 @@
                             <option value="3">ศัลยกรรมกระดูก</option>
                         </select>
                     </div>
-                    <div class="col-6 col-lg-3 mb-0">
-                        <label class="font-weight-bold small text-muted"><i class="fas fa-user-md"></i> แพทย์</label>
+                    <div class="col-6 col-md-3">
+                        <label class="font-weight-bold small text-muted"><i class="fas fa-user-md"></i>
+                            แพทย์เจ้าของไข้</label>
                         <select class="custom-select" id="doctorFilter">
                             <option value="all" selected>ทั้งหมด</option>
                             <option value="นพ. สมศักดิ์ รักษาดี">นพ. สมศักดิ์ รักษาดี</option>
@@ -403,26 +361,39 @@
 
         <div class="card border shadow-sm">
             <div class="card-body p-0">
-                <div class="">
+                <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 50px;">#</th>
-                                <th class="text-center" style="width: 80px;" onclick="handleSort('bed')">เตียง <i
-                                        class="fas fa-sort sort-icon" id="sort-bed"></i></th>
+                                <th class="text-center" style="width: 80px;" onclick="handleSort('bed')">
+                                    เตียง <i class="fas fa-sort sort-icon" id="sort-bed"></i>
+                                </th>
                                 <th onclick="handleSort('an')">AN <i class="fas fa-sort sort-icon" id="sort-an"></i>
                                 </th>
                                 <th onclick="handleSort('hn')">HN <i class="fas fa-sort sort-icon" id="sort-hn"></i>
                                 </th>
-                                <th style="width: 12%;" onclick="handleSort('name')">ชื่อ-นามสกุล <i
-                                        class="fas fa-sort sort-icon" id="sort-name"></i></th>
-                                <th class="text-center" onclick="handleSort('age')">อายุ</th>
-                                <th style="width: 15%;" onclick="handleSort('underlying')">โรคประจำตัว</th>
-                                <th onclick="handleSort('doctor')">แพทย์เจ้าของไข้</th>
-                                <th onclick="handleSort('admitDate')">วัน/เวลา Admit</th>
-                                <th onclick="handleSort('screenDate')">คัดกรองล่าสุด</th>
-                                <th onclick="handleSort('assessDate')">ประเมินล่าสุด</th>
-                                <th class="text-center" style="width: 120px;">จัดการ</th>
+                                <th style="width: 12%;" onclick="handleSort('name')">
+                                    ชื่อ-นามสกุล <i class="fas fa-sort sort-icon" id="sort-name"></i>
+                                </th>
+                                <th class="text-center" onclick="handleSort('age')">อายุ <i
+                                        class="fas fa-sort sort-icon" id="sort-age"></i></th>
+                                <th style="width: 12%;" onclick="handleSort('underlying')">
+                                    โรคประจำตัว <i class="fas fa-sort sort-icon" id="sort-underlying"></i>
+                                </th>
+                                <th onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i class="fas fa-sort sort-icon"
+                                        id="sort-doctor"></i></th>
+                                <th onclick="handleSort('admitDate')">วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon"
+                                        id="sort-admitDate"></i></th>
+
+                                <th onclick="handleSort('nutritionStatus')" style="min-width: 120px;">
+                                    สถานะทางโภชนาการ <i class="fas fa-sort sort-icon" id="sort-nutritionStatus"></i>
+                                </th>
+                                <th onclick="handleSort('nextAction')" style="min-width: 140px;">
+                                    การดำเนินการ <i class="fas fa-sort sort-icon" id="sort-nextAction"></i>
+                                </th>
+
+                                <th class="text-center" style="width: 130px;">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="patientTableBody">
@@ -460,7 +431,8 @@
                 screenDate: '24 พ.ย. 67',
                 screenCount: 2,
                 assessDate: '-',
-                status: 'normal', scoreVal: 1, nafScore: null
+                status: 'normal', scoreVal: 1, nafScore: null,
+                nutritionStatus: 'ปกติ', nextAction: 'Re-screen 7 วัน'
             },
             {
                 bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
@@ -471,7 +443,8 @@
                 screenDate: '-',
                 screenCount: 0,
                 assessDate: '-',
-                status: 'wait_screen', scoreVal: null, nafScore: null
+                status: 'wait_screen', scoreVal: null, nafScore: null,
+                nutritionStatus: 'รอคัดกรอง', nextAction: 'คัดกรองเบื้องต้น'
             },
             {
                 bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
@@ -482,7 +455,8 @@
                 screenDate: '20 พ.ย. 67',
                 screenCount: 1,
                 assessDate: '-',
-                status: 'wait_assess', scoreVal: 3, nafScore: null
+                status: 'wait_assess', scoreVal: 3, nafScore: null,
+                nutritionStatus: 'เสี่ยง (Score 3)', nextAction: 'ประเมิน NAF'
             },
             {
                 bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
@@ -493,7 +467,8 @@
                 screenDate: '15 พ.ย. 67',
                 screenCount: 1,
                 assessDate: '-',
-                status: 'normal', scoreVal: 0, nafScore: null
+                status: 'normal', scoreVal: 0, nafScore: null,
+                nutritionStatus: 'ปกติ', nextAction: 'Re-screen (เกินกำหนด)'
             }
         ];
 
@@ -510,6 +485,7 @@
             });
         });
 
+        // --- Logic (เหมือนเดิมแต่ปรับ HTML ใน render) ---
         function handleSort(column) {
             if (currentSort.column === column) {
                 currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -524,13 +500,12 @@
         function updateSortIcons(activeColumn, direction) {
             document.querySelectorAll('.sort-icon').forEach(icon => {
                 icon.className = 'fas fa-sort sort-icon';
-                icon.style.opacity = '0.3';
+                icon.parentElement.classList.remove('active-sort');
             });
             const targetIcon = document.getElementById(`sort-${activeColumn}`);
             if (targetIcon) {
                 targetIcon.className = direction === 'asc' ? 'fas fa-sort-up sort-icon' : 'fas fa-sort-down sort-icon';
-                targetIcon.style.opacity = '1';
-                targetIcon.style.color = '#3498DB';
+                targetIcon.parentElement.classList.add('active-sort');
             }
         }
 
@@ -580,84 +555,73 @@
             }
 
             data.forEach((p, index) => {
-                let screeningHTML = '';
-                let assessmentHTML = '';
                 let actionBtn = '';
-
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
+
+                // Format Admit Date
                 const splitAdmit = p.admitDate.split(' ');
                 if (splitAdmit.length > 3) {
                     admitDateShow = splitAdmit.slice(0, 3).join(' ');
                     admitTimeShow = splitAdmit.slice(3).join(' ');
                 }
 
+                // Calculate Overdue
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const isOverdue = daysSinceScreen >= 7;
 
-                // Status Logic
+                // --- 1. Nutrition Status Display (Formal Badge) ---
+                let statusDisplay = '';
                 if (p.status === 'wait_screen') {
-                    screeningHTML = `<div class="text-muted text-center">-</div>`;
+                    statusDisplay = `<span class="badge badge-formal badge-formal-wait">รอคัดกรอง</span>`;
+                } else if (p.status === 'wait_assess') {
+                    statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (3)</span>`;
                 } else {
-                    let badgeClass = (p.scoreVal >= 2) ? 'badge-risk-med' : 'badge-normal';
-                    let badgeText = (p.scoreVal >= 2) ? 'เสี่ยง' : 'ปกติ';
-                    let overdueLabel = (p.status === 'normal' && isOverdue) ? `<div class="text-danger mt-1" style="font-size:0.7rem;"><i class="fas fa-clock"></i> ครบ 7 วัน</div>` : '';
-
-                    screeningHTML = `
-                        <div class="d-flex flex-column align-items-end align-items-md-center">
-                            <div class="font-weight-bold" style="font-size:0.9rem;">${p.screenDate}</div>
-                            <div class="mt-1">
-                                <span class="badge ${badgeClass} font-weight-normal border">${badgeText} (${p.scoreVal})</span>
-                            </div>
-                            ${overdueLabel}
-                        </div>
-                    `;
+                    statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (${p.scoreVal})</span>`;
                 }
 
-                if (p.status === 'wait_assess') {
-                    assessmentHTML = `<span class="badge badge-warning text-dark font-weight-normal">รอประเมิน NAF</span>`;
-                } else if (p.nafScore !== null) {
-                    assessmentHTML = `<span class="text-success font-weight-bold">ประเมินแล้ว</span>`;
-                } else {
-                    assessmentHTML = `<div class="text-muted text-center">-</div>`;
-                }
+                // --- 2. Next Action Display (Clean Text) ---
+                let nextActionDisplay = '';
+                let nextActionClass = 'text-action-normal';
 
-                // Action Button Logic
                 if (p.status === 'wait_screen') {
+                    nextActionDisplay = 'คัดกรองเบื้องต้น';
                     actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 90px;" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
-                } else if (p.status === 'wait_assess' || (p.scoreVal >= 2 && p.nafScore === null)) {
+                } else if (p.status === 'wait_assess') {
+                    nextActionDisplay = 'ประเมิน NAF';
+                    nextActionClass = 'text-action-urgent'; // Urgent because risk
                     actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 90px;" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 } else if (p.status === 'normal') {
                     if (isOverdue) {
+                        nextActionDisplay = 'Re-screen';
+                        nextActionClass = 'text-action-urgent';
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> ซ้ำ</button>`;
                     } else {
+                        nextActionDisplay = `ติดตามผล`;
+                        nextActionClass = 'text-action-muted';
                         actionBtn = `<button class="btn btn-sm btn-light text-muted" style="min-width: 90px;" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
                     }
-                } else {
-                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
-
-                // Updated Row Structure with Data-Label for Mobile
                 const row = `
                     <tr>
-                        <td class="text-center text-muted" data-label="#">${index + 1}</td>
-                        <td class="text-center" data-label="เตียง"><span class="bed-badge">${p.bed}</span></td>
-                        <td data-label="AN"><small class="text-muted">${p.an}</small></td>
-                        <td data-label="HN" class="font-weight-bold text-dark">${p.hn}</td>
-                        <td data-label="ชื่อ-สกุล"><a href="#" class="patient-link">${p.name}</a></td>
-                        <td class="text-center" data-label="อายุ">${p.age} ปี</td>
-                        <td data-label="โรคประจำตัว"><span class="text-muted small">${p.underlying}</span></td>
-                        <td data-label="แพทย์"><small class="text-secondary">${p.doctor}</small></td>
-                        <td data-label="Admit">
-                            <div class="d-flex flex-column align-items-end align-items-md-start">
-                                <span class="small font-weight-bold">${admitDateShow}</span>
-                                <span class="small text-muted">${admitTimeShow}</span>
-                            </div>
+                        <td class="text-center text-muted">${index + 1}</td>
+                        <td class="text-center"><span class="bed-badge">${p.bed}</span></td>
+                        <td><small class="text-muted">${p.an}</small></td>
+                        <td class="font-weight-bold text-dark">${p.hn}</td>
+                        <td><a href="patient_profile.html?hn=${p.hn}" class="patient-link">${p.name}</a></td>
+                        <td class="text-center">${p.age} ปี</td>
+                        <td><span class="text-muted small">${p.underlying}</span></td>
+                        <td><small class="text-secondary">${p.doctor}</small></td>
+                        <td>
+                            <div class="small font-weight-bold">${admitDateShow}</div>
+                            <div class="small text-muted">${admitTimeShow}</div>
                         </td>
-                        <td data-label="คัดกรองล่าสุด">${screeningHTML}</td>
-                        <td data-label="ประเมินล่าสุด">${assessmentHTML}</td>
-                        <td data-label="จัดการ">${actionBtn}</td>
+                        
+                        <td>${statusDisplay}</td>
+                        <td class="${nextActionClass}"><small>${nextActionDisplay}</small></td>
+
+                        <td class="text-center">${actionBtn}</td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -670,7 +634,7 @@
             const doctor = document.getElementById('doctorFilter').value;
 
             let result = patients.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm);
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
                 const matchesWard = ward === 'all' || p.ward === ward;
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
@@ -703,6 +667,7 @@
         function showToast(message) {
             const container = document.getElementById('toast-container');
             const toastId = 'toast-' + Date.now();
+
             const toastHTML = `
                 <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
                     <div class="toast-header bg-success text-white">
@@ -712,16 +677,22 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="toast-body bg-white text-dark">
+                    <div class="toast-body">
                         ${message}
                     </div>
                 </div>
             `;
+
             $(container).append(toastHTML);
             $(`#${toastId}`).toast('show');
+
             $(`#${toastId}`).on('hidden.bs.toast', function () {
                 $(this).remove();
             });
+        }
+
+        function confirmLogout() {
+            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
         }
     </script>
 </body>
