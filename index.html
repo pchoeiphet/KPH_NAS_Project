@@ -52,7 +52,7 @@
             align-items: center;
             padding: 5px 15px 5px 5px;
             border: 1px solid #eee;
-            border-radius: 50px;
+            border-radius: 12px;
             background-color: #fff;
             transition: all 0.2s ease;
             cursor: pointer;
@@ -149,7 +149,6 @@
             color: #0d47a1;
             font-weight: 600;
             border-radius: 4px;
-            /* ปรับให้เหลี่ยมขึ้นเล็กน้อยดูทางการ */
             padding: 4px 10px;
             display: inline-block;
             min-width: 45px;
@@ -165,12 +164,13 @@
             display: inline-block;
             width: 100%;
             text-align: center;
+            letter-spacing: 0.3px;
         }
 
         .badge-formal-wait {
-            background-color: #e9ecef;
+            background-color: #f1f3f5;
             color: #495057;
-            border: 1px solid #ced4da;
+            border: 1px solid #dee2e6;
         }
 
         .badge-formal-risk {
@@ -185,13 +185,25 @@
             border: 1px solid #c3e6cb;
         }
 
+        .badge-formal-assessed {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        /* Action Text Colors */
         .text-action-urgent {
             color: #dc3545;
             font-weight: 600;
         }
 
+        .text-action-warning {
+            color: #856404;
+            font-weight: 600;
+        }
+
         .text-action-normal {
-            color: #495057;
+            color: #0056b3;
         }
 
         .text-action-muted {
@@ -236,12 +248,12 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
                         <div class="user-profile-btn">
                             <div class="user-avatar">
                                 <i class="fa-solid fa-user-doctor"></i>
                             </div>
-                            <div class="user-info d-none d-md-block">
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
                                 <div class="user-name">เพชรลดา เชยเพ็ชร</div>
                                 <div class="user-role">นักโภชนาการ</div>
                             </div>
@@ -249,7 +261,7 @@
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
-                        style="border-radius: 12px; min-width: 280px;">
+                        style="border-radius: 12px; min-width: 250px;">
 
                         <div class="dropdown-header bg-light border-bottom py-3">
                             <div class="d-flex align-items-center">
@@ -365,7 +377,9 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 50px;">#</th>
+                                <th class="text-center" style="width: 50px;" onclick="handleSort('id')">
+                                    # <i class="fas fa-sort sort-icon" id="sort-id"></i>
+                                </th>
                                 <th class="text-center" style="width: 80px;" onclick="handleSort('bed')">
                                     เตียง <i class="fas fa-sort sort-icon" id="sort-bed"></i>
                                 </th>
@@ -379,14 +393,14 @@
                                 <th class="text-center" onclick="handleSort('age')">อายุ <i
                                         class="fas fa-sort sort-icon" id="sort-age"></i></th>
                                 <th style="width: 12%;" onclick="handleSort('underlying')">
-                                    โรคประจำตัว <i class="fas fa-sort sort-icon" id="sort-underlying"></i>
+                                    โรค <i class="fas fa-sort sort-icon" id="sort-underlying"></i>
                                 </th>
-                                <th onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i class="fas fa-sort sort-icon"
+                                <th style="width: 12%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i class="fas fa-sort sort-icon"
                                         id="sort-doctor"></i></th>
                                 <th onclick="handleSort('admitDate')">วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon"
                                         id="sort-admitDate"></i></th>
 
-                                <th onclick="handleSort('nutritionStatus')" style="min-width: 120px;">
+                                <th onclick="handleSort('nutritionStatus')" style="min-width: 140px;">
                                     สถานะทางโภชนาการ <i class="fas fa-sort sort-icon" id="sort-nutritionStatus"></i>
                                 </th>
                                 <th onclick="handleSort('nextAction')" style="min-width: 140px;">
@@ -423,6 +437,7 @@
 
         const patients = [
             {
+                id: 1,
                 bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
                 underlying: 'ความดันโลหิตสูง (HT)',
@@ -431,10 +446,10 @@
                 screenDate: '24 พ.ย. 67',
                 screenCount: 2,
                 assessDate: '-',
-                status: 'normal', scoreVal: 1, nafScore: null,
-                nutritionStatus: 'ปกติ', nextAction: 'Re-screen 7 วัน'
+                status: 'normal', scoreVal: 1, nafScore: null
             },
             {
+                id: 2,
                 bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
                 underlying: 'เบาหวาน (DM), โรคไต (CKD)',
@@ -443,10 +458,10 @@
                 screenDate: '-',
                 screenCount: 0,
                 assessDate: '-',
-                status: 'wait_screen', scoreVal: null, nafScore: null,
-                nutritionStatus: 'รอคัดกรอง', nextAction: 'คัดกรองเบื้องต้น'
+                status: 'wait_screen', scoreVal: null, nafScore: null
             },
             {
+                id: 3,
                 bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
                 underlying: 'ไขมันในเลือดสูง (DLP)',
@@ -455,10 +470,10 @@
                 screenDate: '20 พ.ย. 67',
                 screenCount: 1,
                 assessDate: '-',
-                status: 'wait_assess', scoreVal: 3, nafScore: null,
-                nutritionStatus: 'เสี่ยง (Score 3)', nextAction: 'ประเมิน NAF'
+                status: 'wait_assess', scoreVal: 3, nafScore: null
             },
             {
+                id: 4,
                 bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
                 hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
                 underlying: 'ปฏิเสธโรคประจำตัว',
@@ -467,8 +482,20 @@
                 screenDate: '15 พ.ย. 67',
                 screenCount: 1,
                 assessDate: '-',
-                status: 'normal', scoreVal: 0, nafScore: null,
-                nutritionStatus: 'ปกติ', nextAction: 'Re-screen (เกินกำหนด)'
+                status: 'normal', scoreVal: 0, nafScore: null
+            },
+            // Example of assessed patient to demonstrate logic
+            {
+                id: 5,
+                bed: '106', ward: '2', departmentText: 'อายุรกรรมหญิง',
+                hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: 30,
+                underlying: 'ไม่มี',
+                doctor: 'พญ. ใจดี มีเมตตา',
+                admitDate: '20 พ.ย. 67 09:00 น.',
+                screenDate: '22 พ.ย. 67',
+                screenCount: 1,
+                assessDate: '23 พ.ย. 67',
+                status: 'assessed', scoreVal: 9, nafScore: 'B'
             }
         ];
 
@@ -559,28 +586,28 @@
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
 
-                // Format Admit Date
                 const splitAdmit = p.admitDate.split(' ');
                 if (splitAdmit.length > 3) {
                     admitDateShow = splitAdmit.slice(0, 3).join(' ');
                     admitTimeShow = splitAdmit.slice(3).join(' ');
                 }
 
-                // Calculate Overdue
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const isOverdue = daysSinceScreen >= 7;
 
-                // --- 1. Nutrition Status Display (Formal Badge) ---
+                // --- 1. Nutrition Status Display (Formal Badge with Form Name) ---
                 let statusDisplay = '';
                 if (p.status === 'wait_screen') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-wait">รอคัดกรอง</span>`;
                 } else if (p.status === 'wait_assess') {
-                    statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (3)</span>`;
-                } else {
-                    statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (${p.scoreVal})</span>`;
+                    statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (SPENT: ${p.scoreVal})</span>`;
+                } else if (p.status === 'normal') {
+                    statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (SPENT: ${p.scoreVal})</span>`;
+                } else if (p.status === 'assessed') {
+                    statusDisplay = `<span class="badge badge-formal badge-formal-assessed">ประเมินแล้ว (NAF: ${p.nafScore})</span>`;
                 }
 
-                // --- 2. Next Action Display (Clean Text) ---
+                // --- 2. Next Action Display (Formal Text) ---
                 let nextActionDisplay = '';
                 let nextActionClass = 'text-action-normal';
 
@@ -597,10 +624,14 @@
                         nextActionClass = 'text-action-urgent';
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> ซ้ำ</button>`;
                     } else {
-                        nextActionDisplay = `ติดตามผล`;
+                        nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted';
                         actionBtn = `<button class="btn btn-sm btn-light text-muted" style="min-width: 90px;" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
                     }
+                } else if (p.status === 'assessed') {
+                    nextActionDisplay = 'ติดตามผล';
+                    nextActionClass = 'text-action-muted';
+                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
                 const row = `
@@ -648,7 +679,7 @@
                     if (['admitDate', 'screenDate', 'assessDate'].includes(currentSort.column)) {
                         valA = parseThaiDateForSort(valA);
                         valB = parseThaiDateForSort(valB);
-                    } else if (['age'].includes(currentSort.column)) {
+                    } else if (['age', 'id'].includes(currentSort.column)) {
                         valA = Number(valA);
                         valB = Number(valB);
                     } else {
