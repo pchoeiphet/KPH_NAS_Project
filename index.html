@@ -110,7 +110,12 @@
             user-select: none;
         }
 
-        .table th:hover {
+        /* เพิ่ม Cursor Default ให้กับ Header ที่ Sort ไม่ได้ */
+        .table th.no-sort {
+            cursor: default;
+        }
+
+        .table th:not(.no-sort):hover {
             background-color: #34495e;
         }
 
@@ -392,22 +397,22 @@
                                 </th>
                                 <th class="text-center" onclick="handleSort('age')">อายุ <i
                                         class="fas fa-sort sort-icon" id="sort-age"></i></th>
-                                <th style="width: 12%;" onclick="handleSort('underlying')">
-                                    โรคประจำตัว <i class="fas fa-sort sort-icon" id="sort-underlying"></i>
+                                <th class="no-sort" style="width: 12%;">
+                                    โรคประจำตัว
                                 </th>
-                                <th style="width: 12%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i class="fas fa-sort sort-icon"
-                                        id="sort-doctor"></i></th>
+                                <th style="width: 14%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i
+                                        class="fas fa-sort sort-icon" id="sort-doctor"></i></th>
                                 <th onclick="handleSort('admitDate')">วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon"
                                         id="sort-admitDate"></i></th>
 
-                                <th onclick="handleSort('nutritionStatus')" style="min-width: 140px;">
-                                    สถานะทางโภชนาการ <i class="fas fa-sort sort-icon" id="sort-nutritionStatus"></i>
+                                <th class="no-sort" style="min-width: 140px;">
+                                    สถานะทางโภชนาการ
                                 </th>
-                                <th onclick="handleSort('nextAction')" style="min-width: 140px;">
-                                    การดำเนินการ <i class="fas fa-sort sort-icon" id="sort-nextAction"></i>
+                                <th class="no-sort" style="min-width: 140px;">
+                                    การดำเนินการ
                                 </th>
 
-                                <th class="text-center" style="width: 130px;">จัดการ</th>
+                                <th class="text-center no-sort" style="width: 130px;">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="patientTableBody">
@@ -583,52 +588,82 @@
 
             data.forEach((p, index) => {
                 let actionBtn = '';
+
+                // จัดการแสดงผลวันที่ Admit
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
-
                 const splitAdmit = p.admitDate.split(' ');
                 if (splitAdmit.length > 3) {
                     admitDateShow = splitAdmit.slice(0, 3).join(' ');
                     admitTimeShow = splitAdmit.slice(3).join(' ');
                 }
 
+                // คำนวณวันสำหรับ Re-screen (7 วัน)
                 const daysSinceScreen = getDaysDiff(p.screenDate);
-                const isOverdue = daysSinceScreen >= 7;
+                const daysRemaining = 7 - daysSinceScreen;
 
-                // --- 1. Nutrition Status Display (Formal Badge with Form Name) ---
+                // -----------------------------------------------------------
+                // 1. ส่วนสถานะทางโภชนาการ (Nutrition Status) - ไม่ยุ่งกับการนับวัน
+                // -----------------------------------------------------------
                 let statusDisplay = '';
+                let dateDisplay = '';
+
                 if (p.status === 'wait_screen') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-wait">รอคัดกรอง</span>`;
-                } else if (p.status === 'wait_assess') {
+                }
+                else if (p.status === 'wait_assess') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (SPENT: ${p.scoreVal})</span>`;
-                } else if (p.status === 'normal') {
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรองวันที่ ${p.screenDate}</div>`;
+                }
+                else if (p.status === 'normal') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (SPENT: ${p.scoreVal})</span>`;
-                } else if (p.status === 'assessed') {
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรองวันที่ ${p.screenDate}</div>`;
+                }
+                else if (p.status === 'assessed') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-assessed">ประเมินแล้ว (NAF: ${p.nafScore})</span>`;
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">ประเมินวันที่ ${p.assessDate}</div>`;
                 }
 
-                // --- 2. Next Action Display (Formal Text) ---
+                // -----------------------------------------------------------
+                // 2. ส่วนการดำเนินการ (Next Action) - เพิ่มการนับวันตรงนี้
+                // -----------------------------------------------------------
                 let nextActionDisplay = '';
                 let nextActionClass = 'text-action-normal';
+                let countdownDisplay = ''; // ข้อความนับถอยหลังที่จะโชว์ใต้ Action
 
                 if (p.status === 'wait_screen') {
                     nextActionDisplay = 'คัดกรองเบื้องต้น';
                     actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 90px;" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
-                } else if (p.status === 'wait_assess') {
+                }
+                else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ประเมิน NAF';
-                    nextActionClass = 'text-action-urgent'; // Urgent because risk
+                    nextActionClass = 'text-action-urgent';
                     actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 90px;" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
-                } else if (p.status === 'normal') {
-                    if (isOverdue) {
+                }
+                else if (p.status === 'normal') {
+                    // Logic นับวัน เฉพาะเคสปกติ
+                    if (daysRemaining < 0) {
+                        // เกิน 7 วันแล้ว
                         nextActionDisplay = 'Re-screen';
                         nextActionClass = 'text-action-urgent';
-                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> ซ้ำ</button>`;
+                        countdownDisplay = `<div class="text-danger small font-weight-bold" style="font-size: 0.75rem;">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
+                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
+                    } else if (daysRemaining === 0) {
+                        // ครบ 7 วันพอดี
+                        nextActionDisplay = 'Re-screen';
+                        nextActionClass = 'text-action-warning';
+                        countdownDisplay = `<div class="text-danger small font-weight-bold" style="font-size: 0.75rem;">ครบกำหนดวันนี้</div>`;
+                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
+                        // ยังไม่ครบ 7 วัน
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted';
+                        // แสดงวันถอยหลังตรงนี้
+                        countdownDisplay = `<div class="text-muted small" style="font-size: 0.75rem;">Re-screen ใน ${daysRemaining} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-light text-muted" style="min-width: 90px;" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
                     }
-                } else if (p.status === 'assessed') {
+                }
+                else if (p.status === 'assessed') {
                     nextActionDisplay = 'ติดตามผล';
                     nextActionClass = 'text-action-muted';
                     actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
@@ -649,8 +684,15 @@
                             <div class="small text-muted">${admitTimeShow}</div>
                         </td>
                         
-                        <td>${statusDisplay}</td>
-                        <td class="${nextActionClass}"><small>${nextActionDisplay}</small></td>
+                        <td>
+                            ${statusDisplay}
+                            ${dateDisplay}
+                        </td>
+
+                        <td class="${nextActionClass}">
+                            <small class="font-weight-bold">${nextActionDisplay}</small>
+                            ${countdownDisplay}
+                        </td>
 
                         <td class="text-center">${actionBtn}</td>
                     </tr>
