@@ -613,15 +613,15 @@
                 }
                 else if (p.status === 'wait_assess') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (SPENT: ${p.scoreVal})</span>`;
-                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรองวันที่ ${p.screenDate}</div>`;
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรอง: วันที่ ${p.screenDate}</div>`;
                 }
                 else if (p.status === 'normal') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (SPENT: ${p.scoreVal})</span>`;
-                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรองวันที่ ${p.screenDate}</div>`;
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรอง: วันที่ ${p.screenDate}</div>`;
                 }
                 else if (p.status === 'assessed') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-assessed">ประเมินแล้ว (NAF: ${p.nafScore})</span>`;
-                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">ประเมินวันที่ ${p.assessDate}</div>`;
+                    dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">ประเมิน:วันที่ ${p.assessDate}</div>`;
                 }
 
                 // -----------------------------------------------------------
