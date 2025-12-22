@@ -21,6 +21,7 @@
             padding-top: 80px;
         }
 
+        /* Navbar Styling */
         .navbar-custom {
             height: 80px;
             background-color: white;
@@ -43,6 +44,59 @@
         .brand-text small {
             font-size: 0.8rem;
             color: #6c757d;
+        }
+
+        /* User Profile Styling */
+        .user-profile-btn {
+            display: flex;
+            align-items: center;
+            padding: 5px 15px 5px 5px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .user-profile-btn:hover,
+        .show>.user-profile-btn {
+            background-color: #f8f9fa;
+            border-color: #e2e6ea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            background-color: #2C3E50;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            margin-left: 10px;
+            margin-right: 15px;
+            line-height: 1.2;
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .dropdown-toggle::after {
+            display: none;
         }
 
         /* Custom Colors */
@@ -135,6 +189,93 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* --- Medical Record Style --- */
+        .med-record-box {
+            background: #ffffff;
+            border: 1px solid #c0c0c0;
+            /* เส้นขอบสีเทาแบบทางการ */
+            border-top: 3px solid #5a6268;
+            /* แถบด้านบนสีเข้มบอกขอบเขต */
+            border-radius: 2px;
+            /* มุมเกือบเหลี่ยม */
+            margin-bottom: 20px;
+            font-family: 'Sarabun', sans-serif;
+            /* แนะนำฟอนต์ไทยทางการ (ถ้ามี) */
+        }
+
+        /* ส่วนหัวของกล่อง */
+        .med-box-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #343a40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .med-box-body {
+            padding: 20px;
+        }
+
+        /* ป้ายกำกับ (Label) */
+        .med-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 2px;
+            font-weight: normal;
+        }
+
+        /* ค่าข้อมูล (Value) */
+        .med-value {
+            font-size: 1rem;
+            color: #212529;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* ส่วนผลลัพธ์หลัก */
+        .med-result-section {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .med-result-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* สีสถานะ (ใช้เฉพาะตัวอักษรผลลัพธ์) */
+        .text-status-normal {
+            color: #155724;
+        }
+
+        /* เขียวเข้มจัด */
+        .text-status-risk {
+            color: #d65b00;
+        }
+
+        /* ส้มอิฐ */
+        .text-status-severe {
+            color: #b21f2d;
+        }
+
+        /* แดงเลือดหมู */
+
+        /* คะแนนในวงกลม/กล่อง */
+        .med-score-box {
+            display: inline-block;
+            background: #f1f3f5;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #dcdcdc;
+        }
     </style>
 </head>
 
@@ -142,7 +283,7 @@
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -153,25 +294,75 @@
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
-                        role="button" data-toggle="dropdown">
-                        <div class="user-avatar mr-2"><i class="fa-solid fa-user-doctor"></i></div>
-                        <div class="d-none d-md-block text-left" style="line-height: 1.2;">
-                            <div class="font-weight-bold text-dark" style="font-size: 0.9rem;">เพชรลดา เชยเพ็ชร</div>
-                            <small class="text-muted">นักโภชนาการ</small>
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        <div class="user-profile-btn">
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
+                                <div class="user-name">เพชรลดา เชยเพ็ชร</div>
+                                <div class="user-role">นักโภชนาการ</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0">
-                        <div class="dropdown-header bg-light border-bottom">
-                            <small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px;">
+
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
                         </div>
-                        <a class="dropdown-item py-2" href="#"><i class="fa-regular fa-id-card mr-2 text-muted"></i>
-                            ข้อมูลผู้ใช้งาน</a>
-                        <a class="dropdown-item py-2" href="#"><i class="fa-solid fa-sliders mr-2 text-muted"></i>
-                            ตั้งค่าระบบ</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item py-2 text-danger" href="#" onclick="confirmLogout()"><i
-                                class="fa-solid fa-right-from-bracket mr-2"></i> ออกจากระบบ</a>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i>
+                                ออกจากระบบ
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>
@@ -237,6 +428,42 @@
                                 <span class="font-weight-bold" id="p_phone">-</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="currentStatusCard" class="med-record-box d-none">
+            <div class="med-box-header">
+                <span><i class="fa-solid fa-file-medical-alt mr-2"></i> สรุปสถานะภาวะโภชนาการ (Nutritional Status
+                    Summary)</span>
+                <span id="cur_type_badge" class="badge badge-secondary font-weight-normal"
+                    style="font-size: 0.75rem;">-</span>
+            </div>
+
+            <div class="med-box-body">
+                <div class="med-result-section">
+                    <div class="row align-items-end">
+                        <div class="col-md-9">
+                            <div class="med-label">ผลการประเมิน/คัดกรอง (Interpretation)</div>
+                            <div id="cur_status_text" class="med-result-text">-</div>
+                            <div id="cur_status_desc" class="text-muted small mt-1" style="font-style: italic;">-</div>
+                        </div>
+                        <div class="col-md-3 text-md-right mt-3 mt-md-0">
+                            <div class="med-label">คะแนนรวม (Total Score)</div>
+                            <div id="cur_score_val" class="med-score-box mt-1">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 border-right">
+                        <div class="med-label" id="cur_date_label">วัน/เวลาที่ประเมิน</div>
+                        <div id="cur_date_text" class="med-value">-</div>
+                    </div>
+                    <div class="col-md-6 pl-md-4">
+                        <div class="med-label">ผู้ประเมิน (Assessor)</div>
+                        <div id="cur_assessor_text" class="med-value">-</div>
                     </div>
                 </div>
             </div>
@@ -389,10 +616,14 @@
                 document.getElementById('p_doctor').innerText = p.info.doctor;
                 document.getElementById('p_ward').innerText = p.info.ward;
                 document.getElementById('p_admit').innerText = p.info.admit;
-                document.getElementById('p_phone').innerText = p.info.phone; // เพิ่มการแสดงเบอร์โทรศัพท์
+                document.getElementById('p_phone').innerText = p.info.phone;
 
                 // 2.2 สร้างตารางประวัติ (History)
                 renderHistoryTable(p.history);
+
+                // 2.3 แสดงสถานะล่าสุด (เพิ่มส่วนนี้)
+                renderCurrentStatus(p.history);
+
             } else {
                 // กรณีไม่พบข้อมูล
                 document.getElementById('p_name').innerHTML = '<span class="text-danger">ไม่พบข้อมูลผู้ป่วย</span>';
@@ -436,23 +667,23 @@
                     : `<div style="line-height:1.2">${item.edit.split(' ')[0]} ${item.edit.split(' ')[1]} ${item.edit.split(' ')[2]}<br><small class="text-muted">${item.edit.split(' ')[3]}</small></div>`;
 
                 const rowHTML = `
-                    <tr data-type="${item.type}">
-                        <td>
-                            <a href="#" class="doc-link">${item.title}</a>
-                            <div class="doc-subtext">Ref: ${item.ref}</div>
-                        </td>
-                        <td class="text-center">${typeBadge}</td>
-                        <td class="text-center font-weight-bold">${item.score}</td>
-                        <td>${spentBadge}</td>
-                        <td>${nafBadge}</td>
-                        <td>${item.user}</td>
-                        <td>
-                            <div style="line-height:1.2">${item.date}<br><small class="text-muted">${item.time}</small></div>
-                        </td>
-                        <td class="text-center">${editShow}</td>
-                        <td class="text-center"><a href="#" class="text-danger h5"><i class="fa-solid fa-file-pdf"></i></a></td>
-                    </tr>
-                `;
+                        <tr data-type="${item.type}">
+                            <td>
+                                <a href="#" class="doc-link">${item.title}</a>
+                                <div class="doc-subtext">Ref: ${item.ref}</div>
+                            </td>
+                            <td class="text-center">${typeBadge}</td>
+                            <td class="text-center font-weight-bold">${item.score}</td>
+                            <td>${spentBadge}</td>
+                            <td>${nafBadge}</td>
+                            <td>${item.user}</td>
+                            <td>
+                                <div style="line-height:1.2">${item.date}<br><small class="text-muted">${item.time}</small></div>
+                            </td>
+                            <td class="text-center">${editShow}</td>
+                            <td class="text-center"><a href="#" class="text-danger h5"><i class="fa-solid fa-file-pdf"></i></a></td>
+                        </tr>
+                    `;
                 tbody.insertAdjacentHTML('beforeend', rowHTML);
             });
         }
@@ -472,6 +703,71 @@
                     tr[i].style.display = "none";
                 }
             }
+        }
+
+        // --- 5. ฟังก์ชันแสดงสถานะปัจจุบัน (แก้ไขให้สมบูรณ์แล้ว) ---
+        function renderCurrentStatus(historyData) {
+            const card = document.getElementById('currentStatusCard');
+
+            if (!historyData || historyData.length === 0) {
+                card.classList.add('d-none');
+                return;
+            }
+
+            card.classList.remove('d-none');
+            const latest = historyData[0];
+
+            // Elements
+            const statusTextElem = document.getElementById('cur_status_text');
+            const statusDescElem = document.getElementById('cur_status_desc');
+            const scoreValElem = document.getElementById('cur_score_val');
+            const dateLabelElem = document.getElementById('cur_date_label');
+            const dateTextElem = document.getElementById('cur_date_text');
+            const assessorElem = document.getElementById('cur_assessor_text');
+            const typeBadgeElem = document.getElementById('cur_type_badge');
+
+            // Reset Colors
+            statusTextElem.className = 'med-result-text'; // reset to base class
+
+            let colorClass = '';
+            let statusDesc = '';
+
+            // Logic แยกประเภท NAF / SPENT
+            if (latest.type === 'NAF') {
+                statusTextElem.innerText = latest.nafResult;
+                typeBadgeElem.innerText = 'NAF Assessment'; // หรือ 'แบบประเมิน NAF'
+                dateLabelElem.innerText = 'วัน/เวลาที่ประเมิน (Date Assessed)';
+
+                if (latest.nafResult.includes('ปกติ')) {
+                    colorClass = 'text-status-normal';
+                    statusDesc = 'ภาวะโภชนาการปกติ (Normal Status)';
+                } else if (latest.nafResult.includes('ปานกลาง')) {
+                    colorClass = 'text-status-risk';
+                    statusDesc = 'มีความเสี่ยงระดับปานกลาง (Moderate Risk)';
+                } else {
+                    colorClass = 'text-status-severe';
+                    statusDesc = 'ทุพโภชนาการรุนแรง (Severe Malnutrition)';
+                }
+            } else {
+                statusTextElem.innerText = latest.spentResult;
+                typeBadgeElem.innerText = 'SPENT Screening'; // หรือ 'แบบคัดกรอง SPENT'
+                dateLabelElem.innerText = 'วัน/เวลาที่คัดกรอง (Date Screened)';
+
+                if (latest.spentResult === 'ปกติ') {
+                    colorClass = 'text-status-normal';
+                    statusDesc = 'ปกติ / ไม่มีความเสี่ยง (Normal)';
+                } else {
+                    colorClass = 'text-status-risk';
+                    statusDesc = 'มีความเสี่ยง (Risk Detected)';
+                }
+            }
+
+            // Apply Data
+            statusTextElem.classList.add(colorClass); // ใส่สีเฉพาะตัวหนังสือผลลัพธ์
+            scoreValElem.innerText = latest.score;
+            statusDescElem.innerText = statusDesc;
+            dateTextElem.innerText = `${latest.date} ${latest.time}`;
+            assessorElem.innerText = latest.user;
         }
 
         function confirmLogout() {
