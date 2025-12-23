@@ -455,27 +455,44 @@
         </div>
 
         <div id="currentStatusCard" class="his-container d-none">
+
+            <div class="d-flex align-items-center border-bottom pb-2 mb-3">
+                <div class="mr-3 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px; background-color: #e3f2fd; border-radius: 50%; color: #0d47a1;">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div>
+                    <h6 class="font-weight-bold m-0 text-primary-custom" style="font-size: 1rem;">
+                        สถานะโภชนาการปัจจุบัน
+                    </h6>
+                    <small class="text-muted" style="font-size: 0.8rem;">Current Nutritional Status</small>
+                </div>
+                <div class="ml-auto">
+                    <span id="cur_source_badge" class="badge badge-light border text-muted">-</span>
+                </div>
+            </div>
+
             <div class="row align-items-center">
                 <div class="col-md-5 his-divider">
-                    <div class="his-label" id="cur_type_label">ผลการประเมิน</div>
-                    <div class="d-flex align-items-center">
+                    <div class="his-label" id="cur_type_label">ผลการวินิจฉัย</div>
+                    <div class="d-flex align-items-center mt-1">
                         <div id="cur_status_text" class="his-result mr-2">-</div>
                     </div>
-                    <div id="cur_status_desc" class="his-desc">-</div>
+                    <div id="cur_status_desc" class="his-desc mt-1">-</div>
                 </div>
                 <div class="col-md-2 his-divider text-center">
                     <div class="his-label">คะแนนรวม</div>
-                    <div id="cur_score_val" class="his-score-box mt-1">-</div>
+                    <div id="cur_score_val" class="his-score-box mt-2">-</div>
                 </div>
                 <div class="col-md-5 pl-md-4">
                     <div class="row">
                         <div class="col-6">
-                            <div class="his-label" id="cur_date_label">วันที่บันทึก</div>
-                            <div class="his-value" id="cur_date_text">-</div>
+                            <div class="his-label" id="cur_date_label">วันที่ประเมินล่าสุด</div>
+                            <div class="his-value mt-1" id="cur_date_text">-</div>
                         </div>
                         <div class="col-6">
-                            <div class="his-label">ผู้ประเมิน</div>
-                            <div class="his-value text-truncate" id="cur_assessor_text">-</div>
+                            <div class="his-label">ผู้บันทึก</div>
+                            <div class="his-value text-truncate mt-1" id="cur_assessor_text">-</div>
                         </div>
                     </div>
                 </div>
@@ -488,7 +505,7 @@
                     <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                 </h6>
                 <div class="form-inline mt-2 mt-md-0">
-                    <label class="small text-muted mr-2"><i class="fa-solid fa-filter"></i> กรองข้อมูล:</label>
+                    <label class="small text-muted mr-2"><i class="fa-solid fa-filter"></i> กรองประเภทเอกสาร:</label>
                     <select id="typeFilter" class="form-control form-control-sm custom-select" onchange="filterTable()">
                         <option value="all">ทั้งหมด (All)</option>
                         <option value="NAF">แบบประเมิน (NAF)</option>
@@ -545,7 +562,7 @@
                 },
                 history: [
                     // SPENT ทำวันนี้ -> ต้องล็อกปุ่ม SPENT แต่เปิดปุ่ม NAF เพราะเสี่ยง
-                    { type: 'SPENT', ref: 'SP-TEST-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'ทดสอบ ระบบ', date: todayStr, time: '10:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ล่าสุด)' },
+                    { type: 'SPENT', ref: 'SP-TEST-001', score: 1, spentResult: 'ปกติ', nafResult: '-', user: 'ทดสอบ ระบบ', date: todayStr, time: '10:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ล่าสุด)' },
                     { type: 'NAF', ref: 'NAF-OLD', score: 4, spentResult: '-', nafResult: 'ปกติ (Normal)', user: 'เพชรลดา เชยเพ็ชร', date: '1 พ.ย. 66', time: '09:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (เก่า)' }
                 ]
             },
@@ -577,7 +594,28 @@
                 history: [
                     { type: 'SPENT', ref: 'SP-671110-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '10 พ.ย. 67', time: '21:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ครั้งที่ 1)' }
                 ]
-            }
+            },
+            '6601122': {
+                info: {
+                    hn: '6601122',
+                    an: '6700450',
+                    name: 'นางสาวมานี มีนา',
+                    age: '30 ปี',
+                    rights: 'บัตรทอง',
+                    underlying: 'ปฏิเสธโรคประจำตัว',
+                    doctor: 'พญ. ใจดี มีเมตตา',
+                    ward: 'อายุรกรรมหญิง / 106',
+                    admit: '20 ธ.ค. 67 10:00 น.',
+                    phone: '089-999-9999'
+                },
+                history: [
+                    // NAF B คือ ระดับปานกลาง (Moderate)
+                    // ใส่ Logic ว่าเพิ่งทำวันนี้ (todayStr) เพื่อให้เห็นสถานะล่าสุด
+                    { type: 'NAF', ref: 'NAF-671223-001', score: 8, spentResult: '-', nafResult: 'ปานกลาง (NAF B)', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '11:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (ล่าสุด)' },
+                    // ต้องมี SPENT ก่อนถึงจะทำ NAF ได้ (ย้อนเวลาไปนิดหน่อย)
+                    { type: 'SPENT', ref: 'SP-671223-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '10:45 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
+                ]
+            },
         };
 
         // ตัวแปรเก็บสถานะ Action
@@ -687,6 +725,7 @@
         }
 
         // --- Render Current Status (HIS Standard) ---
+        // --- Render Current Status (ปรับปรุงข้อความ) ---
         function renderCurrentStatus(historyData) {
             const card = document.getElementById('currentStatusCard');
 
@@ -706,6 +745,7 @@
             const dateLabelElem = document.getElementById('cur_date_label');
             const dateTextElem = document.getElementById('cur_date_text');
             const assessorElem = document.getElementById('cur_assessor_text');
+            const sourceBadgeElem = document.getElementById('cur_source_badge'); // ตัวใหม่
 
             // Reset Styles
             card.classList.remove('his-normal', 'his-risk', 'his-severe');
@@ -717,31 +757,33 @@
 
             // Logic
             if (latest.type === 'NAF') {
-                typeLabelElem.innerText = 'ผลการประเมิน NAF';
-                dateLabelElem.innerText = 'วัน/เวลาที่ประเมิน';
+                sourceBadgeElem.innerText = 'อ้างอิง: แบบประเมิน NAF';
+                typeLabelElem.innerText = 'ระดับความรุนแรง (Severity)';
+                dateLabelElem.innerText = 'วันที่ประเมินล่าสุด';
                 statusTextElem.innerText = latest.nafResult;
 
                 if (latest.nafResult.includes('ปกติ')) {
                     themeClass = 'his-normal'; textClass = 'text-his-normal';
-                    statusDesc = 'ภาวะโภชนาการปกติ';
+                    statusDesc = 'ภาวะโภชนาการปกติ ให้การดูแลตามมาตรฐาน';
                 } else if (latest.nafResult.includes('ปานกลาง')) {
                     themeClass = 'his-risk'; textClass = 'text-his-risk';
-                    statusDesc = 'มีความเสี่ยงระดับปานกลาง';
+                    statusDesc = 'มีความเสี่ยงระดับปานกลาง ควรติดตามต่อเนื่อง';
                 } else {
                     themeClass = 'his-severe'; textClass = 'text-his-severe';
-                    statusDesc = 'มีภาวะทุพโภชนาการรุนแรง';
+                    statusDesc = 'มีภาวะทุพโภชนาการรุนแรง ต้องการการดูแลเร่งด่วน';
                 }
             } else {
-                typeLabelElem.innerText = 'ผลการคัดกรอง SPENT';
-                dateLabelElem.innerText = 'วัน/เวลาที่คัดกรอง';
+                sourceBadgeElem.innerText = 'อ้างอิง: แบบคัดกรอง SPENT';
+                typeLabelElem.innerText = 'ผลการคัดกรองความเสี่ยง';
+                dateLabelElem.innerText = 'วันที่คัดกรองล่าสุด';
                 statusTextElem.innerText = latest.spentResult;
 
                 if (latest.spentResult === 'ปกติ') {
                     themeClass = 'his-normal'; textClass = 'text-his-normal';
-                    statusDesc = 'ไม่พบความเสี่ยง';
+                    statusDesc = 'ไม่พบความเสี่ยงในขณะนี้';
                 } else {
                     themeClass = 'his-risk'; textClass = 'text-his-risk';
-                    statusDesc = 'มีความเสี่ยง';
+                    statusDesc = 'มีความเสี่ยงต่อภาวะทุพโภชนาการ';
                 }
             }
 
@@ -750,7 +792,7 @@
             statusTextElem.classList.add(textClass);
             scoreValElem.innerText = latest.score;
             statusDescElem.innerText = statusDesc;
-            dateTextElem.innerHTML = `${latest.date} <span style="font-size:0.85em; color:#888;">${latest.time}</span>`;
+            dateTextElem.innerHTML = `<span class="font-weight-bold">${latest.date}</span> <span class="text-muted ml-1" style="font-size:0.85em;">${latest.time}</span>`;
             assessorElem.innerText = latest.user;
         }
 
