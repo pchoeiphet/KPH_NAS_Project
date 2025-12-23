@@ -228,6 +228,103 @@
         .doc-link:hover {
             text-decoration: underline;
         }
+
+        /* --- Formal Clinical Callout Style --- */
+        .clinical-action-box {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left-width: 5px;
+            /* แถบสีบอกสถานะ */
+            border-radius: 4px;
+            /* มุมมนน้อยๆ ดูเป็นทางการ */
+            padding: 12px 20px;
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            /* จัดชิดบน */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            /* เงาบางมากๆ แทบมองไม่เห็น */
+        }
+
+        .clinical-action-icon {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            margin-top: 2px;
+            /* ดันไอคอนลงมานิดให้ตรงกับบรรทัดแรก */
+        }
+
+        .clinical-action-content {
+            flex-grow: 1;
+        }
+
+        .clinical-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .clinical-desc {
+            font-size: 0.9rem;
+            color: #555;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Status Themes (เน้นสีสุภาพ ไม่แสบตา) */
+        /* 1. ด่วน/ความเสี่ยง (สีส้มอิฐ) */
+        .status-urgent {
+            border-left-color: #d35400;
+        }
+
+        .status-urgent .clinical-action-icon {
+            color: #d35400;
+        }
+
+        .status-urgent .clinical-title {
+            color: #a04000;
+        }
+
+        /* 2. ปกติ/รอเวลา (สีเขียวใบไม้) */
+        .status-normal {
+            border-left-color: #27ae60;
+        }
+
+        .status-normal .clinical-action-icon {
+            color: #27ae60;
+        }
+
+        .status-normal .clinical-title {
+            color: #1e8449;
+        }
+
+        /* 3. เสร็จสิ้น/รอติดตาม (สีฟ้าคราม) */
+        .status-info {
+            border-left-color: #2980b9;
+        }
+
+        .status-info .clinical-action-icon {
+            color: #2980b9;
+        }
+
+        .status-info .clinical-title {
+            color: #1a5276;
+        }
+
+        /* 4. เกินกำหนด (สีแดงเลือดหมู) */
+        .status-overdue {
+            border-left-color: #c0392b;
+        }
+
+        .status-overdue .clinical-action-icon {
+            color: #c0392b;
+        }
+
+        .status-overdue .clinical-title {
+            color: #922b21;
+        }
     </style>
 </head>
 
@@ -472,18 +569,24 @@
                 </div>
             </div>
 
-            <div class="row align-items-center">
+            <div class="row align-items-start">
                 <div class="col-md-5 his-divider">
                     <div class="his-label" id="cur_type_label">ผลการวินิจฉัย</div>
                     <div class="d-flex align-items-center mt-1">
                         <div id="cur_status_text" class="his-result mr-2">-</div>
                     </div>
                     <div id="cur_status_desc" class="his-desc mt-1">-</div>
+
+                    <div id="cur_next_action" class="mt-3 p-2 rounded"
+                        style="font-size: 0.9rem; background-color: #f8f9fa; border-left: 4px solid #ccc;">
+                    </div>
                 </div>
+
                 <div class="col-md-2 his-divider text-center">
                     <div class="his-label">คะแนนรวม</div>
                     <div id="cur_score_val" class="his-score-box mt-2">-</div>
                 </div>
+
                 <div class="col-md-5 pl-md-4">
                     <div class="row">
                         <div class="col-6">
@@ -724,8 +827,7 @@
             }
         }
 
-        // --- Render Current Status (HIS Standard) ---
-        // --- Render Current Status (ปรับปรุงข้อความ) ---
+        // --- Render Current Status (Full Function - Fixed) ---
         function renderCurrentStatus(historyData) {
             const card = document.getElementById('currentStatusCard');
 
@@ -735,9 +837,9 @@
             }
 
             card.classList.remove('d-none');
-            const latest = historyData[0];
+            const latest = historyData[0]; // ข้อมูลล่าสุด
 
-            // Elements
+            // 1. Elements
             const typeLabelElem = document.getElementById('cur_type_label');
             const statusTextElem = document.getElementById('cur_status_text');
             const statusDescElem = document.getElementById('cur_status_desc');
@@ -745,17 +847,18 @@
             const dateLabelElem = document.getElementById('cur_date_label');
             const dateTextElem = document.getElementById('cur_date_text');
             const assessorElem = document.getElementById('cur_assessor_text');
-            const sourceBadgeElem = document.getElementById('cur_source_badge'); // ตัวใหม่
+            const sourceBadgeElem = document.getElementById('cur_source_badge');
+            const nextActionElem = document.getElementById('cur_next_action');
 
-            // Reset Styles
+            // 2. Reset Styles & Variables for Main Card
             card.classList.remove('his-normal', 'his-risk', 'his-severe');
             statusTextElem.className = 'his-result';
 
-            let themeClass = '';
+            let mainThemeClass = ''; // เปลี่ยนชื่อเพื่อไม่ให้ชนกัน
             let textClass = '';
             let statusDesc = '';
 
-            // Logic
+            // --- Logic Part 1: Main Status Card ---
             if (latest.type === 'NAF') {
                 sourceBadgeElem.innerText = 'อ้างอิง: แบบประเมิน NAF';
                 typeLabelElem.innerText = 'ระดับความรุนแรง (Severity)';
@@ -763,13 +866,13 @@
                 statusTextElem.innerText = latest.nafResult;
 
                 if (latest.nafResult.includes('ปกติ')) {
-                    themeClass = 'his-normal'; textClass = 'text-his-normal';
+                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal';
                     statusDesc = 'ภาวะโภชนาการปกติ ให้การดูแลตามมาตรฐาน';
                 } else if (latest.nafResult.includes('ปานกลาง')) {
-                    themeClass = 'his-risk'; textClass = 'text-his-risk';
+                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk';
                     statusDesc = 'มีความเสี่ยงระดับปานกลาง ควรติดตามต่อเนื่อง';
                 } else {
-                    themeClass = 'his-severe'; textClass = 'text-his-severe';
+                    mainThemeClass = 'his-severe'; textClass = 'text-his-severe';
                     statusDesc = 'มีภาวะทุพโภชนาการรุนแรง ต้องการการดูแลเร่งด่วน';
                 }
             } else {
@@ -779,21 +882,115 @@
                 statusTextElem.innerText = latest.spentResult;
 
                 if (latest.spentResult === 'ปกติ') {
-                    themeClass = 'his-normal'; textClass = 'text-his-normal';
+                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal';
                     statusDesc = 'ไม่พบความเสี่ยงในขณะนี้';
                 } else {
-                    themeClass = 'his-risk'; textClass = 'text-his-risk';
+                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk';
                     statusDesc = 'มีความเสี่ยงต่อภาวะทุพโภชนาการ';
                 }
             }
 
-            // Apply
-            card.classList.add(themeClass);
+            // Apply Basic Styles to Card
+            card.classList.add(mainThemeClass);
             statusTextElem.classList.add(textClass);
             scoreValElem.innerText = latest.score;
             statusDescElem.innerText = statusDesc;
             dateTextElem.innerHTML = `<span class="font-weight-bold">${latest.date}</span> <span class="text-muted ml-1" style="font-size:0.85em;">${latest.time}</span>`;
             assessorElem.innerText = latest.user;
+
+
+            // --- Logic Part 2: Next Action --
+            let actionThemeClass = '';
+            let iconClass = '';
+            let titleText = '';
+            let descText = '';
+
+            const lastSpent = historyData.find(item => item.type === 'SPENT');
+            const lastNaf = historyData.find(item => item.type === 'NAF');
+
+            let diffDays = 0;
+            let daysLeft = 0;
+
+            if (lastSpent) {
+                const today = new Date();
+                const spentDate = parseThaiDate(lastSpent.date);
+                const diffTime = Math.abs(today - spentDate);
+                diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                daysLeft = 7 - diffDays;
+                if (daysLeft < 0) daysLeft = 0;
+            }
+
+            // Decision Tree
+            if (!lastSpent) {
+                // Case 1: New Patient
+                actionThemeClass = 'status-info';
+                iconClass = 'fa-clipboard-list';
+                titleText = 'ผู้ป่วยรายใหม่ (New Patient)';
+                descText = 'ยังไม่มีข้อมูลการคัดกรอง กรุณาเริ่มทำแบบคัดกรอง SPENT';
+
+            } else if (lastSpent.spentResult === 'ปกติ') {
+                // Case 2: Normal
+                if (diffDays < 7) {
+                    actionThemeClass = 'status-normal';
+                    iconClass = 'fa-clock';
+                    titleText = 'เฝ้าระวังตามรอบ (Monitoring)';
+                    descText = `ผลคัดกรองปกติ: รอคัดกรองซ้ำในอีก <strong>${daysLeft} วัน</strong>`;
+                } else {
+                    actionThemeClass = 'status-overdue';
+                    iconClass = 'fa-bell';
+                    titleText = 'ครบกำหนดคัดกรอง (Overdue)';
+                    descText = 'ครบกำหนด 7 วันแล้ว กรุณาทำแบบคัดกรอง SPENT ใหม่';
+                }
+
+            } else {
+                // Case 3: Risk
+                let isNafDone = false;
+                if (lastNaf) {
+                    const spentDate = parseThaiDate(lastSpent.date);
+                    const nafDate = parseThaiDate(lastNaf.date);
+                    if (nafDate >= spentDate) isNafDone = true;
+                }
+
+                if (!isNafDone) {
+                    // Risk + No NAF
+                    actionThemeClass = 'status-urgent';
+                    iconClass = 'fa-user-doctor';
+                    titleText = 'พบความเสี่ยง (Action Required)';
+                    descText = 'กรุณาทำการประเมิน <strong>NAF</strong> เพื่อยืนยันภาวะโภชนาการ';
+                } else {
+                    // Risk + NAF Done
+                    if (diffDays < 7) {
+                        actionThemeClass = 'status-info';
+                        iconClass = 'fa-check-circle';
+                        titleText = 'บันทึกผลเรียบร้อย (Completed)';
+                        descText = 'ดำเนินการประเมินครบถ้วน รอติดตามอาการตามรอบ';
+                    } else {
+                        actionThemeClass = 'status-overdue';
+                        iconClass = 'fa-circle-exclamation';
+                        titleText = 'ครบกำหนดติดตาม (Overdue)';
+                        descText = 'ครบกำหนดติดตามอาการ กรุณาเริ่มกระบวนการคัดกรองใหม่';
+                    }
+                }
+            }
+
+            // Render HTML (ใส่ actionThemeClass ที่ถูกต้อง)
+            const htmlContent = `
+                <div class="clinical-action-box ${actionThemeClass}">
+                    <div class="clinical-action-icon">
+                        <i class="fa-solid ${iconClass}"></i>
+                    </div>
+                    <div class="clinical-action-content">
+                        <div class="clinical-title">
+                            ${titleText}
+                        </div>
+                        <p class="clinical-desc">${descText}</p>
+                    </div>
+                </div>
+            `;
+
+            nextActionElem.innerHTML = htmlContent;
+            nextActionElem.style = "";
+            nextActionElem.className = "";
         }
 
         // --- Logic: Action Dropdown Control ---
