@@ -97,58 +97,25 @@
             display: none;
         }
 
-        /* --- HIS Standard Style (Card แบบทางการ/คลีน) --- */
+        /* --- HIS Standard Style (Card) --- */
         .his-container {
             background-color: #fff;
             border: 1px solid #c8c8c8;
             border-left: 6px solid #999;
             border-radius: 4px;
-            padding: 15px 20px;
+            padding: 20px 25px;
             margin-bottom: 20px;
-        }
-
-        .his-label {
-            font-size: 0.75rem;
-            color: #666;
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .his-value {
-            font-size: 0.95rem;
-            color: #333;
-            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
 
         .his-result {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 700;
             line-height: 1.2;
+            color: #2c3e50;
         }
 
-        .his-desc {
-            font-size: 0.85rem;
-            color: #555;
-            margin-top: 2px;
-        }
-
-        .his-score-box {
-            display: inline-block;
-            background: #f0f0f0;
-            color: #000;
-            border: 1px solid #ccc;
-            padding: 2px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .his-divider {
-            border-right: 1px solid #e0e0e0;
-            min-height: 40px;
-        }
-
-        /* Colors */
+        /* Status Colors */
         .his-normal {
             border-left-color: #28a745 !important;
         }
@@ -158,11 +125,11 @@
         }
 
         .his-risk {
-            border-left-color: #ff8800 !important;
+            border-left-color: #ffc107 !important;
         }
 
         .text-his-risk {
-            color: #d65b00;
+            color: #d39e00;
         }
 
         .his-severe {
@@ -173,27 +140,156 @@
             color: #c82333;
         }
 
-        /* --- Dropdown Disabled Logic --- */
-        .dropdown-item.disabled-action {
-            background-color: #f8f9fa;
-            cursor: not-allowed !important;
-            opacity: 0.6;
+        /* --- Dashboard Layout --- */
+        @media (min-width: 768px) {
+            .border-right-md {
+                border-right: 1px solid #eee;
+            }
         }
 
-        .dropdown-item.disabled-action .title-text,
-        .dropdown-item.disabled-action .sub-text,
-        .dropdown-item.disabled-action .icon-box {
-            color: #adb5bd !important;
+        /* Score Circle */
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 5px solid #e9ecef;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto;
         }
 
-        .dropdown-item.disabled-action:hover {
-            background-color: #f8f9fa;
+        .his-risk .score-circle {
+            border-color: #ffecd1;
+            color: #d39e00;
+        }
+
+        .his-severe .score-circle {
+            border-color: #f8d7da;
+            color: #c82333;
+        }
+
+        .his-normal .score-circle {
+            border-color: #d4edda;
+            color: #155724;
+        }
+
+        /* --- Clinical Action Box (Official Notice Style) --- */
+        .clinical-action-box {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left-width: 5px;
+            /* แถบสีด้านซ้าย */
+            border-radius: 6px;
+            padding: 15px;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .clinical-action-icon {
+            font-size: 1.4rem;
+            margin-right: 15px;
+            opacity: 0.9;
+            flex-shrink: 0;
+        }
+
+        .clinical-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clinical-desc {
+            font-size: 0.9rem;
+            color: #555;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* เพิ่มใน <style> */
+        .border-right-md {
+            border-right: 1px solid #f0f0f0;
+        }
+
+        @media (max-width: 767px) {
+            .border-right-md {
+                border-right: none;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .d-flex.align-items-start.mb-3 {
+                flex-direction: row;
+            }
+
+            /* มือถือก็ยังให้คะแนนอยู่ข้างๆ ได้ */
+        }
+
+        /* ปรับแต่งส่วนคะแนนใน layout ใหม่ */
+        .score-circle {
+            /* สีขอบจะเปลี่ยนตาม Class แม่ (his-risk, his-normal) อัตโนมัติจาก CSS เดิม */
+            transition: all 0.3s;
+        }
+
+        /* Theme Colors for Action Box */
+        .status-urgent {
+            border-left-color: #c0392b;
+        }
+
+        .status-urgent .clinical-action-icon {
+            color: #c0392b;
+        }
+
+        .status-urgent .clinical-title {
+            color: #922b21;
+        }
+
+        .status-normal {
+            border-left-color: #27ae60;
+        }
+
+        .status-normal .clinical-action-icon {
+            color: #27ae60;
+        }
+
+        .status-normal .clinical-title {
+            color: #1e8449;
+        }
+
+        .status-info {
+            border-left-color: #2980b9;
+        }
+
+        .status-info .clinical-action-icon {
+            color: #2980b9;
+        }
+
+        .status-info .clinical-title {
+            color: #1a5276;
+        }
+
+        .status-overdue {
+            border-left-color: #e67e22;
+        }
+
+        .status-overdue .clinical-action-icon {
+            color: #e67e22;
+        }
+
+        .status-overdue .clinical-title {
+            color: #d35400;
         }
 
         /* General */
         .patient-icon-box {
-            width: 120px;
-            height: 150px;
+            width: 100px;
+            height: 120px;
             background-color: #e3f2fd;
             color: #2C3E50;
             border-radius: 8px;
@@ -229,101 +325,14 @@
             text-decoration: underline;
         }
 
-        /* --- Formal Clinical Callout Style --- */
-        .clinical-action-box {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-left-width: 5px;
-            /* แถบสีบอกสถานะ */
-            border-radius: 4px;
-            /* มุมมนน้อยๆ ดูเป็นทางการ */
-            padding: 12px 20px;
-            margin-top: 15px;
-            display: flex;
-            align-items: flex-start;
-            /* จัดชิดบน */
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-            /* เงาบางมากๆ แทบมองไม่เห็น */
+        .disabled-action {
+            background-color: #f8f9fa;
+            cursor: not-allowed !important;
+            opacity: 0.6;
         }
 
-        .clinical-action-icon {
-            margin-right: 15px;
-            font-size: 1.2rem;
-            margin-top: 2px;
-            /* ดันไอคอนลงมานิดให้ตรงกับบรรทัดแรก */
-        }
-
-        .clinical-action-content {
-            flex-grow: 1;
-        }
-
-        .clinical-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-        }
-
-        .clinical-desc {
-            font-size: 0.9rem;
-            color: #555;
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        /* Status Themes (เน้นสีสุภาพ ไม่แสบตา) */
-        /* 1. ด่วน/ความเสี่ยง (สีส้มอิฐ) */
-        .status-urgent {
-            border-left-color: #d35400;
-        }
-
-        .status-urgent .clinical-action-icon {
-            color: #d35400;
-        }
-
-        .status-urgent .clinical-title {
-            color: #a04000;
-        }
-
-        /* 2. ปกติ/รอเวลา (สีเขียวใบไม้) */
-        .status-normal {
-            border-left-color: #27ae60;
-        }
-
-        .status-normal .clinical-action-icon {
-            color: #27ae60;
-        }
-
-        .status-normal .clinical-title {
-            color: #1e8449;
-        }
-
-        /* 3. เสร็จสิ้น/รอติดตาม (สีฟ้าคราม) */
-        .status-info {
-            border-left-color: #2980b9;
-        }
-
-        .status-info .clinical-action-icon {
-            color: #2980b9;
-        }
-
-        .status-info .clinical-title {
-            color: #1a5276;
-        }
-
-        /* 4. เกินกำหนด (สีแดงเลือดหมู) */
-        .status-overdue {
-            border-left-color: #c0392b;
-        }
-
-        .status-overdue .clinical-action-icon {
-            color: #c0392b;
-        }
-
-        .status-overdue .clinical-title {
-            color: #922b21;
+        .disabled-action * {
+            color: #adb5bd !important;
         }
     </style>
 </head>
@@ -453,6 +462,10 @@
                                 <span class="font-weight-bold" id="p_rights">-</span>
                             </div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">โรคประจำตัว</small>
+                                <span class="font-weight-bold text-danger" id="p_underlying">-</span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
                                 <span class="font-weight-bold" id="p_doctor">-</span>
                             </div>
@@ -468,147 +481,129 @@
                                 <small class="text-muted d-block">เบอร์โทรศัพท์</small>
                                 <span class="font-weight-bold" id="p_phone">-</span>
                             </div>
-                            <div class="col-12 col-md-6 col-lg-4 mb-3">
-                                <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold text-danger" id="p_underlying">-</span>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="index.html" class="btn btn-outline-secondary btn-sm" style="border-radius: 4px; ">
-                <i class="fa-solid fa-chevron-left mr-2"></i> กลับหน้าหลัก
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="index.html" class="btn btn-outline-secondary btn-sm" style="border-radius: 4px;">
+                <i class="fa-solid fa-chevron-left mr-1"></i> กลับหน้าหลัก
             </a>
-
             <div class="btn-group">
                 <button type="button" class="btn btn-primary px-4 shadow-sm dropdown-toggle" data-toggle="dropdown"
-                    style="background-color: #0d47a1; border-color: #0d47a1; border-radius: 4px; height: 40px; font-size: 1rem;">
+                    style="background-color: #0d47a1; border-color: #0d47a1; border-radius: 4px; height: 45px; font-size: 1rem;">
                     <i class="fa-solid fa-folder-plus mr-2"></i> เพิ่มไฟล์เอกสารใหม่
                 </button>
-
                 <div class="dropdown-menu dropdown-menu-right border shadow-sm p-0 mt-1"
                     style="min-width: 380px; border-radius: 4px; border-color: #ced4da;">
-
                     <div class="bg-light px-3 py-2 border-bottom">
-                        <small class="text-uppercase text-muted font-weight-bold"
-                            style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                            เลือกประเภทของเอกสาร
+                        <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">
+                            เลือกประเภทเอกสาร
                         </small>
                     </div>
-
                     <a href="#" class="dropdown-item py-3 px-3 menu-action-link border-bottom" id="menu_spent"
-                        onclick="handleAction('SPENT', 'nutrition_screening_form.html')" style="transition: all 0.2s;">
+                        onclick="handleAction('SPENT', 'nutrition_screening_form.html')">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
                                 style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
                                 <i class="fa-solid fa-file-medical fa-lg"></i>
                             </div>
-
                             <div class="w-100">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="font-weight-bold text-dark title-text"
-                                        style="font-size: 1rem;">แบบคัดกรองภาวะโภชนาการ</span>
-                                </div>
-                                <small class="text-muted sub-text d-block mb-1" style="font-size: 0.85rem;">SPENT
-                                    Nutrition
-                                    Screening Tool</small>
-
+                                <span class="font-weight-bold text-dark title-text"
+                                    style="font-size: 1rem;">แบบคัดกรองภาวะโภชนาการ</span>
+                                <small class="text-muted sub-text d-block mb-1">SPENT Nutrition Screening Tool</small>
                                 <div class="reason-text d-none mt-1"
                                     style="font-size: 0.75rem; background-color: #fff5f5; color: #c00; border: 1px solid #fcc; padding: 4px 8px; border-radius: 2px;">
                                 </div>
                             </div>
                         </div>
                     </a>
-
                     <a href="#" class="dropdown-item py-3 px-3 menu-action-link" id="menu_naf"
-                        onclick="handleAction('NAF', 'nutrition_alert_form.html')" style="transition: all 0.2s;">
+                        onclick="handleAction('NAF', 'nutrition_alert_form.html')">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
                                 style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
                                 <i class="fa-solid fa-clipboard-user fa-lg"></i>
                             </div>
-
                             <div class="w-100">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="font-weight-bold text-dark title-text"
-                                        style="font-size: 1rem;">แบบประเมินภาวะโภชนาการ</span>
-                                </div>
-                                <small class="text-muted sub-text d-block mb-1" style="font-size: 0.85rem;">Nutrition
-                                    Alert Form
-                                    (NAF)</small>
-
+                                <span class="font-weight-bold text-dark title-text"
+                                    style="font-size: 1rem;">แบบประเมินภาวะโภชนาการ</span>
+                                <small class="text-muted sub-text d-block mb-1">Nutrition Alert Form (NAF)</small>
                                 <div class="reason-text d-none mt-1"
                                     style="font-size: 0.75rem; background-color: #fff5f5; color: #c00; border: 1px solid #fcc; padding: 4px 8px; border-radius: 2px;">
                                 </div>
                             </div>
                         </div>
                     </a>
-
                 </div>
             </div>
         </div>
 
-        <div id="currentStatusCard" class="his-container d-none">
+        <div id="currentStatusCard" class="his-container d-none p-0 overflow-hidden">
+            <div class="row no-gutters">
 
-            <div class="d-flex align-items-center border-bottom pb-2 mb-3">
-                <div class="mr-3 d-flex align-items-center justify-content-center"
-                    style="width: 40px; height: 40px; background-color: #e3f2fd; border-radius: 50%; color: #0d47a1;">
-                    <i class="fa-solid fa-heart-pulse"></i>
-                </div>
-                <div>
-                    <h6 class="font-weight-bold m-0 text-primary-custom" style="font-size: 1rem;">
-                        สถานะโภชนาการปัจจุบัน
-                    </h6>
-                    <small class="text-muted" style="font-size: 0.8rem;">Current Nutritional Status</small>
-                </div>
-                <div class="ml-auto">
-                    <span id="cur_source_badge" class="badge badge-light border text-muted">-</span>
-                </div>
-            </div>
+                <div class="col-md-8 p-4 d-flex flex-column border-right-md">
 
-            <div class="row align-items-start">
-                <div class="col-md-5 his-divider">
-                    <div class="his-label" id="cur_type_label">ผลการวินิจฉัย</div>
-                    <div class="d-flex align-items-center mt-1">
-                        <div id="cur_status_text" class="his-result mr-2">-</div>
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                        <h6 class="font-weight-bold m-0 text-primary-custom">
+                            <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
+                        </h6>
+                        <span id="cur_source_badge"
+                            class="badge badge-light border text-muted font-weight-normal px-2">-</span>
                     </div>
-                    <div id="cur_status_desc" class="his-desc mt-1">-</div>
 
-                    <div id="cur_next_action" class="mt-3 p-2 rounded"
-                        style="font-size: 0.9rem; background-color: #f8f9fa; border-left: 4px solid #ccc;">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="flex-grow-1 pr-3">
+                            <small class="text-uppercase text-muted font-weight-bold" id="cur_type_label"
+                                style="font-size: 0.75rem;">-</small>
+                            <h4 id="cur_status_text" class="his-result mt-1 mb-2" style="font-size: 1.5rem;">-</h4>
+                            <p id="cur_status_desc" class="text-muted" style="font-size: 0.95rem; line-height: 1.5;">-
+                            </p>
+                        </div>
+
+                        <div class="text-center pl-3 border-left">
+                            <div class="score-circle shadow-sm bg-white mx-auto mb-1"
+                                style="width: 60px; height: 60px; font-size: 1.6rem;">
+                                <span id="cur_score_val">-</span>
+                            </div>
+                            <small class="text-muted font-weight-bold" style="font-size: 0.7rem;">คะแนนรวม</small>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="d-flex align-items-center bg-light rounded p-2" style="font-size: 0.85rem;">
+                            <div class="mr-4 d-flex align-items-center">
+                                <i class="fa-regular fa-calendar text-muted mr-2"></i>
+                                <span id="cur_date_text" class="font-weight-medium text-dark">-</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-user-nurse text-muted mr-2"></i>
+                                <span id="cur_assessor_text" class="font-weight-medium text-dark">-</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-2 his-divider text-center">
-                    <div class="his-label">คะแนนรวม</div>
-                    <div id="cur_score_val" class="his-score-box mt-2">-</div>
-                </div>
-
-                <div class="col-md-5 pl-md-4">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="his-label" id="cur_date_label">วันที่ประเมินล่าสุด</div>
-                            <div class="his-value mt-1" id="cur_date_text">-</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="his-label">ผู้บันทึก</div>
-                            <div class="his-value text-truncate mt-1" id="cur_assessor_text">-</div>
-                        </div>
+                <div class="col-md-4 p-4 d-flex flex-column justify-content-center bg-white">
+                    <div class="w-100">
+                        <h6 class="text-muted font-weight-bold text-uppercase mb-3"
+                            style="font-size: 0.75rem; letter-spacing: 1px;">
+                            สิ่งดำเนินการถัดไป (Next Action)
+                        </h6>
+                        <div id="cur_next_action" class="w-100"></div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="card border shadow-sm mb-5">
             <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary-custom">
                     <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                 </h6>
                 <div class="form-inline mt-2 mt-md-0">
-                    <label class="small text-muted mr-2"><i class="fa-solid fa-filter"></i> กรองประเภทเอกสาร:</label>
+                    <label class="small text-muted mr-2"><i class="fa-solid fa-filter"></i> กรองข้อมูล:</label>
                     <select id="typeFilter" class="form-control form-control-sm custom-select" onchange="filterTable()">
                         <option value="all">ทั้งหมด (All)</option>
                         <option value="NAF">แบบประเมิน (NAF)</option>
@@ -627,8 +622,7 @@
                                 <th style="width: 12%;">ผลการคัดกรอง</th>
                                 <th style="width: 12%;">ผลการประเมิน</th>
                                 <th style="width: 13%;">ผู้ประเมิน</th>
-                                <th style="width: 10%;">วัน/เวลาที่บันทึก</th>
-                                <th style="width: 10%;">วัน/เวลาที่แก้ไข</th>
+                                <th style="width: 10%;">วัน/เวลา</th>
                                 <th class="text-center" style="width: 5%;">เอกสาร</th>
                             </tr>
                         </thead>
@@ -641,100 +635,69 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // --- 1. ข้อมูลจำลอง (Mock Data) แบบ Dynamic Date ---
-        // คำนวณวันที่ "วันนี้" เพื่อให้ Logic 7 วันทำงานได้จริงในการทดสอบ
+        // --- 1. Mock Data (แก้ไข: สมชาย SPENT 1 คะแนน = ปกติ/สีเขียว) ---
+
         const now = new Date();
         const thMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
         const d = now.getDate();
         const m = thMonths[now.getMonth()];
-        const y = (now.getFullYear() + 543) - 2500; // แปลงเป็นปี 67, 68
-        const todayStr = `${d} ${m} ${y}`; // เช่น "22 ธ.ค. 67"
+        const y = (now.getFullYear() + 543) - 2500;
+        const todayStr = `${d} ${m} ${y}`;
 
         const patientsData = {
-            '6604589': { // นายสมชาย (TEST CASE: เพิ่งคัดกรองวันนี้ -> เสี่ยง)
-                info: {
-                    hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี',
-                    rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)',
-                    doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111'
-                },
+            '6601122': {
+                // มานี (NAF B)
+                info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' },
                 history: [
-                    // SPENT ทำวันนี้ -> ต้องล็อกปุ่ม SPENT แต่เปิดปุ่ม NAF เพราะเสี่ยง
+                    { type: 'NAF', ref: 'NAF-671223-001', score: 8, spentResult: '-', nafResult: 'ปานกลาง (NAF B)', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '11:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (ล่าสุด)' },
+                    { type: 'SPENT', ref: 'SP-671223-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '10:45 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
+                ]
+            },
+            '6604589': {
+                // [แก้ไข] สมชาย: SPENT 1 คะแนน -> ปกติ (สีเขียว)
+                info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' },
+                history: [
+                    // แก้ไขตรงนี้: score: 1, spentResult: 'ปกติ'
                     { type: 'SPENT', ref: 'SP-TEST-001', score: 1, spentResult: 'ปกติ', nafResult: '-', user: 'ทดสอบ ระบบ', date: todayStr, time: '10:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ล่าสุด)' },
+                    // ประวัติเก่า (ถ้ามี)
                     { type: 'NAF', ref: 'NAF-OLD', score: 4, spentResult: '-', nafResult: 'ปกติ (Normal)', user: 'เพชรลดา เชยเพ็ชร', date: '1 พ.ย. 66', time: '09:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (เก่า)' }
                 ]
             },
-            '6605112': { // นางสมหญิง (TEST CASE: เพิ่งคัดกรองวันนี้ -> ปกติ)
-                info: {
-                    hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี',
-                    rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)',
-                    doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222'
-                },
-                history: []
-            },
-            '6603321': { // นายวิชัย (TEST CASE: คัดกรองนานแล้ว)
-                info: {
-                    hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี',
-                    rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)',
-                    doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333'
-                },
+            '6603321': {
+                // วิชัย
+                info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' },
                 history: [
-                    // เกิน 7 วัน -> กด SPENT ได้
                     { type: 'SPENT', ref: 'SP-OLD', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '1 ต.ค. 67', time: '14:30 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (เก่า)' }
                 ]
             },
             '6609888': {
-                info: {
-                    hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี',
-                    rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว',
-                    doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444'
-                },
+                // มั่นคง
+                info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' },
                 history: [
-                    { type: 'SPENT', ref: 'SP-671110-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '10 พ.ย. 67', time: '21:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ครั้งที่ 1)' }
+                    { type: 'SPENT', ref: 'SP-671110-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '10 พ.ย. 67', time: '21:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
                 ]
             },
-            '6601122': {
-                info: {
-                    hn: '6601122',
-                    an: '6700450',
-                    name: 'นางสาวมานี มีนา',
-                    age: '30 ปี',
-                    rights: 'บัตรทอง',
-                    underlying: 'ปฏิเสธโรคประจำตัว',
-                    doctor: 'พญ. ใจดี มีเมตตา',
-                    ward: 'อายุรกรรมหญิง / 106',
-                    admit: '20 ธ.ค. 67 10:00 น.',
-                    phone: '089-999-9999'
-                },
-                history: [
-                    // NAF B คือ ระดับปานกลาง (Moderate)
-                    // ใส่ Logic ว่าเพิ่งทำวันนี้ (todayStr) เพื่อให้เห็นสถานะล่าสุด
-                    { type: 'NAF', ref: 'NAF-671223-001', score: 8, spentResult: '-', nafResult: 'ปานกลาง (NAF B)', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '11:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (ล่าสุด)' },
-                    // ต้องมี SPENT ก่อนถึงจะทำ NAF ได้ (ย้อนเวลาไปนิดหน่อย)
-                    { type: 'SPENT', ref: 'SP-671223-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '10:45 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
-                ]
-            },
+            '6605112': {
+                // สมหญิง
+                info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' },
+                history: []
+            }
         };
 
-        // ตัวแปรเก็บสถานะ Action
-        let actionState = {
-            SPENT: { enabled: true, reason: '' },
-            NAF: { enabled: true, reason: '' }
-        };
+        let actionState = { SPENT: { enabled: true, reason: '' }, NAF: { enabled: true, reason: '' } };
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            const hn = urlParams.get('hn');
+            let hn = urlParams.get('hn');
+            if (!hn || !patientsData[hn]) { hn = '6601122'; } // Default
 
             if (hn && patientsData[hn]) {
                 const p = patientsData[hn];
-
-                // Render Info
                 document.getElementById('p_hn').innerText = p.info.hn;
                 document.getElementById('p_an').innerText = p.info.an;
                 document.getElementById('p_name').innerText = p.info.name;
@@ -746,392 +709,202 @@
                 document.getElementById('p_admit').innerText = p.info.admit;
                 document.getElementById('p_phone').innerText = p.info.phone;
 
-                // Render Tables & Status
-                renderHistoryTable(p.history);
-                renderCurrentStatus(p.history);
-                updateDropdownLogic(p.history);
+                // Sort History
+                const sortedHistory = p.history.sort((a, b) => {
+                    const dateA = parseThaiDateTime(a.date, a.time);
+                    const dateB = parseThaiDateTime(b.date, b.time);
+                    return dateB - dateA;
+                });
 
+                renderHistoryTable(sortedHistory);
+                renderCurrentStatus(sortedHistory);
+                updateDropdownLogic(sortedHistory);
             } else {
                 document.getElementById('p_name').innerHTML = '<span class="text-danger">ไม่พบข้อมูลผู้ป่วย</span>';
-                document.getElementById('historyTableBody').innerHTML = '';
+                document.getElementById('currentStatusCard').classList.add('d-none');
                 document.getElementById('noDataMessage').classList.remove('d-none');
             }
         });
 
-        // --- Render History Table ---
-        function renderHistoryTable(historyData) {
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-
-            if (!historyData || historyData.length === 0) {
-                document.getElementById('noDataMessage').classList.remove('d-none');
-                return;
-            }
-
-            historyData.forEach(item => {
-                let spentBadge = '<span class="badge badge-wait">-</span>';
-                if (item.spentResult !== '-') {
-                    if (item.spentResult === 'ปกติ') spentBadge = '<span class="badge badge-status-normal">ปกติ</span>';
-                    else spentBadge = '<span class="badge badge-status-risk">มีความเสี่ยง</span>';
-                }
-
-                let nafBadge = '<span class="badge badge-wait">-</span>';
-                if (item.nafResult !== '-') {
-                    if (item.nafResult.includes('ปกติ')) nafBadge = '<span class="badge badge-status-normal">' + item.nafResult + '</span>';
-                    else if (item.nafResult.includes('ปานกลาง')) nafBadge = '<span class="badge badge-status-risk">' + item.nafResult + '</span>';
-                    else nafBadge = '<span class="badge badge-status-severe">' + item.nafResult + '</span>';
-                }
-
-                let typeBadge = (item.type === 'NAF')
-                    ? '<span class="badge badge-pill badge-type-naf">NAF</span>'
-                    : '<span class="badge badge-pill badge-type-spent">SPENT</span>';
-
-                let editShow = (item.edit === '-') ? '<span class="text-muted">-</span>'
-                    : `<div style="line-height:1.2">${item.edit.split(' ')[0]} ${item.edit.split(' ')[1]} ${item.edit.split(' ')[2]}<br><small class="text-muted">${item.edit.split(' ')[3]}</small></div>`;
-
-                const rowHTML = `
-                    <tr data-type="${item.type}">
-                        <td>
-                            <a href="#" class="doc-link">${item.title}</a>
-                            <div class="doc-subtext">Ref: ${item.ref}</div>
-                        </td>
-                        <td class="text-center">${typeBadge}</td>
-                        <td class="text-center font-weight-bold">${item.score}</td>
-                        <td>${spentBadge}</td>
-                        <td>${nafBadge}</td>
-                        <td>${item.user}</td>
-                        <td>
-                            <div style="line-height:1.2">${item.date}<br><small class="text-muted">${item.time}</small></div>
-                        </td>
-                        <td class="text-center">${editShow}</td>
-                        <td class="text-center"><a href="#" class="text-danger h5"><i class="fa-solid fa-file-pdf"></i></a></td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', rowHTML);
-            });
-        }
-
-        function filterTable() {
-            var input = document.getElementById("typeFilter");
-            var filter = input.value;
-            var tableBody = document.getElementById("historyTableBody");
-            var tr = tableBody.getElementsByTagName("tr");
-
-            for (var i = 0; i < tr.length; i++) {
-                var type = tr[i].getAttribute("data-type");
-                if (filter === "all" || type === filter) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-
-        // --- Render Current Status (Full Function - Fixed) ---
+        // --- Render Functions ---
         function renderCurrentStatus(historyData) {
             const card = document.getElementById('currentStatusCard');
-
-            if (!historyData || historyData.length === 0) {
-                card.classList.add('d-none');
-                return;
-            }
-
+            if (!historyData || historyData.length === 0) { card.classList.add('d-none'); return; }
             card.classList.remove('d-none');
-            const latest = historyData[0]; // ข้อมูลล่าสุด
+            const latest = historyData[0];
 
-            // 1. Elements
             const typeLabelElem = document.getElementById('cur_type_label');
             const statusTextElem = document.getElementById('cur_status_text');
             const statusDescElem = document.getElementById('cur_status_desc');
             const scoreValElem = document.getElementById('cur_score_val');
-            const dateLabelElem = document.getElementById('cur_date_label');
             const dateTextElem = document.getElementById('cur_date_text');
             const assessorElem = document.getElementById('cur_assessor_text');
             const sourceBadgeElem = document.getElementById('cur_source_badge');
             const nextActionElem = document.getElementById('cur_next_action');
 
-            // 2. Reset Styles & Variables for Main Card
             card.classList.remove('his-normal', 'his-risk', 'his-severe');
             statusTextElem.className = 'his-result';
 
-            let mainThemeClass = ''; // เปลี่ยนชื่อเพื่อไม่ให้ชนกัน
-            let textClass = '';
-            let statusDesc = '';
+            let mainThemeClass = ''; let textClass = ''; let statusDesc = '';
 
-            // --- Logic Part 1: Main Status Card ---
+            // Logic สีการ์ด (สำคัญ)
             if (latest.type === 'NAF') {
                 sourceBadgeElem.innerText = 'อ้างอิง: แบบประเมิน NAF';
                 typeLabelElem.innerText = 'ระดับความรุนแรง (Severity)';
-                dateLabelElem.innerText = 'วันที่ประเมินล่าสุด';
                 statusTextElem.innerText = latest.nafResult;
-
                 if (latest.nafResult.includes('ปกติ')) {
-                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal';
-                    statusDesc = 'ภาวะโภชนาการปกติ ให้การดูแลตามมาตรฐาน';
+                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal'; statusDesc = 'ภาวะโภชนาการปกติ ให้การดูแลตามมาตรฐาน';
                 } else if (latest.nafResult.includes('ปานกลาง')) {
-                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk';
-                    statusDesc = 'มีความเสี่ยงระดับปานกลาง ควรติดตามต่อเนื่อง';
+                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk'; statusDesc = 'มีความเสี่ยงระดับปานกลาง ควรติดตามต่อเนื่อง';
                 } else {
-                    mainThemeClass = 'his-severe'; textClass = 'text-his-severe';
-                    statusDesc = 'มีภาวะทุพโภชนาการรุนแรง ต้องการการดูแลเร่งด่วน';
+                    mainThemeClass = 'his-severe'; textClass = 'text-his-severe'; statusDesc = 'มีภาวะทุพโภชนาการรุนแรง ต้องการการดูแลเร่งด่วน';
                 }
             } else {
                 sourceBadgeElem.innerText = 'อ้างอิง: แบบคัดกรอง SPENT';
                 typeLabelElem.innerText = 'ผลการคัดกรองความเสี่ยง';
-                dateLabelElem.innerText = 'วันที่คัดกรองล่าสุด';
                 statusTextElem.innerText = latest.spentResult;
 
+                // [จุดที่ทำให้เป็นสีเขียว] ถ้าผล = ปกติ
                 if (latest.spentResult === 'ปกติ') {
-                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal';
+                    mainThemeClass = 'his-normal';
+                    textClass = 'text-his-normal';
                     statusDesc = 'ไม่พบความเสี่ยงในขณะนี้';
                 } else {
-                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk';
+                    mainThemeClass = 'his-risk';
+                    textClass = 'text-his-risk';
                     statusDesc = 'มีความเสี่ยงต่อภาวะทุพโภชนาการ';
                 }
             }
 
-            // Apply Basic Styles to Card
             card.classList.add(mainThemeClass);
             statusTextElem.classList.add(textClass);
             scoreValElem.innerText = latest.score;
             statusDescElem.innerText = statusDesc;
-            dateTextElem.innerHTML = `<span class="font-weight-bold">${latest.date}</span> <span class="text-muted ml-1" style="font-size:0.85em;">${latest.time}</span>`;
+            dateTextElem.innerText = latest.date + ' ' + latest.time;
             assessorElem.innerText = latest.user;
 
+            renderNextAction(historyData, nextActionElem);
+        }
 
-            // --- Logic Part 2: Next Action --
-            let actionThemeClass = '';
-            let iconClass = '';
-            let titleText = '';
-            let descText = '';
-
+        function renderNextAction(historyData, containerElem) {
+            let actionThemeClass = ''; let iconClass = ''; let titleText = ''; let descText = ''; let refText = '';
             const lastSpent = historyData.find(item => item.type === 'SPENT');
             const lastNaf = historyData.find(item => item.type === 'NAF');
-
-            let diffDays = 0;
-            let daysLeft = 0;
+            let diffDays = 0; let daysLeft = 0;
 
             if (lastSpent) {
                 const today = new Date();
-                const spentDate = parseThaiDate(lastSpent.date);
+                const spentDate = parseThaiDateTime(lastSpent.date, lastSpent.time);
                 const diffTime = Math.abs(today - spentDate);
                 diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 daysLeft = 7 - diffDays;
                 if (daysLeft < 0) daysLeft = 0;
             }
 
-            // Decision Tree
             if (!lastSpent) {
-                // Case 1: New Patient
-                actionThemeClass = 'status-info';
-                iconClass = 'fa-clipboard-list';
-                titleText = 'ผู้ป่วยรายใหม่ (New Patient)';
-                descText = 'ยังไม่มีข้อมูลการคัดกรอง กรุณาเริ่มทำแบบคัดกรอง SPENT';
-
+                actionThemeClass = 'status-info'; iconClass = 'fa-clipboard-list'; titleText = 'New Patient'; descText = 'เริ่มทำแบบคัดกรอง SPENT'; refText = 'ยังไม่มีประวัติการคัดกรอง';
             } else if (lastSpent.spentResult === 'ปกติ') {
-                // Case 2: Normal
+                refText = `อ้างอิง: ผล SPENT ปกติ (${lastSpent.date})`;
                 if (diffDays < 7) {
-                    actionThemeClass = 'status-normal';
-                    iconClass = 'fa-clock';
-                    titleText = 'เฝ้าระวังตามรอบ (Monitoring)';
-                    descText = `ผลคัดกรองปกติ: รอคัดกรองซ้ำในอีก <strong>${daysLeft} วัน</strong>`;
+                    actionThemeClass = 'status-normal'; iconClass = 'fa-clock'; titleText = 'Monitoring'; descText = `รอคัดกรองซ้ำในอีก ${daysLeft} วัน`;
                 } else {
-                    actionThemeClass = 'status-overdue';
-                    iconClass = 'fa-bell';
-                    titleText = 'ครบกำหนดคัดกรอง (Overdue)';
-                    descText = 'ครบกำหนด 7 วันแล้ว กรุณาทำแบบคัดกรอง SPENT ใหม่';
+                    actionThemeClass = 'status-overdue'; iconClass = 'fa-bell'; titleText = 'Overdue'; descText = 'ครบกำหนด 7 วัน กรุณาทำแบบคัดกรองใหม่';
                 }
-
             } else {
-                // Case 3: Risk
                 let isNafDone = false;
                 if (lastNaf) {
-                    const spentDate = parseThaiDate(lastSpent.date);
-                    const nafDate = parseThaiDate(lastNaf.date);
+                    const spentDate = parseThaiDateTime(lastSpent.date, lastSpent.time);
+                    const nafDate = parseThaiDateTime(lastNaf.date, lastNaf.time);
                     if (nafDate >= spentDate) isNafDone = true;
                 }
-
                 if (!isNafDone) {
-                    // Risk + No NAF
-                    actionThemeClass = 'status-urgent';
-                    iconClass = 'fa-user-doctor';
-                    titleText = 'พบความเสี่ยง (Action Required)';
-                    descText = 'กรุณาทำการประเมิน <strong>NAF</strong> เพื่อยืนยันภาวะโภชนาการ';
+                    actionThemeClass = 'status-urgent'; iconClass = 'fa-user-doctor'; titleText = 'Action Required'; descText = 'พบความเสี่ยง! ต้องประเมิน NAF ทันที'; refText = `อ้างอิง: พบความเสี่ยง SPENT (${lastSpent.date})`;
                 } else {
-                    // Risk + NAF Done
+                    refText = `อ้างอิง: ประเมิน NAF เรียบร้อย (${lastNaf.date})`;
                     if (diffDays < 7) {
-                        actionThemeClass = 'status-info';
-                        iconClass = 'fa-check-circle';
-                        titleText = 'บันทึกผลเรียบร้อย (Completed)';
-                        descText = 'ดำเนินการประเมินครบถ้วน รอติดตามอาการตามรอบ';
+                        actionThemeClass = 'status-info'; iconClass = 'fa-check-circle'; titleText = 'Completed'; descText = 'บันทึกผลเรียบร้อย รอติดตามอาการตามรอบ';
                     } else {
-                        actionThemeClass = 'status-overdue';
-                        iconClass = 'fa-circle-exclamation';
-                        titleText = 'ครบกำหนดติดตาม (Overdue)';
-                        descText = 'ครบกำหนดติดตามอาการ กรุณาเริ่มกระบวนการคัดกรองใหม่';
+                        actionThemeClass = 'status-overdue'; iconClass = 'fa-circle-exclamation'; titleText = 'Overdue'; descText = 'ครบกำหนดติดตามอาการ กรุณาเริ่มกระบวนการใหม่';
                     }
                 }
             }
-
-            // Render HTML (ใส่ actionThemeClass ที่ถูกต้อง)
-            const htmlContent = `
-                <div class="clinical-action-box ${actionThemeClass}">
-                    <div class="clinical-action-icon">
-                        <i class="fa-solid ${iconClass}"></i>
-                    </div>
-                    <div class="clinical-action-content">
-                        <div class="clinical-title">
-                            ${titleText}
-                        </div>
-                        <p class="clinical-desc">${descText}</p>
-                    </div>
-                </div>
-            `;
-
-            nextActionElem.innerHTML = htmlContent;
-            nextActionElem.style = "";
-            nextActionElem.className = "";
+            containerElem.innerHTML = `<div class="clinical-action-box ${actionThemeClass}"><div class="d-flex align-items-start w-100"><div class="clinical-action-icon pt-1"><i class="fa-solid ${iconClass}"></i></div><div class="clinical-action-content w-100"><div class="clinical-title">${titleText}</div><p class="clinical-desc">${descText}</p>${refText ? `<div class="mt-2 pt-2 border-top" style="border-color: rgba(0,0,0,0.08) !important;"><small class="text-muted font-weight-bold" style="font-size: 0.75rem; letter-spacing: 0.3px;"><i class="fa-solid fa-file-signature mr-1"></i> ${refText}</small></div>` : ''}</div></div></div>`;
         }
 
-        // --- Logic: Action Dropdown Control ---
         function updateDropdownLogic(historyData) {
-            // Reset ค่าเริ่มต้น
             actionState.SPENT = { enabled: true, reason: '' };
             actionState.NAF = { enabled: true, reason: '' };
-
-            // หา SPENT ล่าสุด และ NAF ล่าสุด
             const lastSpent = historyData.find(item => item.type === 'SPENT');
             const lastNaf = historyData.find(item => item.type === 'NAF');
 
-            // --- Condition 1: ยังไม่เคยคัดกรอง SPENT ---
             if (!lastSpent) {
-                actionState.SPENT.enabled = true;
-                actionState.NAF.enabled = false;
-                actionState.NAF.reason = "⚠️ กรุณาทำแบบคัดกรอง SPENT ก่อน";
-
+                actionState.NAF.enabled = false; actionState.NAF.reason = "⚠️ กรุณาทำแบบคัดกรอง SPENT ก่อน";
                 renderMenuAndExit(); return;
             }
 
-            // คำนวณวันที่
             const today = new Date();
-            const spentDate = parseThaiDate(lastSpent.date);
+            const spentDate = parseThaiDateTime(lastSpent.date, lastSpent.time);
             const diffTime = Math.abs(today - spentDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             const daysLeft = 7 - diffDays;
 
-            // --- Condition 2: คัดกรองแล้ว ผลเป็น "ปกติ" ---
             if (lastSpent.spentResult === 'ปกติ') {
-                if (diffDays < 7) {
-                    // ล็อก SPENT (เพราะเพิ่งทำ)
-                    actionState.SPENT.enabled = false;
-                    actionState.SPENT.reason = `ผลปกติ (รออีก ${daysLeft} วัน)`;
-                } else {
-                    // ครบ 7 วันแล้ว เปิดให้ทำใหม่ได้
-                    actionState.SPENT.enabled = true;
-                }
-
-                // ล็อก NAF เสมอ เพราะผลปกติ
-                actionState.NAF.enabled = false;
-                actionState.NAF.reason = "ผลคัดกรองปกติ ไม่จำเป็นต้องทำ NAF";
-
+                if (diffDays < 7) { actionState.SPENT.enabled = false; actionState.SPENT.reason = `⚠️ ผลปกติ (รออีก ${daysLeft} วัน)`; }
+                actionState.NAF.enabled = false; actionState.NAF.reason = "⚠️ ผลปกติ ไม่ต้องทำ NAF";
                 renderMenuAndExit(); return;
             }
-
-            // --- Condition 3: คัดกรองแล้ว ผล "มีความเสี่ยง" ---
-            // เช็คว่าทำ NAF หรือยัง? (โดยดูว่ามี NAF ที่วันที่ >= วันที่ทำ SPENT หรือไม่)
             let isNafDone = false;
             if (lastNaf) {
-                const nafDate = parseThaiDate(lastNaf.date);
-                // ถ้าวันที่ทำ NAF ใหม่กว่าหรือเท่ากับ SPENT ถือว่าทำแล้ว
-                if (nafDate >= spentDate) {
-                    isNafDone = true;
-                }
+                const nafDate = parseThaiDateTime(lastNaf.date, lastNaf.time);
+                if (nafDate >= spentDate) isNafDone = true;
             }
-
             if (!isNafDone) {
-                // >>> เจอความเสี่ยง แต่ยังไม่ทำ NAF <<<
-
-                // ล็อก SPENT (เพื่อบังคับให้ไปทำ NAF ให้จบกระบวนการ)
-                actionState.SPENT.enabled = false;
-                actionState.SPENT.reason = "พบความเสี่ยง กรุณาประเมิน NAF ให้เสร็จสิ้น";
-
-                // เปิด NAF
+                actionState.SPENT.enabled = false; actionState.SPENT.reason = "⚠️ พบความเสี่ยง ต้องทำ NAF";
                 actionState.NAF.enabled = true;
-
             } else {
-                // >>> ทำครบแล้ว (เสี่ยง -> NAF แล้ว) <<<
-
-                // เช็คระยะเวลา 7 วัน จาก SPENT ล่าสุด
-                if (diffDays < 7) {
-                    actionState.SPENT.enabled = false;
-                    actionState.SPENT.reason = `ทำรายการครบแล้ว (รออีก ${daysLeft} วัน)`;
-                } else {
-                    actionState.SPENT.enabled = true;
-                }
-
-                // ล็อก NAF (ต้องเริ่มที่ SPENT รอบใหม่ก่อนเสมอ)
-                actionState.NAF.enabled = false;
-                actionState.NAF.reason = "กรุณาเริ่มคัดกรอง SPENT รอบใหม่";
+                if (diffDays < 7) { actionState.SPENT.enabled = false; actionState.SPENT.reason = `⚠️ ทำรายการครบแล้ว (รออีก ${daysLeft} วัน)`; }
+                actionState.NAF.enabled = false; actionState.NAF.reason = "⚠️ กรุณาเริ่มคัดกรองใหม่";
             }
-
             renderMenuAndExit();
         }
 
-        // Helper function เพื่อลดการเขียนซ้ำ
-        function renderMenuAndExit() {
-            renderMenuState('menu_spent', actionState.SPENT);
-            renderMenuState('menu_naf', actionState.NAF);
+        function renderMenuAndExit() { renderMenuState('menu_spent', actionState.SPENT); renderMenuState('menu_naf', actionState.NAF); }
+        function renderMenuState(id, state) {
+            const el = document.getElementById(id); if (!el) return;
+            const rEl = el.querySelector('.reason-text');
+            if (!state.enabled) { el.classList.add('disabled-action'); if (rEl) { rEl.innerText = state.reason; rEl.classList.remove('d-none'); } }
+            else { el.classList.remove('disabled-action'); if (rEl) { rEl.innerText = ''; rEl.classList.add('d-none'); } }
         }
-
-        function renderMenuState(elementId, state) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            const reasonEl = el.querySelector('.reason-text');
-
-            if (!state.enabled) {
-                el.classList.add('disabled-action');
-                if (reasonEl) {
-                    reasonEl.innerText = state.reason;
-                    reasonEl.classList.remove('d-none');
-                }
-            } else {
-                el.classList.remove('disabled-action');
-                if (reasonEl) {
-                    reasonEl.innerText = '';
-                    reasonEl.classList.add('d-none');
-                }
-            }
+        function renderHistoryTable(historyData) {
+            const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
+            if (!historyData || historyData.length === 0) { document.getElementById('noDataMessage').classList.remove('d-none'); return; }
+            historyData.forEach(item => {
+                let spentBadge = item.spentResult === '-' ? '-' : (item.spentResult === 'ปกติ' ? '<span class="badge badge-status-normal">ปกติ</span>' : '<span class="badge badge-status-risk">มีความเสี่ยง</span>');
+                let nafBadge = item.nafResult === '-' ? '-' : (item.nafResult.includes('ปกติ') ? '<span class="badge badge-status-normal">' + item.nafResult + '</span>' : (item.nafResult.includes('ปานกลาง') ? '<span class="badge badge-status-risk">' + item.nafResult + '</span>' : '<span class="badge badge-status-severe">' + item.nafResult + '</span>'));
+                let typeBadge = item.type === 'NAF' ? '<span class="badge badge-pill badge-info">NAF</span>' : '<span class="badge badge-pill badge-primary">SPENT</span>';
+                let targetUrl = (item.type === 'SPENT') ? `nutrition_screening_form.html?ref=${item.ref}&mode=view` : `nutrition_alert_form.html?ref=${item.ref}&mode=view`;
+                tbody.insertAdjacentHTML('beforeend', `<tr data-type="${item.type}"><td><a href="${targetUrl}" class="doc-link">${item.title}</a><div class="small text-muted">Ref: ${item.ref}</div></td><td class="text-center">${typeBadge}</td><td class="text-center font-weight-bold">${item.score}</td><td>${spentBadge}</td><td>${nafBadge}</td><td>${item.user}</td><td>${item.date}<br><small class="text-muted">${item.time}</small></td><td class="text-center"><a href="${targetUrl}" class="text-danger h5"><i class="fa-solid fa-file-pdf"></i></a></td></tr>`);
+            });
         }
-
-        function handleAction(type, url) {
-            if (actionState[type].enabled) {
-                window.location.href = url;
-            } else {
-                console.log("Action Disabled: " + actionState[type].reason);
-            }
+        function handleAction(type, url) { if (actionState[type].enabled) window.location.href = url; }
+        function filterTable() {
+            var filter = document.getElementById("typeFilter").value;
+            var tr = document.getElementById("historyTableBody").getElementsByTagName("tr");
+            for (var i = 0; i < tr.length; i++) { tr[i].style.display = (filter === "all" || tr[i].getAttribute("data-type") === filter) ? "" : "none"; }
         }
-
-        // Helper to parse Thai Date (e.g. "22 ธ.ค. 67")
-        function parseThaiDate(dateStr) {
-            const thaiMonths = {
-                'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5,
-                'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11
-            };
+        function parseThaiDateTime(dateStr, timeStr) {
+            const thaiMonths = { 'ม.ค.': 0, 'ก.พ.': 1, 'มี.ค.': 2, 'เม.ย.': 3, 'พ.ค.': 4, 'มิ.ย.': 5, 'ก.ค.': 6, 'ส.ค.': 7, 'ก.ย.': 8, 'ต.ค.': 9, 'พ.ย.': 10, 'ธ.ค.': 11 };
             const parts = dateStr.split(' ');
             if (parts.length < 3) return new Date();
-
-            const day = parseInt(parts[0]);
-            const month = thaiMonths[parts[1]] !== undefined ? thaiMonths[parts[1]] : 0;
             let year = parseInt(parts[2]);
-            // Convert 67 -> 2024 (approx)
             year = (year + 2500) - 543;
-
-            return new Date(year, month, day);
+            const month = thaiMonths[parts[1]] !== undefined ? thaiMonths[parts[1]] : 0;
+            const day = parseInt(parts[0]);
+            let hours = 0; let minutes = 0;
+            if (timeStr) { const timeParts = timeStr.replace(' น.', '').split(':'); if (timeParts.length >= 2) { hours = parseInt(timeParts[0]); minutes = parseInt(timeParts[1]); } }
+            return new Date(year, month, day, hours, minutes);
         }
-
-        function confirmLogout() {
-            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
-        }
+        function confirmLogout() { if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html'; }
     </script>
 </body>
 
