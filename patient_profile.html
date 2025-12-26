@@ -616,14 +616,15 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 25%;">รายการบันทึก</th>
-                                <th class="text-center" style="width: 10%;">ประเภท</th>
-                                <th class="text-center" style="width: 15%;">คะแนน (SPENT/NAF)</th>
+                                <th style="width: 20%;">รายการบันทึก</th>
+                                <th class="text-center" style="width: 8%;">ประเภท</th>
+                                <th class="text-center" style="width: 5%;">คะแนน</th>
                                 <th style="width: 12%;">ผลการคัดกรอง</th>
                                 <th style="width: 12%;">ผลการประเมิน</th>
-                                <th style="width: 13%;">ผู้ประเมิน</th>
-                                <th style="width: 10%;">วัน/เวลา</th>
-                                <th class="text-center" style="width: 5%;" >เอกสาร</th>
+                                <th style="width: 12%;">ผู้ประเมิน</th>
+                                <th style="width: 10%;">วันเวลาที่บันทึก</th>
+                                <th style="width: 10%;">วันเวลาที่แก้ไข</th>
+                                <th class="text-center" style="width: 6%;">เอกสาร</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody"></tbody>
@@ -640,8 +641,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // --- 1. Mock Data (แก้ไข: สมชาย SPENT 1 คะแนน = ปกติ/สีเขียว) ---
-
+        // --- 1. Mock Data ---
         const now = new Date();
         const thMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
         const d = now.getDate();
@@ -651,35 +651,35 @@
 
         const patientsData = {
             '6601122': {
-                // มานี (NAF B)
+                // มานี: SPENT ครั้งที่ 1 -> NAF ครั้งที่ 1
                 info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' },
                 history: [
-                    { type: 'NAF', ref: 'NAF-671223-001', score: 8, spentResult: '-', nafResult: 'ปานกลาง (NAF B)', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '11:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (ล่าสุด)' },
-                    { type: 'SPENT', ref: 'SP-671223-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '10:45 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
+                    { type: 'NAF', ref: 'NAF-671223-001', score: 8, spentResult: '-', nafResult: 'ปานกลาง (NAF B)', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '11:00 น.', edit: '-' },
+                    { type: 'SPENT', ref: 'SP-671223-001', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: todayStr, time: '10:45 น.', edit: '-' }
                 ]
             },
             '6604589': {
-                // [แก้ไข] สมชาย: SPENT 1 คะแนน -> ปกติ (สีเขียว)
+                // สมชาย: เคยทำ SPENT มาก่อน (ครั้งที่ 1) และวันนี้ทำอีกรอบ (ครั้งที่ 2)
                 info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' },
                 history: [
-                    // แก้ไขตรงนี้: score: 1, spentResult: 'ปกติ'
-                    { type: 'SPENT', ref: 'SP-TEST-001', score: 1, spentResult: 'ปกติ', nafResult: '-', user: 'ทดสอบ ระบบ', date: todayStr, time: '10:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (ล่าสุด)' },
-                    // ประวัติเก่า (ถ้ามี)
-                    { type: 'NAF', ref: 'NAF-OLD', score: 4, spentResult: '-', nafResult: 'ปกติ (Normal)', user: 'เพชรลดา เชยเพ็ชร', date: '1 พ.ย. 66', time: '09:00 น.', edit: '-', title: 'แบบประเมินภาวะโภชนาการ (เก่า)' }
+                    // อันใหม่ (จะเป็นครั้งที่ 2)
+                    { type: 'SPENT', ref: 'SP-TEST-002', score: 1, spentResult: 'ปกติ', nafResult: '-', user: 'ทดสอบ ระบบ', date: todayStr, time: '10:00 น.', edit: '-' },
+                    // อันเก่า (จะเป็นครั้งที่ 1)
+                    { type: 'SPENT', ref: 'SP-TEST-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '1 พ.ย. 67', time: '09:00 น.', edit: '-' }
                 ]
             },
             '6603321': {
                 // วิชัย
                 info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' },
                 history: [
-                    { type: 'SPENT', ref: 'SP-OLD', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '1 ต.ค. 67', time: '14:30 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ (เก่า)' }
+                    { type: 'SPENT', ref: 'SP-OLD', score: 3, spentResult: 'มีความเสี่ยง', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '1 ต.ค. 67', time: '14:30 น.', edit: '-' }
                 ]
             },
             '6609888': {
                 // มั่นคง
                 info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' },
                 history: [
-                    { type: 'SPENT', ref: 'SP-671110-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '10 พ.ย. 67', time: '21:00 น.', edit: '-', title: 'แบบคัดกรองภาวะโภชนาการ' }
+                    { type: 'SPENT', ref: 'SP-671110-001', score: 0, spentResult: 'ปกติ', nafResult: '-', user: 'เพชรลดา เชยเพ็ชร', date: '10 พ.ย. 67', time: '21:00 น.', edit: '-' }
                 ]
             },
             '6605112': {
@@ -698,6 +698,8 @@
 
             if (hn && patientsData[hn]) {
                 const p = patientsData[hn];
+
+                // Render Patient Info
                 document.getElementById('p_hn').innerText = p.info.hn;
                 document.getElementById('p_an').innerText = p.info.an;
                 document.getElementById('p_name').innerText = p.info.name;
@@ -709,16 +711,37 @@
                 document.getElementById('p_admit').innerText = p.info.admit;
                 document.getElementById('p_phone').innerText = p.info.phone;
 
-                // Sort History
-                const sortedHistory = p.history.sort((a, b) => {
-                    const dateA = parseThaiDateTime(a.date, a.time);
-                    const dateB = parseThaiDateTime(b.date, b.time);
-                    return dateB - dateA;
+                // --- LOGIC: จัดเรียงและสร้างชื่อ "ครั้งที่ X" อัตโนมัติ ---
+
+                // 1. เรียงจาก "เก่า -> ใหม่" เพื่อไล่นับเลข (1, 2, 3...)
+                let processHistory = p.history.sort((a, b) => {
+                    return parseThaiDateTime(a.date, a.time) - parseThaiDateTime(b.date, b.time);
                 });
 
-                renderHistoryTable(sortedHistory);
-                renderCurrentStatus(sortedHistory);
-                updateDropdownLogic(sortedHistory);
+                // ตัวนับ
+                let countSPENT = 0;
+                let countNAF = 0;
+
+                // วนลูปสร้าง Title
+                processHistory.forEach(item => {
+                    if (item.type === 'SPENT') {
+                        countSPENT++;
+                        item.title = `แบบคัดกรองภาวะโภชนาการ (ครั้งที่ ${countSPENT})`;
+                    } else if (item.type === 'NAF') {
+                        countNAF++;
+                        item.title = `แบบประเมินภาวะโภชนาการ (ครั้งที่ ${countNAF})`;
+                    }
+                });
+
+                // 2. เรียงกลับจาก "ใหม่ -> เก่า" เพื่อแสดงผล (ล่าสุดอยู่บน)
+                const finalHistory = processHistory.sort((a, b) => {
+                    return parseThaiDateTime(b.date, b.time) - parseThaiDateTime(a.date, a.time);
+                });
+
+                renderHistoryTable(finalHistory);
+                renderCurrentStatus(finalHistory);
+                updateDropdownLogic(finalHistory);
+
             } else {
                 document.getElementById('p_name').innerHTML = '<span class="text-danger">ไม่พบข้อมูลผู้ป่วย</span>';
                 document.getElementById('currentStatusCard').classList.add('d-none');
@@ -726,7 +749,8 @@
             }
         });
 
-        // --- Render Functions ---
+        // --- Helper Functions ---
+
         function renderCurrentStatus(historyData) {
             const card = document.getElementById('currentStatusCard');
             if (!historyData || historyData.length === 0) { card.classList.add('d-none'); return; }
@@ -747,7 +771,6 @@
 
             let mainThemeClass = ''; let textClass = ''; let statusDesc = '';
 
-            // Logic สีการ์ด (สำคัญ)
             if (latest.type === 'NAF') {
                 sourceBadgeElem.innerText = 'อ้างอิง: แบบประเมิน NAF';
                 typeLabelElem.innerText = 'ระดับความรุนแรง (Severity)';
@@ -764,15 +787,10 @@
                 typeLabelElem.innerText = 'ผลการคัดกรองความเสี่ยง';
                 statusTextElem.innerText = latest.spentResult;
 
-                // [จุดที่ทำให้เป็นสีเขียว] ถ้าผล = ปกติ
                 if (latest.spentResult === 'ปกติ') {
-                    mainThemeClass = 'his-normal';
-                    textClass = 'text-his-normal';
-                    statusDesc = 'ไม่พบความเสี่ยงในขณะนี้';
+                    mainThemeClass = 'his-normal'; textClass = 'text-his-normal'; statusDesc = 'ไม่พบความเสี่ยงในขณะนี้';
                 } else {
-                    mainThemeClass = 'his-risk';
-                    textClass = 'text-his-risk';
-                    statusDesc = 'มีความเสี่ยงต่อภาวะทุพโภชนาการ';
+                    mainThemeClass = 'his-risk'; textClass = 'text-his-risk'; statusDesc = 'มีความเสี่ยงต่อภาวะทุพโภชนาการ';
                 }
             }
 
@@ -875,17 +893,43 @@
             if (!state.enabled) { el.classList.add('disabled-action'); if (rEl) { rEl.innerText = state.reason; rEl.classList.remove('d-none'); } }
             else { el.classList.remove('disabled-action'); if (rEl) { rEl.innerText = ''; rEl.classList.add('d-none'); } }
         }
+
         function renderHistoryTable(historyData) {
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
             if (!historyData || historyData.length === 0) { document.getElementById('noDataMessage').classList.remove('d-none'); return; }
+
             historyData.forEach(item => {
+                // Badge Logic
                 let spentBadge = item.spentResult === '-' ? '-' : (item.spentResult === 'ปกติ' ? '<span class="badge badge-status-normal">ปกติ</span>' : '<span class="badge badge-status-risk">มีความเสี่ยง</span>');
                 let nafBadge = item.nafResult === '-' ? '-' : (item.nafResult.includes('ปกติ') ? '<span class="badge badge-status-normal">' + item.nafResult + '</span>' : (item.nafResult.includes('ปานกลาง') ? '<span class="badge badge-status-risk">' + item.nafResult + '</span>' : '<span class="badge badge-status-severe">' + item.nafResult + '</span>'));
                 let typeBadge = item.type === 'NAF' ? '<span class="badge badge-pill badge-info">NAF</span>' : '<span class="badge badge-pill badge-primary">SPENT</span>';
+
+                // Link
                 let targetUrl = (item.type === 'SPENT') ? `nutrition_screening_form.html?ref=${item.ref}&mode=view` : `nutrition_alert_form.html?ref=${item.ref}&mode=view`;
-                tbody.insertAdjacentHTML('beforeend', `<tr data-type="${item.type}"><td><a href="${targetUrl}" class="doc-link">${item.title}</a><div class="small text-muted">Ref: ${item.ref}</div></td><td class="text-center">${typeBadge}</td><td class="text-center font-weight-bold">${item.score}</td><td>${spentBadge}</td><td>${nafBadge}</td><td>${item.user}</td><td>${item.date}<br><small class="text-muted">${item.time}</small></td><td class="text-center"><a href="${targetUrl}" class="text-danger h4" data-toggle="tooltip" title="ดูเอกสาร PDF"><i class="fa-solid fa-file-pdf"></i></a></td></tr>`);
+
+                // Row HTML (เพิ่มคอลัมน์ edit)
+                const rowHtml = `
+                    <tr data-type="${item.type}">
+                        <td><a href="${targetUrl}" class="doc-link">${item.title}</a><div class="small text-muted">Ref: ${item.ref}</div></td>
+                        <td class="text-center">${typeBadge}</td>
+                        <td class="text-center font-weight-bold">${item.score}</td>
+                        <td>${spentBadge}</td>
+                        <td>${nafBadge}</td>
+                        <td>${item.user}</td>
+                        <td>${item.date}<br><small class="text-muted">${item.time}</small></td>
+                        <td>${item.edit}</td> <td class="text-center">
+                            <a href="${targetUrl}" class="text-danger h5" data-toggle="tooltip" title="ดูเอกสาร PDF">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', rowHtml);
             });
+            // Init Tooltips
+            $('[data-toggle="tooltip"]').tooltip();
         }
+
         function handleAction(type, url) { if (actionState[type].enabled) window.location.href = url; }
         function filterTable() {
             var filter = document.getElementById("typeFilter").value;
@@ -905,6 +949,9 @@
             return new Date(year, month, day, hours, minutes);
         }
         function confirmLogout() { if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html'; }
+
+        // Init Tooltips globally
+        $(function () { $('[data-toggle="tooltip"]').tooltip() })
     </script>
 </body>
 
