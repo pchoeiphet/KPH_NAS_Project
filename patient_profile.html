@@ -618,12 +618,12 @@
                             <tr>
                                 <th style="width: 25%;">รายการบันทึก</th>
                                 <th class="text-center" style="width: 10%;">ประเภท</th>
-                                <th class="text-center" style="width: 5%;">คะแนน</th>
+                                <th class="text-center" style="width: 15%;">คะแนน (SPENT/NAF)</th>
                                 <th style="width: 12%;">ผลการคัดกรอง</th>
                                 <th style="width: 12%;">ผลการประเมิน</th>
                                 <th style="width: 13%;">ผู้ประเมิน</th>
                                 <th style="width: 10%;">วัน/เวลา</th>
-                                <th class="text-center" style="width: 5%;">เอกสาร</th>
+                                <th class="text-center" style="width: 5%;" >เอกสาร</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody"></tbody>
@@ -883,7 +883,7 @@
                 let nafBadge = item.nafResult === '-' ? '-' : (item.nafResult.includes('ปกติ') ? '<span class="badge badge-status-normal">' + item.nafResult + '</span>' : (item.nafResult.includes('ปานกลาง') ? '<span class="badge badge-status-risk">' + item.nafResult + '</span>' : '<span class="badge badge-status-severe">' + item.nafResult + '</span>'));
                 let typeBadge = item.type === 'NAF' ? '<span class="badge badge-pill badge-info">NAF</span>' : '<span class="badge badge-pill badge-primary">SPENT</span>';
                 let targetUrl = (item.type === 'SPENT') ? `nutrition_screening_form.html?ref=${item.ref}&mode=view` : `nutrition_alert_form.html?ref=${item.ref}&mode=view`;
-                tbody.insertAdjacentHTML('beforeend', `<tr data-type="${item.type}"><td><a href="${targetUrl}" class="doc-link">${item.title}</a><div class="small text-muted">Ref: ${item.ref}</div></td><td class="text-center">${typeBadge}</td><td class="text-center font-weight-bold">${item.score}</td><td>${spentBadge}</td><td>${nafBadge}</td><td>${item.user}</td><td>${item.date}<br><small class="text-muted">${item.time}</small></td><td class="text-center"><a href="${targetUrl}" class="text-danger h5"><i class="fa-solid fa-file-pdf"></i></a></td></tr>`);
+                tbody.insertAdjacentHTML('beforeend', `<tr data-type="${item.type}"><td><a href="${targetUrl}" class="doc-link">${item.title}</a><div class="small text-muted">Ref: ${item.ref}</div></td><td class="text-center">${typeBadge}</td><td class="text-center font-weight-bold">${item.score}</td><td>${spentBadge}</td><td>${nafBadge}</td><td>${item.user}</td><td>${item.date}<br><small class="text-muted">${item.time}</small></td><td class="text-center"><a href="${targetUrl}" class="text-danger h4" data-toggle="tooltip" title="ดูเอกสาร PDF"><i class="fa-solid fa-file-pdf"></i></a></td></tr>`);
             });
         }
         function handleAction(type, url) { if (actionState[type].enabled) window.location.href = url; }
