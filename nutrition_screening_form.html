@@ -116,92 +116,6 @@
         }
 
         /* --- Form Elements --- */
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-        }
-
-        .form-header h2 {
-            font-weight: 700;
-            color: #0d47a1;
-            margin-bottom: 5px;
-        }
-
-        .form-header p {
-            color: #666;
-            margin: 0;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            border-left: 4px solid #0d47a1;
-            padding-left: 10px;
-        }
-
-        .form-control:read-only {
-            background-color: #f8f9fa;
-            color: #666;
-        }
-
-        .table-custom th {
-            background-color: #f1f8ff;
-            color: #0d47a1;
-            font-weight: 600;
-            vertical-align: middle;
-        }
-
-        .table-custom td {
-            vertical-align: middle;
-        }
-
-        .screen-input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        /* Result Box */
-        .result-box {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 6px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        .result-normal {
-            background-color: #e8f5e9;
-            border-color: #c8e6c9;
-            color: #2e7d32;
-        }
-
-        .result-risk {
-            background-color: #fff8e1;
-            border-color: #ffe082;
-            color: #f57f17;
-        }
-
-        /* Buttons */
-        .btn-submit {
-            background-color: #0d47a1;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .btn-submit:hover {
-            background-color: #083275;
-            color: white;
-        }
-
         .form-card {
             border: none;
             border-radius: 8px;
@@ -249,10 +163,34 @@
             text-align: center;
         }
 
-        /* ปรับ Radio ให้ใหญ่ขึ้นนิดนึงเพื่อให้คลิกง่าย */
         .custom-control-input:checked~.custom-control-label::before {
             background-color: #17a2b8;
             border-color: #17a2b8;
+        }
+
+        /* Result Box (ปรับแต่งให้แสดงผลตรงกลางสวยงาม) */
+        .result-box {
+            display: none;
+            margin-top: 30px;
+            padding: 40px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+            /* จัดกึ่งกลาง */
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        /* สีพื้นหลังเมื่อมีความเสี่ยง */
+        .result-box.risk-high {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+
+        /* สีพื้นหลังเมื่อปกติ */
+        .result-box.risk-normal {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
         }
     </style>
 </head>
@@ -421,7 +359,7 @@
                     <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                 </div>
                 <div class="text-right">
-                    <span class="badge badge-info p-2">Form ID: NAF-01</span>
+                    <span class="badge badge-info p-2">Form ID: SPENT-01</span>
                 </div>
             </div>
 
@@ -430,15 +368,14 @@
 
                     <div class="form-group mb-4">
                         <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
-                        <input type="text" class="form-control form-control-lg"
-                            placeholder="ระบุการวินิจฉัยโรค..." style="font-weight: 400;">
+                        <input type="text" class="form-control form-control-lg" value="Pneumonia"
+                            placeholder="ระบุการวินิจฉัยโรค..." style="font-weight: 500;">
                     </div>
 
                     <hr class="my-4" style="border-top: 1px dashed #dee2e6;">
 
                     <div class="mb-4">
                         <label class="section-label">2. ข้อมูลสัดส่วนร่างกาย (Anthropometry)</label>
-
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -446,38 +383,32 @@
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" id="currentWeight"
                                             placeholder="0.0" oninput="calculateBMI()">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text input-unit">กก.</span>
-                                        </div>
+                                        <div class="input-group-append"><span
+                                                class="input-group-text input-unit">กก.</span></div>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">ส่วนสูง</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="heightVal" placeholder="0"
                                             oninput="calculateBMI()">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text input-unit">ซม.</span>
-                                        </div>
+                                        <div class="input-group-append"><span
+                                                class="input-group-text input-unit">ซม.</span></div>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">น้ำหนักปกติ</label>
+                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" placeholder="0.0">
-                                        <div class="input-group-append">
-                                            <span class="input-group-text input-unit">กก.</span>
-                                        </div>
+                                        <div class="input-group-append"><span
+                                                class="input-group-text input-unit">กก.</span></div>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">ดัชนีมวลกาย (BMI)</label>
@@ -519,7 +450,7 @@
                             <table class="table table-screening mb-0">
                                 <thead>
                                     <tr>
-                                        <th style="width: 70%; border-bottom: 2px solid #dee2e6;">หัวข้อการคัดกรอง</th>
+                                        <th style="width: 70%; border-bottom: 2px solid #dee2e6;">ประเด็นคำถาม</th>
                                         <th class="text-center text-success"
                                             style="width: 15%; border-bottom: 2px solid #dee2e6;">ใช่ (1)</th>
                                         <th class="text-center text-muted"
@@ -528,71 +459,56 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="align-middle">1. ผู้ป่วยมีน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจในช่วง 6 เดือนที่ผ่านมา</td>
+                                        <td class="align-middle">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจ (ในช่วง 6
+                                            เดือนที่ผ่านมา)</td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q1_yes" name="q1" class="custom-control-input"
-                                                    value="yes">
-                                                <label class="custom-control-label" for="q1_yes"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q1_yes"
+                                                    name="q1" class="custom-control-input" value="yes"><label
+                                                    class="custom-control-label" for="q1_yes"></label></div>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q1_no" name="q1" class="custom-control-input"
-                                                    value="no" checked>
-                                                <label class="custom-control-label" for="q1_no"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q1_no"
+                                                    name="q1" class="custom-control-input" value="no" checked><label
+                                                    class="custom-control-label" for="q1_no"></label></div>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="align-middle">2. ผู้ป่วยได้รับอาหารน้อยกว่าที่เคยได้ (> 7 วัน)</td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q2_yes" name="q2" class="custom-control-input"
-                                                    value="yes">
-                                                <label class="custom-control-label" for="q2_yes"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q2_yes"
+                                                    name="q2" class="custom-control-input" value="yes"><label
+                                                    class="custom-control-label" for="q2_yes"></label></div>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q2_no" name="q2" class="custom-control-input"
-                                                    value="no" checked>
-                                                <label class="custom-control-label" for="q2_no"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q2_no"
+                                                    name="q2" class="custom-control-input" value="no" checked><label
+                                                    class="custom-control-label" for="q2_no"></label></div>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="align-middle">3. BMI < 18.5 หรือ ≥ 25.0 กก./ม.² หรือไม่</td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q3_yes" name="q3" class="custom-control-input"
-                                                    value="yes">
-                                                <label class="custom-control-label" for="q3_yes"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q3_yes"
+                                                    name="q3" class="custom-control-input" value="yes"><label
+                                                    class="custom-control-label" for="q3_yes"></label></div>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q3_no" name="q3" class="custom-control-input"
-                                                    value="no" checked>
-                                                <label class="custom-control-label" for="q3_no"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q3_no"
+                                                    name="q3" class="custom-control-input" value="no" checked><label
+                                                    class="custom-control-label" for="q3_no"></label></div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="align-middle">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤตร่วมด้วยหรือไม่</td>
+                                        <td class="align-middle">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต</td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q4_yes" name="q4" class="custom-control-input"
-                                                    value="yes">
-                                                <label class="custom-control-label" for="q4_yes"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q4_yes"
+                                                    name="q4" class="custom-control-input" value="yes"><label
+                                                    class="custom-control-label" for="q4_yes"></label></div>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="q4_no" name="q4" class="custom-control-input"
-                                                    value="no" checked>
-                                                <label class="custom-control-label" for="q4_no"></label>
-                                            </div>
+                                            <div class="custom-control custom-radio"><input type="radio" id="q4_no"
+                                                    name="q4" class="custom-control-input" value="no" checked><label
+                                                    class="custom-control-label" for="q4_no"></label></div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -611,33 +527,32 @@
                         </div>
                     </div>
 
-                    <div id="resultBox" class="result-box mt-4 p-4 rounded border"
-                        style="display: none; background: #fff3cd; border-color: #ffeeba !important;">
-                        <div class="d-flex align-items-start">
-                            <i class="fa-solid fa-circle-exclamation text-warning fa-2x mr-3 mt-1"></i>
-                            <div>
-                                <h5 class="font-weight-bold mb-1" id="resultTitle">ผลการคัดกรอง</h5>
-                                <p class="mb-3 text-dark" id="resultDesc">...</p>
+                    <div id="resultBox" class="result-box">
+                        <div class="mb-3">
+                            <i id="resultIcon" class="fa-solid fa-circle-exclamation fa-4x"></i>
+                        </div>
 
-                                <div id="highRiskOptions" class="d-none mt-3">
-                                    <p class="font-weight-bold text-danger mb-2">ข้อแนะนำ: ผู้ป่วยมีความเสี่ยง
-                                        ควรประเมิน NAF
-                                        ต่อทันที</p>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="saveLater()">
-                                            <i class="fa-regular fa-clock mr-2"></i> ไว้ทำทีหลัง
-                                        </button>
-                                        <button type="button" class="btn btn-danger" onclick="openAssessment()">
-                                            <i class="fa-solid fa-user-doctor mr-2"></i> ทำแบบประเมิน NAF
-                                        </button>
-                                    </div>
-                                </div>
+                        <h3 class="font-weight-bold mb-2" id="resultTitle">...</h3>
+                        <p class="mb-4" id="resultDesc" style="font-size: 0.95rem;">...</p>
 
-                                <div id="normalOptions" class="d-none mt-3">
-                                    <button type="button" class="btn btn-success" onclick="saveLater()">
-                                        <i class="fa-solid fa-check mr-2"></i> บันทึกเสร็จสิ้น
-                                    </button>
-                                </div>
+                        <div id="highRiskOptions" class="d-none">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-outline-secondary mr-3 px-4 py-2"
+                                    onclick="saveLater()">
+                                    <i class="fa-regular fa-clock mr-2"></i> ไว้ทำทีหลัง
+                                </button>
+                                <button type="button" class="btn btn-danger px-4 py-2 shadow-sm"
+                                    onclick="openAssessment()">
+                                    <i class="fa-solid fa-user-doctor mr-2"></i> ประเมิน NAF ต่อทันที
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="normalOptions" class="d-none">
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-success px-5 py-2 shadow-sm" onclick="saveLater()">
+                                    <i class="fa-solid fa-check mr-2"></i> บันทึกและกลับหน้าหลัก
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -654,49 +569,31 @@
     <script>
         // Mock Data
         const patientsData = {
-            '6601122': {
-                info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' }
-            },
-            '6604589': {
-                info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' }
-            },
-            '6603321': {
-                info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' }
-            },
-            '6609888': {
-                info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' }
-            },
-            '6605112': {
-                info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' }
-            }
+            '6601122': { info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67' } },
+            '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67' } },
+            '6603321': { info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67' } },
+            '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67' } },
+            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน, โรคไต', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67' } }
         };
 
         let currentHn = '';
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            currentHn = urlParams.get('hn');
-
-            // Fallback: ถ้าไม่มี HN ให้ใช้ค่า Default เพื่อแสดงผล (เช่น สมหญิง)
-            if (!currentHn || !patientsData[currentHn]) {
-                currentHn = '6605112';
-            }
+            currentHn = urlParams.get('hn') || '6605112';
 
             if (patientsData[currentHn]) {
-                const p = patientsData[currentHn];
-                // Render Detailed Info
-                document.getElementById('p_hn').innerText = p.info.hn;
-                document.getElementById('p_an').innerText = p.info.an;
-                document.getElementById('p_name').innerText = p.info.name;
-                document.getElementById('p_age').innerText = p.info.age;
-                document.getElementById('p_rights').innerText = p.info.rights;
-                document.getElementById('p_underlying').innerText = p.info.underlying;
-                document.getElementById('p_doctor').innerText = p.info.doctor;
-                document.getElementById('p_ward').innerText = p.info.ward;
-                document.getElementById('p_admit').innerText = p.info.admit;
-                document.getElementById('p_phone').innerText = p.info.phone;
-            } else {
-                document.getElementById('p_name').innerText = 'ไม่พบข้อมูล';
+                const p = patientsData[currentHn].info;
+                document.getElementById('p_hn').innerText = p.hn;
+                document.getElementById('p_an').innerText = p.an;
+                document.getElementById('p_name').innerText = p.name;
+                document.getElementById('p_age').innerText = p.age;
+                document.getElementById('p_rights').innerText = p.rights;
+                document.getElementById('p_underlying').innerText = p.underlying;
+                document.getElementById('p_doctor').innerText = p.doctor;
+                document.getElementById('p_ward').innerText = p.ward;
+                document.getElementById('p_admit').innerText = p.admit;
+                document.getElementById('p_phone').innerText = '-';
             }
         });
 
@@ -729,6 +626,7 @@
             }
 
             const resultBox = document.getElementById('resultBox');
+            const resultIcon = document.getElementById('resultIcon');
             const resultTitle = document.getElementById('resultTitle');
             const resultDesc = document.getElementById('resultDesc');
             const highRiskOptions = document.getElementById('highRiskOptions');
@@ -738,18 +636,26 @@
             resultBox.style.display = 'block';
             saveBtn.style.display = 'none';
 
-            resultBox.classList.remove('result-normal', 'result-risk');
+            // Reset
+            resultBox.className = 'result-box mt-4 p-4 rounded border text-center';
+            resultIcon.className = 'fa-solid fa-4x mb-2';
             highRiskOptions.classList.add('d-none');
             normalOptions.classList.add('d-none');
 
             if (score >= 2) {
-                resultBox.classList.add('result-risk');
+                // High Risk Style
+                resultBox.classList.add('risk-high'); // สีเหลืองอ่อน
+                resultIcon.classList.add('fa-circle-exclamation', 'text-warning');
                 resultTitle.innerText = `คะแนนรวม: ${score} (มีความเสี่ยง)`;
+                resultTitle.classList.add('text-warning', 'text-dark');
                 resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2) ควรได้รับการประเมินภาวะโภชนาการ (NAF) เพิ่มเติม";
                 highRiskOptions.classList.remove('d-none');
             } else {
-                resultBox.classList.add('result-normal');
+                // Normal Style
+                resultBox.classList.add('risk-normal'); // สีเขียวอ่อน
+                resultIcon.classList.add('fa-check-circle', 'text-success');
                 resultTitle.innerText = `คะแนนรวม: ${score} (ปกติ)`;
+                resultTitle.classList.add('text-success');
                 resultDesc.innerText = "ไม่พบความเสี่ยงในขณะนี้ ให้คัดกรองซ้ำในอีก 7 วัน";
                 normalOptions.classList.remove('d-none');
             }
