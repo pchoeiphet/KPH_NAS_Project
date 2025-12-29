@@ -77,17 +77,17 @@ symptom_problem - symptom_problem_id, symptom_problem_name, symptom_problem_type
 disease - disease_id, disease_name, disease_type, disease_score
 
 14.ประวัติการคัดกรอง
-ืnutrition_screening_history - nutrition_screening_id, admissions_an, patients_hn, assessed_at, ward_id, initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method, q1_weight_loss, 	q2_eat_less, q3_bmi_abnormal, q4_critical, nutrition_screening_result, assessor_name, assessed_at
+ืnutrition_screening - nutrition_screening_id, admissions_an, patients_hn, assessed_at, ward_id, initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method, q1_weight_loss, 	q2_eat_less, q3_bmi_abnormal, q4_critical, nutrition_screening_result, assessor_name, assessed_at
 
 15.ประวัติการประเมิน
-nutririon_assessment_history - nutririon_assessment_id, patients_hn, received_date, initial_diagnosis, info_source, other_source, height_measure, body_length, arm_span, height_relative, weight, bmi, bmi_score, is_no_weight, lab_method, albumin_val, tlc_val, lab_score, weight_option_id, patient_shape_id , weight_change_4_week_id, food_type_id, food_amount_id, food_access_id, total_score, risk_level, assessor_name, assessed_at, updated_at
+nutririon_assessment - nutrition_assessment_id, patients_hn, received_date, initial_diagnosis, info_source, other_source, height_measure, body_length, arm_span, height_relative, weight, bmi, bmi_score, is_no_weight, lab_method, albumin_val, tlc_val, lab_score, weight_option_id, patient_shape_id , weight_change_4_week_id, food_type_id, food_amount_id, food_access_id, total_score, risk_level, assessor_name, assessed_at, updated_at
 
 16.บันทึกโรคที่เป็น
-disease_assessment - nutririon_assessment_id, disease_id, disease_other_name, disease_type, disease_score
+disease_saved - nutrition_assessment_id, disease_id, disease_other_name, disease_type, disease_score
 
 
 17.บันทึกอาการที่เป็น
-symptom_problem_assessment - nutririon_assessment_id, symptom_problem_id, symptom_problem_score
+symptom_problem_saved - nutrition_assessment_id, symptom_problem_id, symptom_problem_score
 
 18. ผู้ใช้
 user - user_id, user_name, user_email, user_password, user_role, user_dob, user_phone
