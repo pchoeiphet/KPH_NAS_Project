@@ -135,7 +135,6 @@
             font-size: 1.1rem;
             margin-bottom: 15px;
             border-left: 4px solid #17a2b8;
-            /* สี Hospital Blue */
             padding-left: 10px;
         }
 
@@ -168,7 +167,6 @@
             border-color: #17a2b8;
         }
 
-        /* Result Box (ปรับแต่งให้แสดงผลตรงกลางสวยงาม) */
         .result-box {
             display: none;
             margin-top: 30px;
@@ -176,18 +174,15 @@
             border-radius: 8px;
             border: 1px solid #ddd;
             text-align: center;
-            /* จัดกึ่งกลาง */
             background-color: #fff;
             transition: all 0.3s ease;
         }
 
-        /* สีพื้นหลังเมื่อมีความเสี่ยง */
         .result-box.risk-high {
             background-color: #fff3cd;
             border-color: #ffeeba;
         }
 
-        /* สีพื้นหลังเมื่อปกติ */
         .result-box.risk-normal {
             background-color: #d4edda;
             border-color: #c3e6cb;
@@ -207,7 +202,6 @@
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
-
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
@@ -223,63 +217,6 @@
                             <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
-                        style="border-radius: 12px; min-width: 250px;">
-
-                        <div class="dropdown-header bg-light border-bottom py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
-                                    <i class="fa-solid fa-user-doctor"></i>
-                                </div>
-                                <div style="line-height: 1.3;">
-                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
-                                        เชยเพ็ชร</strong>
-                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
-                                    <br>
-                                    <span class="badge badge-info mt-1"
-                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-2">
-                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
-                                งานของฉัน</h6>
-                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
-                                href="#">
-                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
-                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
-                                <span class="badge badge-danger badge-pill">5</span>
-                            </a>
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
-                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
-                            </a>
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
-                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
-                            </a>
-                        </div>
-
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <i class="fa-solid fa-file-signature mr-2 text-warning"
-                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
-                            </a>
-                        </div>
-
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
-                                <i class="fa-solid fa-right-from-bracket mr-2"
-                                    style="width:20px; text-align:center;"></i>
-                                ออกจากระบบ
-                            </a>
-                        </div>
-                    </div>
                 </li>
             </ul>
         </div>
@@ -308,7 +245,7 @@
                             </div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                <span class="font-weight-bold" id="p_name"
+                                <span class="font-weight-bold text-primary-custom" id="p_name"
                                     style="font-size: 1.1rem;">-</span>
                             </div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3">
@@ -346,10 +283,10 @@
         </div>
 
         <div class="mb-4">
-            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm shadow-sm"
-                style="border-radius: 4px;">
+            <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" style="border-radius: 4px;"
+                onclick="window.history.back()">
                 <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
-            </a>
+            </button>
         </div>
 
         <div class="card form-card mb-5">
@@ -365,7 +302,6 @@
 
             <div class="card-body p-4">
                 <form id="screeningForm">
-
                     <div class="form-group mb-4">
                         <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
                         <input type="text" class="form-control form-control-lg" value="Pneumonia"
@@ -521,7 +457,7 @@
                             <button type="button" class="btn btn-outline-secondary mr-2" onclick="location.reload()">
                                 <i class="fa-solid fa-rotate-left"></i> ล้างค่า
                             </button>
-                            <button type="button" class="btn btn-info shadow-sm px-4" onclick="saveScreening()">
+                            <button type="button" class="btn btn-info shadow-sm px-4" onclick="processScreening()">
                                 <i class="fa-solid fa-floppy-disk mr-2"></i> ประมวลผลและบันทึก
                             </button>
                         </div>
@@ -538,11 +474,11 @@
                         <div id="highRiskOptions" class="d-none">
                             <div class="d-flex justify-content-center">
                                 <button type="button" class="btn btn-outline-secondary mr-3 px-4 py-2"
-                                    onclick="saveLater()">
+                                    onclick="saveLater(true)">
                                     <i class="fa-regular fa-clock mr-2"></i> ไว้ทำทีหลัง
                                 </button>
                                 <button type="button" class="btn btn-danger px-4 py-2 shadow-sm"
-                                    onclick="openAssessment()">
+                                    onclick="openAssessment(true)">
                                     <i class="fa-solid fa-user-doctor mr-2"></i> ประเมิน NAF ต่อทันที
                                 </button>
                             </div>
@@ -550,7 +486,8 @@
 
                         <div id="normalOptions" class="d-none">
                             <div class="d-flex justify-content-center">
-                                <button type="button" class="btn btn-success px-5 py-2 shadow-sm" onclick="saveLater()">
+                                <button type="button" class="btn btn-success px-5 py-2 shadow-sm"
+                                    onclick="saveLater(false)">
                                     <i class="fa-solid fa-check mr-2"></i> บันทึกและกลับหน้าหลัก
                                 </button>
                             </div>
@@ -567,16 +504,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // Mock Data
+        // Mock Data (For Display Info)
         const patientsData = {
             '6601122': { info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' } },
             '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08: 30 น.', phone: '081-111-1111' } },
             '6603321': { info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' } },
-            '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone:'084-444-4444' } },
-            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone:'082-222-2222' } }
+            '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' } },
+            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' } }
         };
 
         let currentHn = '';
+        let currentScore = 0;
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -616,7 +554,7 @@
             }
         }
 
-        function saveScreening() {
+        function processScreening() {
             let score = 0;
             for (let i = 1; i <= 4; i++) {
                 const radios = document.getElementsByName('q' + i);
@@ -624,6 +562,7 @@
                     if (r.checked && r.value === 'yes') score++;
                 }
             }
+            currentScore = score; // Store global
 
             const resultBox = document.getElementById('resultBox');
             const resultIcon = document.getElementById('resultIcon');
@@ -643,16 +582,16 @@
             normalOptions.classList.add('d-none');
 
             if (score >= 2) {
-                // High Risk Style
-                resultBox.classList.add('risk-high'); // สีเหลืองอ่อน
+                // High Risk
+                resultBox.classList.add('risk-high');
                 resultIcon.classList.add('fa-circle-exclamation', 'text-warning');
                 resultTitle.innerText = `คะแนนรวม: ${score} (มีความเสี่ยง)`;
                 resultTitle.classList.add('text-warning', 'text-dark');
                 resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2) ควรได้รับการประเมินภาวะโภชนาการ (NAF) เพิ่มเติม";
                 highRiskOptions.classList.remove('d-none');
             } else {
-                // Normal Style
-                resultBox.classList.add('risk-normal'); // สีเขียวอ่อน
+                // Normal
+                resultBox.classList.add('risk-normal');
                 resultIcon.classList.add('fa-check-circle', 'text-success');
                 resultTitle.innerText = `คะแนนรวม: ${score} (ปกติ)`;
                 resultTitle.classList.add('text-success');
@@ -661,12 +600,40 @@
             }
         }
 
-        function saveLater() {
+        // --- Save Data Logic ---
+        function saveToLocalStorage(isHighRisk) {
+            const dateObj = new Date();
+            const thaiDate = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+            const time = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+            const datetime = `${thaiDate} ${time}`;
+
+            const newRecord = {
+                hn: currentHn,
+                type: 'SPENT',
+                name: 'แบบคัดกรองภาวะโภชนาการ (SPENT)',
+                score: currentScore,
+                result: isHighRisk ? 'มีความเสี่ยง' : 'ปกติ',
+                assessor: 'เพชรลดา เชยเพ็ชร', // Current User
+                date: datetime,
+                timestamp: Date.now(), // For sorting
+                url: 'nutrition_screening_form.html'
+            };
+
+            // Get existing history or init empty
+            let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            history.push(newRecord);
+            localStorage.setItem('nas_patient_history', JSON.stringify(history));
+        }
+
+        function saveLater(isHighRisk) {
+            saveToLocalStorage(isHighRisk);
             alert('บันทึกข้อมูลเรียบร้อย');
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
 
-        function openAssessment() {
+        function openAssessment(isHighRisk) {
+            saveToLocalStorage(isHighRisk);
+            // Redirect to NAF form
             window.location.href = `nutrition_alert_form.html?hn=${currentHn}`;
         }
 
