@@ -110,7 +110,6 @@
             user-select: none;
         }
 
-        /* เพิ่ม Cursor Default ให้กับ Header ที่ Sort ไม่ได้ */
         .table th.no-sort {
             cursor: default;
         }
@@ -160,7 +159,7 @@
             text-align: center;
         }
 
-        /* Status Badges (Formal Style) */
+        /* Status Badges */
         .badge-formal {
             font-weight: 500;
             padding: 6px 10px;
@@ -190,6 +189,14 @@
             border: 1px solid #c3e6cb;
         }
 
+        /* เพิ่มสีแดงสำหรับ Severe (NAF C) */
+        .badge-formal-severe {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* สีเดิมสำหรับประเมินแล้วทั่วไป (ถ้าไม่มีคะแนน) */
         .badge-formal-assessed {
             background-color: #cce5ff;
             color: #004085;
@@ -327,17 +334,6 @@
     </nav>
 
     <div class="container-fluid px-lg-5 mt-4 mb-5">
-
-        <div class="d-flex align-items-center mb-4">
-            <div class="bg-light p-3 rounded mr-3 text-secondary">
-                <i class="fa-solid fa-hospital-user fa-2x"></i>
-            </div>
-            <div>
-                <h4 class="font-weight-bold text-dark mb-0">รายชื่อผู้ป่วยใน (In-patients)</h4>
-                <p class="text-muted mb-0 small">ค้นหาและจัดการข้อมูลการคัดกรองภาวะโภชนาการ</p>
-            </div>
-        </div>
-
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <div class="form-row align-items-end">
@@ -489,7 +485,7 @@
                 assessDate: '-',
                 status: 'normal', scoreVal: 0, nafScore: null
             },
-            // Example of assessed patient to demonstrate logic
+            // ตัวอย่างผู้ป่วยที่ประเมินแล้ว (Moderate - NAF B)
             {
                 id: 5,
                 bed: '106', ward: '2', departmentText: 'อายุรกรรมหญิง',
@@ -500,7 +496,20 @@
                 screenDate: '22 พ.ย. 67',
                 screenCount: 1,
                 assessDate: '23 ธ.ค. 68',
-                status: 'assessed', scoreVal: 9, nafScore: 'B'
+                status: 'assessed', scoreVal: 9, nafScore: 'B' // Score 9 = NAF B
+            },
+            // เพิ่มตัวอย่างผู้ป่วย Severe (NAF C)
+            {
+                id: 6,
+                bed: '201', ward: '1', departmentText: 'อายุรกรรมชาย',
+                hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: 80,
+                underlying: 'มะเร็งปอด',
+                doctor: 'นพ. สมศักดิ์ รักษาดี',
+                admitDate: '20 พ.ย. 67 11:00 น.',
+                screenDate: '21 พ.ย. 67',
+                screenCount: 1,
+                assessDate: '22 พ.ย. 67',
+                status: 'assessed', scoreVal: 15, nafScore: 'C' // Score 15 = NAF C
             }
         ];
 
@@ -517,7 +526,7 @@
             });
         });
 
-        // --- Logic (เหมือนเดิมแต่ปรับ HTML ใน render) ---
+        // --- Logic ---
         function handleSort(column) {
             if (currentSort.column === column) {
                 currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -589,7 +598,6 @@
             data.forEach((p, index) => {
                 let actionBtn = '';
 
-                // จัดการแสดงผลวันที่ Admit
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
                 const splitAdmit = p.admitDate.split(' ');
@@ -598,12 +606,11 @@
                     admitTimeShow = splitAdmit.slice(3).join(' ');
                 }
 
-                // คำนวณวันสำหรับ Re-screen (7 วัน)
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const daysRemaining = 7 - daysSinceScreen;
 
                 // -----------------------------------------------------------
-                // 1. ส่วนสถานะทางโภชนาการ (Nutrition Status) - ไม่ยุ่งกับการนับวัน
+                // 1. ส่วนสถานะทางโภชนาการ (ปรับปรุงเรื่องสี NAF A, B, C)
                 // -----------------------------------------------------------
                 let statusDisplay = '';
                 let dateDisplay = '';
@@ -620,45 +627,60 @@
                     dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">คัดกรอง: วันที่ ${p.screenDate}</div>`;
                 }
                 else if (p.status === 'assessed') {
-                    statusDisplay = `<span class="badge badge-formal badge-formal-assessed">ประเมินแล้ว (NAF: ${p.nafScore})</span>`;
+                    // Logic แบ่งสีตามคะแนน NAF
+                    let badgeClass = 'badge-formal-assessed';
+                    let statusText = `ประเมินแล้ว (NAF: ${p.nafScore})`;
+
+                    if (p.scoreVal !== null && p.scoreVal !== undefined) {
+                        if (p.scoreVal >= 11) {
+                            // NAF C: Severe
+                            badgeClass = 'badge-formal-severe'; // แดง
+                            statusText = `NAF C - Severe (${p.scoreVal})`;
+                        } else if (p.scoreVal >= 6) {
+                            // NAF B: Moderate
+                            badgeClass = 'badge-formal-risk'; // เหลือง (ใช้ class เดิมที่มีสีเหลือง)
+                            statusText = `NAF B - Moderate (${p.scoreVal})`;
+                        } else {
+                            // NAF A: Normal-Mild (0-5)
+                            badgeClass = 'badge-formal-normal'; // เขียว (ใช้ class เดิมที่มีสีเขียว)
+                            statusText = `NAF A - Normal (${p.scoreVal})`;
+                        }
+                    }
+
+                    statusDisplay = `<span class="badge badge-formal ${badgeClass}">${statusText}</span>`;
                     dateDisplay = `<div class="text-muted small mt-1" style="font-size: 0.75rem;">ประเมิน: วันที่ ${p.assessDate}</div>`;
                 }
 
                 // -----------------------------------------------------------
-                // 2. ส่วนการดำเนินการ (Next Action) - เพิ่มการนับวันตรงนี้
+                // 2. ส่วนการดำเนินการ (Next Action) - เปลี่ยน Link ตามโจทย์เดิม
                 // -----------------------------------------------------------
                 let nextActionDisplay = '';
                 let nextActionClass = 'text-action-normal';
-                let countdownDisplay = ''; // ข้อความนับถอยหลังที่จะโชว์ใต้ Action
+                let countdownDisplay = '';
 
                 if (p.status === 'wait_screen') {
                     nextActionDisplay = 'คัดกรองเบื้องต้น';
-                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 90px;" onclick="showToast('เริ่มคัดกรอง: ${p.name}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 90px;" onclick="window.location.href='nutrition_screening_form.html?hn=${p.hn}'"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 }
                 else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ประเมิน NAF';
                     nextActionClass = 'text-action-urgent';
-                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 90px;" onclick="showToast('ทำแบบประเมิน NAF: ${p.name}')"><i class="fas fa-user-md"></i> ประเมิน</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 90px;" onclick="window.location.href='nutrition_alert_form.html?hn=${p.hn}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 }
                 else if (p.status === 'normal') {
-                    // Logic นับวัน เฉพาะเคสปกติ
                     if (daysRemaining < 0) {
-                        // เกิน 7 วันแล้ว
                         nextActionDisplay = 'Re-screen';
                         nextActionClass = 'text-action-urgent';
                         countdownDisplay = `<div class="text-danger small font-weight-bold" style="font-size: 0.75rem;">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
+                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="window.location.href='nutrition_screening_form.html?hn=${p.hn}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
-                        // ครบ 7 วันพอดี
                         nextActionDisplay = 'Re-screen';
                         nextActionClass = 'text-action-warning';
                         countdownDisplay = `<div class="text-danger small font-weight-bold" style="font-size: 0.75rem;">ครบกำหนดวันนี้</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="showToast('Re-screen: ${p.name}')"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
+                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 90px;" onclick="window.location.href='nutrition_screening_form.html?hn=${p.hn}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
-                        // ยังไม่ครบ 7 วัน
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted';
-                        // แสดงวันถอยหลังตรงนี้
                         countdownDisplay = `<div class="text-muted small" style="font-size: 0.75rem;">Re-screen ใน ${daysRemaining} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-light text-muted" style="min-width: 90px;" disabled><i class="fas fa-check"></i> เรียบร้อย</button>`;
                     }
@@ -666,7 +688,7 @@
                 else if (p.status === 'assessed') {
                     nextActionDisplay = 'ติดตามผล';
                     nextActionClass = 'text-action-muted';
-                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="showToast('ดูแผนการรักษา: ${p.name}')"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 90px;" onclick="window.location.href='patient_profile.html?hn=${p.hn}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
                 const row = `
