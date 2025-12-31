@@ -19,7 +19,7 @@
             padding-top: 80px;
         }
 
-        /* Navbar Styling */
+        /* Navbar */
         .navbar-custom {
             height: 80px;
             background-color: white;
@@ -31,54 +31,34 @@
             width: auto;
         }
 
-        .brand-text h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2C3E50;
-            margin-bottom: 0;
-            line-height: 1.1;
-        }
-
-        .brand-text small {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-
-        /* User Profile Styling */
         .user-profile-btn {
             display: flex;
             align-items: center;
-            padding: 5px 15px 5px 5px;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            background-color: #fff;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
         }
 
-        .user-profile-btn:hover,
-        .show>.user-profile-btn {
+        .user-profile-btn:hover {
             background-color: #f8f9fa;
-            border-color: #e2e6ea;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .user-avatar {
             width: 38px;
             height: 38px;
-            background-color: #2C3E50;
-            color: white;
+            background-color: #e9ecef;
+            color: #495057;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.1rem;
+            margin-right: 10px;
         }
 
         .user-info {
-            margin-left: 10px;
-            margin-right: 15px;
             line-height: 1.2;
+            margin-right: 10px;
             text-align: left;
         }
 
@@ -90,11 +70,7 @@
 
         .user-role {
             font-size: 0.75rem;
-            color: #888;
-        }
-
-        .dropdown-toggle::after {
-            display: none;
+            color: #6c757d;
         }
 
         /* Form Specific */
@@ -144,7 +120,7 @@
         .result-box {
             display: none;
             margin-top: 30px;
-            padding: 40px 20px;
+            padding: 30px 20px 40px 20px;
             border-radius: 8px;
             border: 1px solid #ddd;
             text-align: center;
@@ -160,6 +136,30 @@
         .result-box.risk-normal {
             background-color: #d4edda;
             border-color: #c3e6cb;
+        }
+
+        /* Next Action Hint - ปรับระยะให้ชิดขึ้น */
+        .next-action-hint {
+            margin-top: 5px;
+            /* ลดระยะห่างด้านบนลง */
+            margin-bottom: 25px;
+            padding: 6px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .hint-normal {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .hint-risk {
+            background-color: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffe0b2;
         }
 
         .patient-icon-box {
@@ -193,11 +193,11 @@
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
-    
+
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 200px;">
                         <div class="user-profile-btn">
                             <div class="user-avatar">
                                 <i class="fa-solid fa-user-doctor"></i>
@@ -211,7 +211,6 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
                         style="border-radius: 12px; min-width: 250px;">
-    
                         <div class="dropdown-header bg-light border-bottom py-3">
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
@@ -227,7 +226,6 @@
                                 </div>
                             </div>
                         </div>
-    
                         <div class="p-2">
                             <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
                                 งานของฉัน</h6>
@@ -246,22 +244,18 @@
                                         style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
                             </a>
                         </div>
-    
                         <div class="dropdown-divider m-0"></div>
-    
                         <div class="p-2">
                             <a class="dropdown-item py-2 rounded" href="#">
                                 <i class="fa-solid fa-file-signature mr-2 text-warning"
                                     style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
                             </a>
                         </div>
-    
                         <div class="dropdown-divider m-0"></div>
-    
                         <div class="p-2">
                             <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
-                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px; text-align:center;"></i>
-                                ออกจากระบบ
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i> ออกจากระบบ
                             </a>
                         </div>
                     </div>
@@ -544,6 +538,12 @@
                         </div>
                     </div>
 
+                    <div class="form-group mb-4">
+                        <label class="section-label">4. หมายเหตุ / ข้อสังเกตเพิ่มเติม (Optional)</label>
+                        <textarea class="form-control" id="screenNotes" rows="3"
+                            placeholder="ระบุข้อมูลเพิ่มเติม (ถ้ามี)..."></textarea>
+                    </div>
+
                     <div class="form-row mt-4" id="saveScreeningRow">
                         <div class="col-12 text-right">
                             <button type="button" class="btn btn-outline-secondary mr-2" onclick="location.reload()">
@@ -561,7 +561,10 @@
                         </div>
 
                         <h3 class="font-weight-bold mb-2" id="resultTitle">...</h3>
-                        <p class="mb-4" id="resultDesc" style="font-size: 0.95rem;">...</p>
+
+                        <p class="mb-2" id="resultDesc" style="font-size: 0.95rem;">...</p>
+
+                        <div id="nextActionHint"></div>
 
                         <div id="highRiskOptions" class="d-none">
                             <div class="d-flex justify-content-center">
@@ -665,7 +668,7 @@
             const currentCount = baseCount + newCount + 1;
             document.getElementById('screenCount').value = currentCount;
 
-            // --- แก้ไขจุดนี้ครับ: ดึงชื่อจาก class .user-name แทน id ---
+            // ตั้งค่าชื่อผู้คัดกรองอัตโนมัติ
             const userNameEl = document.querySelector('.user-name');
             if (userNameEl) {
                 document.getElementById('screenAssessor').value = userNameEl.innerText.trim();
@@ -705,6 +708,8 @@
             const resultIcon = document.getElementById('resultIcon');
             const resultTitle = document.getElementById('resultTitle');
             const resultDesc = document.getElementById('resultDesc');
+            const nextActionHint = document.getElementById('nextActionHint'); // Subtle Hint
+
             const highRiskOptions = document.getElementById('highRiskOptions');
             const normalOptions = document.getElementById('normalOptions');
             const saveBtn = document.getElementById('saveScreeningRow');
@@ -714,22 +719,42 @@
 
             resultBox.className = 'result-box mt-4 p-4 rounded border text-center';
             resultIcon.className = 'fa-solid fa-4x mb-2';
+            nextActionHint.className = 'next-action-hint'; // Reset class
+
             highRiskOptions.classList.add('d-none');
             normalOptions.classList.add('d-none');
 
             if (score >= 2) {
+                // CASE: High Risk
                 resultBox.classList.add('risk-high');
                 resultIcon.classList.add('fa-circle-exclamation', 'text-warning');
                 resultTitle.innerText = `คะแนนรวม: ${score} (มีความเสี่ยง)`;
                 resultTitle.classList.add('text-warning', 'text-dark');
-                resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2) ควรได้รับการประเมินภาวะโภชนาการ (NAF) เพิ่มเติม";
+                resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2)";
+
+                // Subtle Hint Content
+                nextActionHint.classList.add('hint-risk');
+                nextActionHint.innerHTML = `<i class="far fa-bell mr-2"></i> <strong>ข้อแนะนำ:</strong> ทำการประเมินภาวะโภชนาการต่อ หรือปรึกษานักกำหนดอาหาร/ทีมโภชนบำบัด`;
+
                 highRiskOptions.classList.remove('d-none');
             } else {
+                // CASE: Normal
                 resultBox.classList.add('risk-normal');
                 resultIcon.classList.add('fa-check-circle', 'text-success');
                 resultTitle.innerText = `คะแนนรวม: ${score} (ปกติ)`;
                 resultTitle.classList.add('text-success');
-                resultDesc.innerText = "ไม่พบความเสี่ยงในขณะนี้ ให้คัดกรองซ้ำในอีก 7 วัน";
+                resultDesc.innerText = "ไม่พบความเสี่ยงในขณะนี้";
+
+                // Calculate Date + 7 Days
+                const nextWeek = new Date();
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                // Thai Date Format
+                const nextDateStr = nextWeek.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+
+                // Subtle Hint Content
+                nextActionHint.classList.add('hint-normal');
+                nextActionHint.innerHTML = `<i class="far fa-calendar-check mr-2"></i> <strong>ข้อแนะนำ:</strong> ให้คัดกรอง ซ้ำสัปดาห์ละ 1 ครั้ง ในช่วงที่อยู่โรงพยาบาล (ประมาณวันที่ ${nextDateStr})`;
+
                 normalOptions.classList.remove('d-none');
             }
         }
@@ -740,6 +765,7 @@
             const datetime = `${dateStr} ${timeStr}`;
 
             const assessorName = document.getElementById('screenAssessor').value;
+            const notes = document.getElementById('screenNotes').value;
 
             const newRecord = {
                 hn: currentHn,
@@ -748,6 +774,7 @@
                 score: currentScore,
                 result: isHighRisk ? 'มีความเสี่ยง' : 'ปกติ',
                 assessor: assessorName,
+                notes: notes,
                 date: datetime,
                 timestamp: Date.now(),
                 url: 'nutrition_screening_form.html'
