@@ -97,25 +97,7 @@
             display: none;
         }
 
-        /* --- Patient Info Card Style --- */
-        .patient-icon-box {
-            width: 120px;
-            height: 150px;
-            background-color: #e3f2fd;
-            color: #2C3E50;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            border: 1px solid #bbdefb;
-        }
-
-        .text-primary-custom {
-            color: #0d47a1;
-        }
-
-        /* --- Form Elements --- */
+        /* Form Specific */
         .form-card {
             border: none;
             border-radius: 8px;
@@ -151,10 +133,6 @@
             border-top: none;
         }
 
-        .table-screening tbody tr:hover {
-            background-color: #fdfdfe;
-        }
-
         .bmi-display {
             background-color: #eef2f5;
             font-weight: 700;
@@ -162,11 +140,7 @@
             text-align: center;
         }
 
-        .custom-control-input:checked~.custom-control-label::before {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-        }
-
+        /* Result Box */
         .result-box {
             display: none;
             margin-top: 30px;
@@ -187,6 +161,23 @@
             background-color: #d4edda;
             border-color: #c3e6cb;
         }
+
+        .patient-icon-box {
+            width: 120px;
+            height: 150px;
+            background-color: #e3f2fd;
+            color: #2C3E50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 1px solid #bbdefb;
+        }
+
+        .text-primary-custom {
+            color: #0d47a1;
+        }
     </style>
 </head>
 
@@ -202,6 +193,7 @@
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+    
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
@@ -217,6 +209,62 @@
                             <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px;">
+    
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+    
+                        <div class="dropdown-divider m-0"></div>
+    
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+    
+                        <div class="dropdown-divider m-0"></div>
+    
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px; text-align:center;"></i>
+                                ออกจากระบบ
+                            </a>
+                        </div>
+                    </div>
                 </li>
             </ul>
         </div>
@@ -290,13 +338,47 @@
         </div>
 
         <div class="card form-card mb-5">
-            <div class="form-header-box d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
-                    <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
+            <div class="form-header-box">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
+                        <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
+                    </div>
+                    <div class="text-right">
+                        <span class="badge badge-info p-2">Form ID: SPENT-01</span>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <span class="badge badge-info p-2">Form ID: SPENT-01</span>
+
+                <div class="form-row">
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white font-weight-bold text-muted">ครั้งที่</span>
+                            </div>
+                            <input type="text" class="form-control text-center font-weight-bold text-primary"
+                                id="screenCount" value="-" readonly style="background-color: #fff;">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white font-weight-bold text-muted"><i
+                                        class="far fa-calendar-alt mr-1"></i> วันที่</span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="screenDate" readonly
+                                style="background-color: #fff;">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white font-weight-bold text-muted"><i
+                                        class="far fa-clock mr-1"></i> เวลา</span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="screenTime" readonly
+                                style="background-color: #fff;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -504,13 +586,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // Mock Data (For Display Info)
         const patientsData = {
             '6601122': { info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' } },
-            '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08: 30 น.', phone: '081-111-1111' } },
+            '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' } },
             '6603321': { info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' } },
             '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' } },
-            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' } }
+            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' } },
+            '6609999': { info: { hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: '80 ปี', rights: 'ข้าราชการ', underlying: 'มะเร็งปอด', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 201', admit: '20 พ.ย. 67 11:00 น.', phone: '085-555-5555' } }
         };
 
         let currentHn = '';
@@ -533,7 +615,28 @@
                 document.getElementById('p_admit').innerText = p.admit;
                 document.getElementById('p_phone').innerText = p.phone;
             }
+
+            setScreeningDateTime();
         });
+
+        function setScreeningDateTime() {
+            const now = new Date();
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+            const thaiDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
+            const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+
+            document.getElementById('screenDate').value = thaiDate;
+            document.getElementById('screenTime').value = time;
+
+            // Calculate Count from LocalStorage
+            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const myHistory = history.filter(h => h.hn === currentHn && h.type === 'SPENT');
+
+            // ถ้ามีประวัติเก่าให้ +1 ถ้าไม่มีก็เป็นครั้งที่ 1
+            const nextCount = myHistory.length + 1;
+            document.getElementById('screenCount').value = nextCount;
+        }
 
         function calculateBMI() {
             const weight = parseFloat(document.getElementById('currentWeight').value);
@@ -562,7 +665,7 @@
                     if (r.checked && r.value === 'yes') score++;
                 }
             }
-            currentScore = score; // Store global
+            currentScore = score;
 
             const resultBox = document.getElementById('resultBox');
             const resultIcon = document.getElementById('resultIcon');
@@ -575,14 +678,12 @@
             resultBox.style.display = 'block';
             saveBtn.style.display = 'none';
 
-            // Reset
             resultBox.className = 'result-box mt-4 p-4 rounded border text-center';
             resultIcon.className = 'fa-solid fa-4x mb-2';
             highRiskOptions.classList.add('d-none');
             normalOptions.classList.add('d-none');
 
             if (score >= 2) {
-                // High Risk
                 resultBox.classList.add('risk-high');
                 resultIcon.classList.add('fa-circle-exclamation', 'text-warning');
                 resultTitle.innerText = `คะแนนรวม: ${score} (มีความเสี่ยง)`;
@@ -590,7 +691,6 @@
                 resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2) ควรได้รับการประเมินภาวะโภชนาการ (NAF) เพิ่มเติม";
                 highRiskOptions.classList.remove('d-none');
             } else {
-                // Normal
                 resultBox.classList.add('risk-normal');
                 resultIcon.classList.add('fa-check-circle', 'text-success');
                 resultTitle.innerText = `คะแนนรวม: ${score} (ปกติ)`;
@@ -600,12 +700,10 @@
             }
         }
 
-        // --- Save Data Logic ---
         function saveToLocalStorage(isHighRisk) {
-            const dateObj = new Date();
-            const thaiDate = dateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-            const time = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
-            const datetime = `${thaiDate} ${time}`;
+            const dateStr = document.getElementById('screenDate').value;
+            const timeStr = document.getElementById('screenTime').value;
+            const datetime = `${dateStr} ${timeStr}`;
 
             const newRecord = {
                 hn: currentHn,
@@ -613,13 +711,12 @@
                 name: 'แบบคัดกรองภาวะโภชนาการ (SPENT)',
                 score: currentScore,
                 result: isHighRisk ? 'มีความเสี่ยง' : 'ปกติ',
-                assessor: 'เพชรลดา เชยเพ็ชร', // Current User
+                assessor: 'เพชรลดา เชยเพ็ชร',
                 date: datetime,
-                timestamp: Date.now(), // For sorting
+                timestamp: Date.now(),
                 url: 'nutrition_screening_form.html'
             };
 
-            // Get existing history or init empty
             let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             history.push(newRecord);
             localStorage.setItem('nas_patient_history', JSON.stringify(history));
@@ -633,7 +730,6 @@
 
         function openAssessment(isHighRisk) {
             saveToLocalStorage(isHighRisk);
-            // Redirect to NAF form
             window.location.href = `nutrition_alert_form.html?hn=${currentHn}`;
         }
 
