@@ -138,10 +138,9 @@
             border-color: #c3e6cb;
         }
 
-        /* Next Action Hint - ปรับระยะให้ชิดขึ้น */
+        /* Next Action Hint */
         .next-action-hint {
             margin-top: 5px;
-            /* ลดระยะห่างด้านบนลง */
             margin-bottom: 25px;
             padding: 6px 15px;
             border-radius: 20px;
@@ -339,7 +338,8 @@
                         <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                     </div>
                     <div class="text-right">
-                        <span class="badge badge-info p-2">Form ID: SPENT-01</span>
+                        <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">Document No.:
+                            ...</span>
                     </div>
                 </div>
 
@@ -541,7 +541,7 @@
                     <div class="form-group mb-4">
                         <label class="section-label">4. หมายเหตุ / ข้อสังเกตเพิ่มเติม (Optional)</label>
                         <textarea class="form-control" id="screenNotes" rows="3"
-                            placeholder="ระบุข้อมูลเพิ่มเติม (ถ้ามี)..."></textarea>
+                            placeholder="ระบุข้อมูลเพิ่มเติมทางคลินิก (ถ้ามี)..."></textarea>
                     </div>
 
                     <div class="form-row mt-4" id="saveScreeningRow">
@@ -561,7 +561,6 @@
                         </div>
 
                         <h3 class="font-weight-bold mb-2" id="resultTitle">...</h3>
-
                         <p class="mb-2" id="resultDesc" style="font-size: 0.95rem;">...</p>
 
                         <div id="nextActionHint"></div>
@@ -628,6 +627,7 @@
 
         let currentHn = '';
         let currentScore = 0;
+        let currentDocNo = ''; // ตัวแปรเก็บเลขที่เอกสาร
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -673,6 +673,14 @@
             if (userNameEl) {
                 document.getElementById('screenAssessor').value = userNameEl.innerText.trim();
             }
+
+            // --- Generate Document No. ---
+            // Format: SPENT-HN-Count (e.g. SPENT-6601122-001)
+            const countStr = String(currentCount).padStart(3, '0');
+            currentDocNo = `SPENT-${currentHn}-${countStr}`;
+
+            // แสดง Document No. บนหน้าจอทันที (Draft)
+            document.getElementById('docIdBadge').innerText = `Document No.: ${currentDocNo}`;
         }
 
         function calculateBMI() {
@@ -708,7 +716,7 @@
             const resultIcon = document.getElementById('resultIcon');
             const resultTitle = document.getElementById('resultTitle');
             const resultDesc = document.getElementById('resultDesc');
-            const nextActionHint = document.getElementById('nextActionHint'); // Subtle Hint
+            const nextActionHint = document.getElementById('nextActionHint');
 
             const highRiskOptions = document.getElementById('highRiskOptions');
             const normalOptions = document.getElementById('normalOptions');
@@ -719,41 +727,35 @@
 
             resultBox.className = 'result-box mt-4 p-4 rounded border text-center';
             resultIcon.className = 'fa-solid fa-4x mb-2';
-            nextActionHint.className = 'next-action-hint'; // Reset class
+            nextActionHint.className = 'next-action-hint';
 
             highRiskOptions.classList.add('d-none');
             normalOptions.classList.add('d-none');
 
             if (score >= 2) {
-                // CASE: High Risk
                 resultBox.classList.add('risk-high');
                 resultIcon.classList.add('fa-circle-exclamation', 'text-warning');
                 resultTitle.innerText = `คะแนนรวม: ${score} (มีความเสี่ยง)`;
                 resultTitle.classList.add('text-warning', 'text-dark');
                 resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2)";
 
-                // Subtle Hint Content
                 nextActionHint.classList.add('hint-risk');
-                nextActionHint.innerHTML = `<i class="far fa-bell mr-2"></i> <strong>ข้อแนะนำ:</strong> ทำการประเมินภาวะโภชนาการต่อ หรือปรึกษานักกำหนดอาหาร/ทีมโภชนบำบัด`;
+                nextActionHint.innerHTML = `<i class="far fa-bell mr-2"></i> <strong>ข้อแนะนำ:</strong> ต้องได้รับการประเมินภาวะโภชนาการ (NAF) ภายใน 24 ชม.`;
 
                 highRiskOptions.classList.remove('d-none');
             } else {
-                // CASE: Normal
                 resultBox.classList.add('risk-normal');
                 resultIcon.classList.add('fa-check-circle', 'text-success');
                 resultTitle.innerText = `คะแนนรวม: ${score} (ปกติ)`;
                 resultTitle.classList.add('text-success');
                 resultDesc.innerText = "ไม่พบความเสี่ยงในขณะนี้";
 
-                // Calculate Date + 7 Days
                 const nextWeek = new Date();
                 nextWeek.setDate(nextWeek.getDate() + 7);
-                // Thai Date Format
                 const nextDateStr = nextWeek.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 
-                // Subtle Hint Content
                 nextActionHint.classList.add('hint-normal');
-                nextActionHint.innerHTML = `<i class="far fa-calendar-check mr-2"></i> <strong>ข้อแนะนำ:</strong> ให้คัดกรอง ซ้ำสัปดาห์ละ 1 ครั้ง ในช่วงที่อยู่โรงพยาบาล (ประมาณวันที่ ${nextDateStr})`;
+                nextActionHint.innerHTML = `<i class="far fa-calendar-check mr-2"></i> <strong>ข้อแนะนำ:</strong> ควรคัดกรองซ้ำในอีก 7 วัน (ประมาณวันที่ ${nextDateStr})`;
 
                 normalOptions.classList.remove('d-none');
             }
@@ -775,6 +777,7 @@
                 result: isHighRisk ? 'มีความเสี่ยง' : 'ปกติ',
                 assessor: assessorName,
                 notes: notes,
+                docNo: currentDocNo, // บันทึกเลขที่เอกสาร
                 date: datetime,
                 timestamp: Date.now(),
                 url: 'nutrition_screening_form.html'
@@ -787,7 +790,7 @@
 
         function saveLater(isHighRisk) {
             saveToLocalStorage(isHighRisk);
-            alert('บันทึกข้อมูลเรียบร้อย');
+            alert(`บันทึกข้อมูลเรียบร้อย (Ref: ${currentDocNo})`);
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
 
