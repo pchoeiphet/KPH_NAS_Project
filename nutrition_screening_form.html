@@ -357,7 +357,7 @@
                                 <span class="input-group-text bg-white font-weight-bold text-muted">ครั้งที่</span>
                             </div>
                             <input type="text" class="form-control text-center font-weight-bold text-primary"
-                                id="screenCount" value="-" readonly style="background-color: #fff;">
+                                id="screenCount" value="-" readonly style="background-color: #fff; font-size: 1.1rem;">
                         </div>
                     </div>
                     <div class="col-md-4 mb-2 mb-md-0">
@@ -387,8 +387,8 @@
                 <form id="screeningForm">
                     <div class="form-group mb-4">
                         <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
-                        <input type="text" class="form-control form-control-lg" placeholder="ระบุการวินิจฉัยโรค..."
-                            style="font-weight: 500;">
+                        <input type="text" class="form-control form-control-lg" value="Pneumonia"
+                            placeholder="ระบุการวินิจฉัยโรค..." style="font-weight: 500;">
                     </div>
 
                     <hr class="my-4" style="border-top: 1px dashed #dee2e6;">
@@ -587,13 +587,32 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
+        // ข้อมูลผู้ป่วยพร้อมประวัติการคัดกรองเก่า (historyCount)
         const patientsData = {
-            '6601122': { info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' } },
-            '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' } },
-            '6603321': { info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' } },
-            '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' } },
-            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' } },
-            '6609999': { info: { hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: '80 ปี', rights: 'ข้าราชการ', underlying: 'มะเร็งปอด', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 201', admit: '20 พ.ย. 67 11:00 น.', phone: '085-555-5555' } }
+            '6601122': {
+                info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' },
+                historyCount: 1 // เคยทำมาแล้ว 1 ครั้ง
+            },
+            '6604589': {
+                info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' },
+                historyCount: 2 // เคยทำมาแล้ว 2 ครั้ง
+            },
+            '6603321': {
+                info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' },
+                historyCount: 1
+            },
+            '6609888': {
+                info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' },
+                historyCount: 1
+            },
+            '6605112': {
+                info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' },
+                historyCount: 0 // ยังไม่เคยทำ
+            },
+            '6609999': {
+                info: { hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: '80 ปี', rights: 'ข้าราชการ', underlying: 'มะเร็งปอด', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 201', admit: '20 พ.ย. 67 11:00 น.', phone: '085-555-5555' },
+                historyCount: 1
+            }
         };
 
         let currentHn = '';
@@ -630,13 +649,18 @@
             document.getElementById('screenDate').value = thaiDate;
             document.getElementById('screenTime').value = time;
 
-            // Calculate Count from LocalStorage
-            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
-            const myHistory = history.filter(h => h.hn === currentHn && h.type === 'SPENT');
+            // --- Logic คำนวณครั้งที่ ---
+            // 1. ดึงประวัติเก่าจาก Mock Data
+            const baseCount = patientsData[currentHn]?.historyCount || 0;
 
-            // ถ้ามีประวัติเก่าให้ +1 ถ้าไม่มีก็เป็นครั้งที่ 1
-            const nextCount = myHistory.length + 1;
-            document.getElementById('screenCount').value = nextCount;
+            // 2. ดึงประวัติใหม่จาก LocalStorage
+            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const newCount = history.filter(h => h.hn === currentHn && h.type === 'SPENT').length;
+
+            // 3. รวมกัน + 1 (ครั้งปัจจุบัน)
+            const currentCount = baseCount + newCount + 1;
+
+            document.getElementById('screenCount').value = currentCount;
         }
 
         function calculateBMI() {
