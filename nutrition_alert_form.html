@@ -182,7 +182,7 @@
             color: #33691e;
         }
 
-       .risk-mod {
+        .risk-mod {
             background-color: #fff9c4;
             border-color: #fbc02d;
             color: #f57f17;
@@ -193,6 +193,7 @@
             border-color: #e57373;
             color: #c62828;
         }
+
         .input-error {
             border-color: #dc3545;
             background-color: #fff;
@@ -315,6 +316,38 @@
         .hidden-section {
             display: none;
         }
+
+        .symptom-box {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .symptom-category-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .symptom-item {
+            margin-bottom: 8px;
+        }
+
+        .symptom-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .symptom-score {
+            float: right;
+            font-weight: 600;
+            color: #0056b3;
+            font-size: 0.85rem;
+        }
+    </style>
     </style>
 </head>
 
@@ -559,7 +592,7 @@
                                     <label class="custom-control-label" for="source3">อื่นๆ</label>
                                 </div>
                                 <input type="text" class="form-control form-control-sm" id="otherSourceText"
-                                    placeholder="ระบุ..." disabled style="max-width: 300px;">
+                                    placeholder="ระบุอื่นๆ..." disabled style="max-width: 300px;">
                             </div>
                         </div>
                     </div>
@@ -920,7 +953,85 @@
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">8. ความรุนแรงของโรค (Severity of Disease)</label>
+                        <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา (เลือกได้มากกว่า 1
+                            ข้อ)</label>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check" id="symChoke"
+                                            value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symChoke">สำลัก <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check" id="symDiff"
+                                            value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symDiff">เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check"
+                                            id="symNormalSwallow" value="0" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symNormalSwallow">ปกติ <span
+                                                class="symptom-score">(0 คะแนน)</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check"
+                                            id="symDiarrhea" value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symDiarrhea">ท้องเสีย <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check" id="symPain"
+                                            value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symPain">ปวดท้อง <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check"
+                                            id="symNormalGI" value="0" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symNormalGI">ปกติ <span
+                                                class="symptom-score">(0 คะแนน)</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check" id="symVomit"
+                                            value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symVomit">อาเจียน <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check" id="symNausea"
+                                            value="2" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symNausea">คลื่นไส้ <span
+                                                class="symptom-score">(2 คะแนน)</span></label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox" class="custom-control-input symptom-check"
+                                            id="symNormalEat" value="0" onchange="calculateScore()">
+                                        <label class="custom-control-label w-100" for="symNormalEat">ปกติ <span
+                                                class="symptom-score">(0 คะแนน)</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">9. ความรุนแรงของโรค (Severity of Disease)</label>
                         <div class="radio-group-container" style="gap: 5px;">
                             <div class="custom-control custom-radio">
                                 <input type="radio" id="sevNone" name="diseaseSeverity" class="custom-control-input"
@@ -1054,7 +1165,7 @@
             if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
 
             const baseCount = patientsData[currentHn]?.historyCount || 0;
-            const currentCount = baseCount + 1; // Simplify for demo
+            const currentCount = baseCount + 1;
             document.getElementById('assessCount').value = currentCount;
         }
 
@@ -1199,14 +1310,19 @@
             const wcRadios = document.getElementsByName('weightChange');
             for (let r of wcRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 4. Food Intake (Type & Amount)
+            // 4. Food Intake
             const typeRadios = document.getElementsByName('foodType');
             for (let r of typeRadios) { if (r.checked) total += parseInt(r.value); }
-
             const amtRadios = document.getElementsByName('foodAmount');
             for (let r of amtRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 5. Severity
+            // 5. Symptoms (Checkboxes)
+            const symChecks = document.querySelectorAll('.symptom-check:checked');
+            symChecks.forEach(chk => {
+                total += parseInt(chk.value);
+            });
+
+            // 6. Severity
             const sevRadios = document.getElementsByName('diseaseSeverity');
             for (let r of sevRadios) { if (r.checked) total += parseInt(r.value); }
 
