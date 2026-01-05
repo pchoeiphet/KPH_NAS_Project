@@ -658,12 +658,12 @@
                                     <div class="custom-control custom-radio custom-control-inline mr-4">
                                         <input type="radio" id="wmLying" name="weightMethod"
                                             class="custom-control-input" value="1" onchange="calculateScore()">
-                                        <label class="custom-control-label" for="wmLying">ท่านอน (1 คะแนน)</label>
+                                        <label class="custom-control-label" for="wmLying">ชั่งในท่านอน (1 คะแนน)</label>
                                     </div>
                                     <div class="custom-control custom-radio custom-control-inline mr-4">
                                         <input type="radio" id="wmStanding" name="weightMethod"
                                             class="custom-control-input" value="0" checked onchange="calculateScore()">
-                                        <label class="custom-control-label" for="wmStanding">ท่ายืน (0 คะแนน)</label>
+                                        <label class="custom-control-label" for="wmStanding">ชั่งในท่ายืน (0 คะแนน)</label>
                                     </div>
                                     <div class="custom-control custom-radio custom-control-inline mr-4">
                                         <input type="radio" id="wmCannot" name="weightMethod"
@@ -677,7 +677,8 @@
                                     </div>
                                 </div>
                                 <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2 คะแนน),
+                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2
+                                    คะแนน),
                                     17-18 (1 คะแนน),
                                     18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
                                 </small>
@@ -810,8 +811,37 @@
 
                     <hr class="my-4">
 
+                    <div class="form-group mb-4">
+                        <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change in 4 weeks)</label>
+                        <div class="radio-group-container">
+                            <div class="custom-control custom-radio custom-control-inline mr-4">
+                                <input type="radio" id="wcDecrease" name="weightChange" class="custom-control-input"
+                                    value="2" onchange="calculateScore()">
+                                <label class="custom-control-label" for="wcDecrease">ลดลง / ผอมลง (2 คะแนน)</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline mr-4">
+                                <input type="radio" id="wcIncrease" name="weightChange" class="custom-control-input"
+                                    value="1" onchange="calculateScore()">
+                                <label class="custom-control-label" for="wcIncrease">เพิ่มขึ้น / อ้วนขึ้น (1
+                                    คะแนน)</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline mr-4">
+                                <input type="radio" id="wcUnknown" name="weightChange" class="custom-control-input"
+                                    value="0" onchange="calculateScore()">
+                                <label class="custom-control-label" for="wcUnknown">ไม่ทราบ (0 คะแนน)</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="wcSame" name="weightChange" class="custom-control-input"
+                                    value="0" checked onchange="calculateScore()">
+                                <label class="custom-control-label" for="wcSame">คงเดิม (0 คะแนน)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
                     <div class="mb-4">
-                        <label class="section-label">6. การประเมินค่าคะแนนอื่นๆ (Assessment Cont.)</label>
+                        <label class="section-label">7. การประเมินค่าคะแนนอื่นๆ (Assessment Cont.)</label>
                         <div class="table-responsive border rounded">
                             <table class="table table-naf mb-0">
                                 <thead class="thead-light">
@@ -821,22 +851,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="align-middle">
-                                            <strong>Weight Loss (น้ำหนักลดลง)</strong><br>
-                                            <small class="text-muted">ไม่ลด (0) | ลดเล็กน้อย (1) | ลดปานกลาง (2) | ลดมาก
-                                                (3)</small>
-                                        </td>
-                                        <td class="text-center align-middle">
-                                            <select class="form-control score-selector mx-auto" style="width: 100px;"
-                                                onchange="calculateScore()">
-                                                <option value="0">0</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                            </select>
-                                        </td>
-                                    </tr>
                                     <tr>
                                         <td class="align-middle">
                                             <strong>Intake (ปริมาณอาหารที่กินได้)</strong><br>
@@ -899,7 +913,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // Mock Patient Data (Updated Structure)
         const patientsData = {
             '6601122': {
                 info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' },
@@ -928,6 +941,8 @@
         };
 
         let currentHn = '';
+        let currentBmiScore = 0;
+        let currentLabScore = 0;
 
         document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(window.location.search);
@@ -946,6 +961,7 @@
                 document.getElementById('p_admit').innerText = p.admit;
                 document.getElementById('p_phone').innerText = p.phone;
             }
+
 
             setAssessmentDateTime();
         });
@@ -1016,25 +1032,21 @@
             const inputTLC = document.getElementById('valTLC');
 
             if (isAlbumin) {
-                // Activate Albumin
                 rowAlbumin.classList.add('lab-row-active');
                 rowAlbumin.classList.remove('lab-row-inactive');
                 inputAlb.disabled = false;
                 inputAlb.focus();
 
-                // Deactivate TLC
                 rowTLC.classList.remove('lab-row-active');
                 rowTLC.classList.add('lab-row-inactive');
                 inputTLC.disabled = true;
                 inputTLC.value = '';
             } else if (isTLC) {
-                // Activate TLC
                 rowTLC.classList.add('lab-row-active');
                 rowTLC.classList.remove('lab-row-inactive');
                 inputTLC.disabled = false;
                 inputTLC.focus();
 
-                // Deactivate Albumin
                 rowAlbumin.classList.remove('lab-row-active');
                 rowAlbumin.classList.add('lab-row-inactive');
                 inputAlb.disabled = true;
@@ -1101,7 +1113,6 @@
         function calculateScore() {
             let total = 0;
 
-            // 1. BMI/Lab
             if (document.getElementById('unknownWeight').checked) {
                 total += currentLabScore;
             } else {
@@ -1112,13 +1123,16 @@
                 }
             }
 
-            // 2. Body Shape
             const shapeRadios = document.getElementsByName('bodyShape');
             for (let r of shapeRadios) {
                 if (r.checked) total += parseInt(r.value);
             }
 
-            // 3. Other Selectors
+            const wcRadios = document.getElementsByName('weightChange');
+            for (let r of wcRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+
             document.querySelectorAll('.score-selector').forEach(sel => {
                 total += parseInt(sel.value);
             });
@@ -1150,7 +1164,6 @@
         }
 
         function saveData() {
-            // Validation
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
@@ -1176,7 +1189,6 @@
             const datetime = `${dateStr} ${timeStr}`;
             const assessorName = document.getElementById('assessAssessor').value;
 
-            // Details based on mode
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
             let weightDetails = {};
             if (isUnknownWeight) {
@@ -1210,7 +1222,8 @@
                     source: source,
                     anthropometry: { height: h, length: l, armSpan: a, reported: r },
                     assessment: weightDetails,
-                    bodyShape: document.querySelector('input[name="bodyShape"]:checked')?.nextElementSibling.innerText
+                    bodyShape: document.querySelector('input[name="bodyShape"]:checked')?.nextElementSibling.innerText,
+                    weightChange: document.querySelector('input[name="weightChange"]:checked')?.nextElementSibling.innerText
                 }
             };
 
