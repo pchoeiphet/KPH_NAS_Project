@@ -205,18 +205,36 @@
             background-color: #fff8f8;
         }
 
-        /* Styling for Radio Group Container */
+        /* BMI Display */
+        .bmi-display-box {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Radio Group Container */
         .radio-group-container {
             background-color: #fff;
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
             padding: 0.375rem 0.75rem;
-            /* Match form-control padding */
             min-height: calc(1.5em + 0.75rem + 2px);
-            /* Match form-control height */
             display: flex;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        /* Lab Criteria Box */
+        .lab-criteria-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -473,8 +491,7 @@
                         <label class="section-label">3. ส่วนสูง/ความยาวตัว/ความยาวช่วงแขนจากปลายนิ้วกลางทั้ง 2 ข้าง (Arm
                             span)</label>
                         <p class="text-muted small mb-2"><i class="fas fa-info-circle mr-1"></i>
-                            กรุณากรอกข้อมูลอย่างน้อย 1 ช่อง
-                            (เพื่อใช้คำนวณ BMI ในข้อถัดไป)</p>
+                            กรุณากรอกข้อมูลอย่างน้อย 1 ช่อง</p>
 
                         <div class="row" id="anthroSection">
                             <div class="col-md-6 col-lg-3 mb-3">
@@ -523,62 +540,146 @@
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">4. น้ำหนักและค่าดัชนีมวลกาย (Weight & BMI)</label>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="section-label mb-0">4. น้ำหนักและค่าดัชนีมวลกาย (Weight & BMI)</label>
 
-                        <div class="row">
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control" id="currentWeight"
-                                        placeholder="0.0" oninput="calculateBMI()">
-                                    <div class="input-group-append"><span class="input-group-text">กก.</span></div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="unknownWeight"
+                                    onchange="toggleWeightMode()">
+                                <label class="custom-control-label text-danger font-weight-bold" for="unknownWeight">
+                                    ไม่ทราบน้ำหนัก (ใช้ผล Albumin หรือ TLC)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="standardWeightSection">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control" id="currentWeight"
+                                            placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text">กก.</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bmi-display-box" id="bmiValue" value="-"
+                                            readonly>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text small" id="bmiScoreText"
+                                                style="background-color: #e8f5e9; font-weight: 500;">Score: 0</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control font-weight-bold text-success" id="bmiValue"
-                                        value="-" readonly style="background-color: #e8f5e9;">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text small" id="bmiScoreText"
-                                            style="background-color: #e8f5e9; font-weight: 500;">Score: 0</span>
+                            <div class="mb-3">
+                                <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Measurement
+                                    Method)</label>
+                                <div class="radio-group-container">
+                                    <div class="custom-control custom-radio custom-control-inline mr-4">
+                                        <input type="radio" id="wmLying" name="weightMethod"
+                                            class="custom-control-input" value="1" onchange="calculateScore()">
+                                        <label class="custom-control-label" for="wmLying">ชั่งในท่านอน (1 คะแนน)</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline mr-4">
+                                        <input type="radio" id="wmStanding" name="weightMethod"
+                                            class="custom-control-input" value="0" checked onchange="calculateScore()">
+                                        <label class="custom-control-label" for="wmStanding">ชั่งในท่ายืน (0 คะแนน)</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline mr-4">
+                                        <input type="radio" id="wmCannot" name="weightMethod"
+                                            class="custom-control-input" value="0" onchange="calculateScore()">
+                                        <label class="custom-control-label" for="wmCannot">ชั่งไม่ได้ (0 คะแนน)</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="wmReported" name="weightMethod"
+                                            class="custom-control-input" value="0" onchange="calculateScore()">
+                                        <label class="custom-control-label" for="wmReported">ญาติบอก (0 คะแนน)</label>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์คะแนน BMI:</strong> &lt; 17
+                                    (2 คะแนน), 17-18 (1 คะแนน),
+                                    18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
+                                </small>
+                            </div>
+                        </div>
+
+                        <div id="labSection" class="hidden-section">
+                            <div class="card bg-light border-warning mb-3">
+                                <div class="card-body p-3">
+                                    <h6 class="text-warning font-weight-bold mb-3"><i
+                                            class="fas fa-flask mr-2"></i>เลือกผลเลือดที่ต้องการใช้ประเมิน
+                                        (เลือกอย่างใดอย่างหนึ่ง):
+                                    </h6>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio" id="useAlbumin" name="labChoice"
+                                                    class="custom-control-input" value="albumin"
+                                                    onchange="toggleLabInputs()">
+                                                <label class="custom-control-label font-weight-bold text-dark"
+                                                    for="useAlbumin">1.
+                                                    Albumin</label>
+                                            </div>
+                                            <div id="albuminInputGroup" style="opacity: 0.5; pointer-events: none;">
+                                                <div class="input-group input-group-sm mb-1 ml-4"
+                                                    style="max-width: 250px;">
+                                                    <input type="number" step="0.1" class="form-control" id="valAlbumin"
+                                                        placeholder="ระบุค่า..." oninput="calculateLabScore()">
+                                                    <div class="input-group-append"><span
+                                                            class="input-group-text">g/dl</span></div>
+                                                </div>
+                                                <div class="lab-criteria-text ml-4">
+                                                    <div>&le; 2.5 (3 คะแนน)</div>
+                                                    <div>2.6 - 2.9 (2 คะแนน)</div>
+                                                    <div>3.0 - 3.5 (1 คะแนน)</div>
+                                                    <div>&gt; 3.5 (0 คะแนน)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio" id="useTLC" name="labChoice"
+                                                    class="custom-control-input" value="tlc"
+                                                    onchange="toggleLabInputs()">
+                                                <label class="custom-control-label font-weight-bold text-dark"
+                                                    for="useTLC">2. Total
+                                                    Lymphocyte Count (TLC)</label>
+                                            </div>
+                                            <div id="tlcInputGroup" style="opacity: 0.5; pointer-events: none;">
+                                                <div class="input-group input-group-sm mb-1 ml-4"
+                                                    style="max-width: 250px;">
+                                                    <input type="number" class="form-control" id="valTLC"
+                                                        placeholder="ระบุค่า..." oninput="calculateLabScore()">
+                                                    <div class="input-group-append"><span
+                                                            class="input-group-text">cells/mm²</span>
+                                                    </div>
+                                                </div>
+                                                <div class="lab-criteria-text ml-4">
+                                                    <div>&le; 1000 (3 คะแนน)</div>
+                                                    <div>1001 - 1200 (2 คะแนน)</div>
+                                                    <div>1201 - 1500 (1 คะแนน)</div>
+                                                    <div>&gt; 1500 (0 คะแนน)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center border-top pt-2 mt-2">
+                                        <span class="badge badge-warning p-2 text-dark" style="font-size: 1rem;"
+                                            id="labScoreText">คะแนนจากผลเลือด: 0</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Measurement
-                                Method)</label>
-                            <div class="radio-group-container">
-                                <div class="custom-control custom-radio custom-control-inline mr-4">
-                                    <input type="radio" id="wmLying" name="weightMethod" class="custom-control-input"
-                                        value="1" onchange="calculateScore()">
-                                    <label class="custom-control-label" for="wmLying">ชั่งในท่านอน (1 คะแนน)</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline mr-4">
-                                    <input type="radio" id="wmStanding" name="weightMethod" class="custom-control-input"
-                                        value="0" checked onchange="calculateScore()">
-                                    <label class="custom-control-label" for="wmStanding">ชั่งในท่ายืน (0 คะแนน)</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline mr-4">
-                                    <input type="radio" id="wmCannot" name="weightMethod" class="custom-control-input"
-                                        value="0" onchange="calculateScore()">
-                                    <label class="custom-control-label" for="wmCannot">ชั่งไม่ได้ (0 คะแนน)</label>
-                                </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="wmReported" name="weightMethod" class="custom-control-input"
-                                        value="0" onchange="calculateScore()">
-                                    <label class="custom-control-label" for="wmReported">ญาติบอก (0 คะแนน)</label>
-                                </div>
-                            </div>
-                            <small class="text-muted mt-1 d-block">
-                                <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์คะแนน BMI:</strong> &lt; 17 (2 คะแนน),
-                                17-18 (1 คะแนน),
-                                18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
-                            </small>
-                        </div>
                     </div>
 
                     <hr class="my-4">
@@ -749,17 +850,81 @@
         function toggleOtherSource() {
             const isOther = document.getElementById('source3').checked;
             const otherInput = document.getElementById('otherSourceText');
+            if (isOther) { otherInput.disabled = false; otherInput.focus(); }
+            else { otherInput.disabled = true; otherInput.value = ''; }
+        }
 
-            if (isOther) {
-                otherInput.disabled = false;
-                otherInput.focus();
+        // --- Logic for Weight Mode Toggle ---
+        function toggleWeightMode() {
+            const isUnknown = document.getElementById('unknownWeight').checked;
+            const standardSection = document.getElementById('standardWeightSection');
+            const labSection = document.getElementById('labSection');
+
+            if (isUnknown) {
+                standardSection.classList.add('hidden-section');
+                labSection.classList.remove('hidden-section');
+                currentBmiScore = 0; // Reset BMI Score
             } else {
-                otherInput.disabled = true;
-                otherInput.value = '';
+                standardSection.classList.remove('hidden-section');
+                labSection.classList.add('hidden-section');
+                currentLabScore = 0; // Reset Lab Score
+                calculateBMI(); // Recalculate BMI
             }
+            calculateScore();
+        }
+
+        function toggleLabInputs() {
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const isTLC = document.getElementById('useTLC').checked;
+
+            const albGroup = document.getElementById('albuminInputGroup');
+            const tlcGroup = document.getElementById('tlcInputGroup');
+
+            // Toggle Opacity/Pointer events instead of hidden to keep layout stable
+            if (isAlbumin) {
+                albGroup.style.opacity = '1';
+                albGroup.style.pointerEvents = 'auto';
+                tlcGroup.style.opacity = '0.3';
+                tlcGroup.style.pointerEvents = 'none';
+                document.getElementById('valTLC').value = ''; // Clear other input
+            } else if (isTLC) {
+                tlcGroup.style.opacity = '1';
+                tlcGroup.style.pointerEvents = 'auto';
+                albGroup.style.opacity = '0.3';
+                albGroup.style.pointerEvents = 'none';
+                document.getElementById('valAlbumin').value = ''; // Clear other input
+            }
+
+            calculateLabScore();
+        }
+
+        function calculateLabScore() {
+            let score = 0;
+            if (document.getElementById('useAlbumin').checked) {
+                const val = parseFloat(document.getElementById('valAlbumin').value);
+                if (!isNaN(val)) {
+                    if (val <= 2.5) score = 3;
+                    else if (val <= 2.9) score = 2;
+                    else if (val <= 3.5) score = 1;
+                    else score = 0;
+                }
+            } else if (document.getElementById('useTLC').checked) {
+                const val = parseFloat(document.getElementById('valTLC').value);
+                if (!isNaN(val)) {
+                    if (val <= 1000) score = 3;
+                    else if (val <= 1200) score = 2;
+                    else if (val <= 1500) score = 1;
+                    else score = 0;
+                }
+            }
+            currentLabScore = score;
+            document.getElementById('labScoreText').innerText = `คะแนนจากผลเลือด: ${score}`;
+            calculateScore();
         }
 
         function calculateBMI() {
+            if (document.getElementById('unknownWeight').checked) return;
+
             let h = parseFloat(document.getElementById('anthroHeight').value);
             if (!h) h = parseFloat(document.getElementById('anthroLength').value);
             if (!h) h = parseFloat(document.getElementById('anthroArmSpan').value);
@@ -790,11 +955,15 @@
 
         function calculateScore() {
             let total = 0;
-            total += currentBmiScore;
 
-            const methodRadios = document.getElementsByName('weightMethod');
-            for (let r of methodRadios) {
-                if (r.checked) total += parseInt(r.value);
+            if (document.getElementById('unknownWeight').checked) {
+                total += currentLabScore;
+            } else {
+                total += currentBmiScore;
+                const methodRadios = document.getElementsByName('weightMethod');
+                for (let r of methodRadios) {
+                    if (r.checked) total += parseInt(r.value);
+                }
             }
 
             document.querySelectorAll('.score-selector').forEach(sel => {
@@ -828,6 +997,7 @@
         }
 
         function saveData() {
+            // Validation
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
@@ -853,6 +1023,25 @@
             const datetime = `${dateStr} ${timeStr}`;
             const assessorName = document.getElementById('assessAssessor').value;
 
+            // Details based on mode
+            const isUnknownWeight = document.getElementById('unknownWeight').checked;
+            let weightDetails = {};
+            if (isUnknownWeight) {
+                weightDetails = {
+                    mode: 'lab',
+                    labType: document.querySelector('input[name="labChoice"]:checked')?.value || '-',
+                    valAlbumin: document.getElementById('valAlbumin').value,
+                    valTLC: document.getElementById('valTLC').value
+                };
+            } else {
+                weightDetails = {
+                    mode: 'bmi',
+                    weight: document.getElementById('currentWeight').value,
+                    bmi: document.getElementById('bmiValue').value,
+                    method: document.querySelector('input[name="weightMethod"]:checked')?.nextElementSibling.innerText
+                };
+            }
+
             const record = {
                 hn: currentHn,
                 type: 'NAF',
@@ -866,11 +1055,8 @@
                 details: {
                     diagnosis: diagnosis,
                     source: source,
-                    anthropometry: {
-                        height: h, length: l, armSpan: a, reported: r
-                    },
-                    weight: document.getElementById('currentWeight').value,
-                    bmi: document.getElementById('bmiValue').value
+                    anthropometry: { height: h, length: l, armSpan: a, reported: r },
+                    assessment: weightDetails
                 }
             };
 
