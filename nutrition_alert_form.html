@@ -968,7 +968,8 @@
                                     <div class="custom-control custom-checkbox symptom-item">
                                         <input type="checkbox" class="custom-control-input symptom-check" id="symDiff"
                                             value="2" onchange="calculateScore()">
-                                        <label class="custom-control-label w-100" for="symDiff">เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง <span
+                                        <label class="custom-control-label w-100"
+                                            for="symDiff">เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง <span
                                                 class="symptom-score">(2 คะแนน)</span></label>
                                     </div>
                                     <div class="custom-control custom-checkbox symptom-item">
@@ -1019,7 +1020,7 @@
                                     </div>
                                     <div class="custom-control custom-checkbox symptom-item">
                                         <input type="checkbox" class="custom-control-input symptom-check"
-                                            id="symNormalEat" value="0" onchange="calculateScore()">
+                                            id="symNormalEat" value="0"  onchange="calculateScore()">
                                         <label class="custom-control-label w-100" for="symNormalEat">ปกติ <span
                                                 class="symptom-score">(0 คะแนน)</span></label>
                                     </div>
@@ -1031,7 +1032,35 @@
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">9. ความรุนแรงของโรค (Severity of Disease)</label>
+                        <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
+                        <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="accessBedridden" name="foodAccess" class="custom-control-input"
+                                    value="2" onchange="calculateScore()">
+                                <label class="custom-control-label" for="accessBedridden">นอนติดเตียง (2 คะแนน)</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="accessAssist" name="foodAccess" class="custom-control-input"
+                                    value="1" onchange="calculateScore()">
+                                <label class="custom-control-label" for="accessAssist">ต้องมีผู้ช่วยบ้าง (1 คะแนน)</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="accessSedentary" name="foodAccess" class="custom-control-input"
+                                    value="0" onchange="calculateScore()">
+                                <label class="custom-control-label" for="accessSedentary">นั่งๆนอนๆ (0 คะแนน )</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="accessNormal" name="foodAccess" class="custom-control-input"
+                                    value="0" checked onchange="calculateScore()">
+                                <label class="custom-control-label" for="accessNormal">ปกติ (0 คะแนน)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">10. ความรุนแรงของโรค (Severity of Disease)</label>
                         <div class="radio-group-container" style="gap: 5px;">
                             <div class="custom-control custom-radio">
                                 <input type="radio" id="sevNone" name="diseaseSeverity" class="custom-control-input"
@@ -1322,7 +1351,11 @@
                 total += parseInt(chk.value);
             });
 
-            // 6. Severity
+            // 6. Functional Capacity (NEW)
+            const accessRadios = document.getElementsByName('foodAccess');
+            for (let r of accessRadios) { if (r.checked) total += parseInt(r.value); }
+
+            // 7. Severity
             const sevRadios = document.getElementsByName('diseaseSeverity');
             for (let r of sevRadios) { if (r.checked) total += parseInt(r.value); }
 
