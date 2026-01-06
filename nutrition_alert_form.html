@@ -250,78 +250,94 @@
             overflow: hidden;
         }
 
-        .lab-row-item {
-            display: flex;
-            align-items: stretch;
-            border-bottom: 1px solid #f1f3f5;
-            transition: all 0.2s;
+        .lab-choice-card {
+            background-color: #fff;
+            border: 1px solid #e2e6ea;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease-in-out;
+            height: 100%;
+            cursor: pointer;
             position: relative;
         }
 
-        .lab-row-item:last-child {
-            border-bottom: none;
+        .lab-choice-card:hover {
+            border-color: #adb5bd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .lab-control-area {
-            flex: 0 0 45%;
-            padding: 15px;
-            background-color: #fff;
+        /* สถานะเมื่อถูกเลือก (Active) */
+        .lab-choice-card.active {
+            border: 2px solid #0056b3;
+            /* Medical Blue */
+            background-color: #f8fbff;
+        }
+
+        .lab-choice-card.active::after {
+            content: '\f00c';
+            /* Check icon from FontAwesome */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #0056b3;
+            font-size: 1.2rem;
+        }
+
+        /* สถานะเมื่อไม่ได้เลือก (Inactive) - ทำให้จางลง */
+        .lab-choice-card.inactive {
+            opacity: 0.6;
+            background-color: #fdfdfd;
+        }
+
+        .lab-header {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 15px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: center;
         }
 
-        .lab-ref-area {
-            flex: 0 0 55%;
-            padding: 15px;
-            background-color: #fcfcfc;
-            border-left: 1px solid #f1f3f5;
+        .lab-unit {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: normal;
+            margin-left: auto;
         }
 
-        .ref-table-sm {
+        /* ตารางเกณฑ์คะแนน */
+        .ref-table-clean {
             width: 100%;
             font-size: 0.85rem;
-            color: #555;
             border-collapse: collapse;
         }
 
-        .ref-table-sm th {
+        .ref-table-clean th {
             text-align: left;
-            padding: 4px 8px;
-            border-bottom: 1px solid #dee2e6;
-            color: #888;
-            font-weight: 500;
+            color: #495057;
+            font-weight: 600;
+            padding: 6px 0;
+            border-bottom: 2px solid #dee2e6;
         }
 
-        .ref-table-sm td {
-            padding: 4px 8px;
+        .ref-table-clean td {
+            padding: 6px 0;
             border-bottom: 1px solid #f1f3f5;
+            color: #555;
         }
 
-        .ref-table-sm tr:last-child td {
+        .ref-table-clean tr:last-child td {
             border-bottom: none;
         }
 
-        .score-col {
+        .score-badge {
+            display: inline-block;
+            width: 24px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             color: #333;
-            width: 60px;
-        }
-
-        .lab-row-active {
-            background-color: #f0f7ff !important;
-            border-left: 4px solid #0056b3;
-        }
-
-        .lab-row-active .lab-control-area,
-        .lab-row-active .lab-ref-area {
-            background-color: transparent;
-        }
-
-        .lab-row-inactive {
-            opacity: 0.5;
-            filter: grayscale(80%);
         }
 
         .hidden-section {
@@ -479,8 +495,7 @@
                             </div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                <span class="font-weight-bold" id="p_name"
-                                    style="font-size: 1.1rem;">-</span>
+                                <span class="font-weight-bold" id="p_name" style="font-size: 1.1rem;">-</span>
                             </div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3">
                                 <small class="text-muted d-block">อายุ</small>
@@ -737,97 +752,133 @@
                         </div>
 
                         <div id="labSection" class="hidden-section fade-in">
-                            <div class="lab-formal-box">
-                                <div class="lab-row-item lab-row-inactive" id="rowAlbumin"
-                                    onclick="triggerRadio('useAlbumin')" style="cursor: pointer;">
-                                    <div class="lab-control-area">
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="useAlbumin" name="labChoice"
-                                                class="custom-control-input" value="albumin"
-                                                onchange="toggleLabInputs()">
-                                            <label class="custom-control-label font-weight-bold text-dark"
-                                                for="useAlbumin" style="pointer-events: none;">ใช้ผล Albumin</label>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="lab-choice-card inactive" id="cardAlbumin"
+                                        onclick="selectLab('albumin')">
+
+                                        <input type="radio" id="useAlbumin" name="labChoice" value="albumin"
+                                            class="d-none" onchange="toggleLabInputs()">
+
+                                        <div class="lab-header">
+                                            <i class="fas fa-vial text-primary mr-2"></i> 1. Albumin
+                                            <span class="lab-unit">(g/dl)</span>
                                         </div>
-                                        <div class="input-group input-group-sm ml-4" style="max-width: 200px;">
-                                            <input type="number" step="0.1" class="form-control" id="valAlbumin"
-                                                placeholder="ระบุค่า..." disabled oninput="calculateLabScore()"
-                                                onclick="event.stopPropagation()">
-                                            <div class="input-group-append"><span class="input-group-text">g/dl</span>
+
+                                        <div class="form-group mb-3">
+                                            <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                            <div class="input-group">
+                                                <input type="number" step="0.1" class="form-control" id="valAlbumin"
+                                                    placeholder="เช่น 3.2" disabled oninput="calculateLabScore()"
+                                                    onclick="event.stopPropagation()">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white text-muted">g/dl</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="lab-ref-area">
-                                        <table class="ref-table-sm">
-                                            <tr>
-                                                <th>ค่า (g/dl)</th>
-                                                <th class="score-col">คะแนน</th>
-                                            </tr>
-                                            <tr>
-                                                <td>&le; 2.5</td>
-                                                <td class="score-col">3</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2.6 - 2.9</td>
-                                                <td class="score-col">2</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3.0 - 3.5</td>
-                                                <td class="score-col">1</td>
-                                            </tr>
-                                            <tr>
-                                                <td>&gt; 3.5</td>
-                                                <td class="score-col text-muted">0</td>
-                                            </tr>
-                                        </table>
+
+                                        <div class="mt-3">
+                                            <table class="ref-table-clean">
+                                                <thead>
+                                                    <tr>
+                                                        <th>เกณฑ์ (Criteria)</th>
+                                                        <th class="text-right">คะแนน</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>&le; 2.5</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-danger">3</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2.6 - 2.9</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-warning">2</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>3.0 - 3.5</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-primary">1</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>&gt; 3.5</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-muted">0</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="lab-row-item lab-row-inactive" id="rowTLC" onclick="triggerRadio('useTLC')"
-                                    style="cursor: pointer;">
-                                    <div class="lab-control-area">
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="useTLC" name="labChoice"
-                                                class="custom-control-input" value="tlc" onchange="toggleLabInputs()">
-                                            <label class="custom-control-label font-weight-bold text-dark" for="useTLC"
-                                                style="pointer-events: none;">ใช้ผล TLC</label>
+                                <div class="col-md-6">
+                                    <div class="lab-choice-card inactive" id="cardTLC" onclick="selectLab('tlc')">
+
+                                        <input type="radio" id="useTLC" name="labChoice" value="tlc" class="d-none"
+                                            onchange="toggleLabInputs()">
+
+                                        <div class="lab-header">
+                                            <i class="fas fa-microscope text-primary mr-2"></i> 2. TLC
+                                            <span class="lab-unit">(cells/mm³)</span>
                                         </div>
-                                        <div class="input-group input-group-sm ml-4" style="max-width: 200px;">
-                                            <input type="number" class="form-control" id="valTLC"
-                                                placeholder="ระบุค่า..." disabled oninput="calculateLabScore()"
-                                                onclick="event.stopPropagation()">
-                                            <div class="input-group-append"><span
-                                                    class="input-group-text">cells/mm³</span></div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="valTLC"
+                                                    placeholder="เช่น 1200" disabled oninput="calculateLabScore()"
+                                                    onclick="event.stopPropagation()">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white text-muted">cells</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="lab-ref-area">
-                                        <table class="ref-table-sm">
-                                            <tr>
-                                                <th>ค่า (cells/mm³)</th>
-                                                <th class="score-col">คะแนน</th>
-                                            </tr>
-                                            <tr>
-                                                <td>&le; 1,000</td>
-                                                <td class="score-col">3</td>
-                                            </tr>
-                                            <tr>
-                                                <td>1,001 - 1,200</td>
-                                                <td class="score-col">2</td>
-                                            </tr>
-                                            <tr>
-                                                <td>1,201 - 1,500</td>
-                                                <td class="score-col">1</td>
-                                            </tr>
-                                            <tr>
-                                                <td>&gt; 1,500</td>
-                                                <td class="score-col text-muted">0</td>
-                                            </tr>
-                                        </table>
+
+                                        <div class="mt-3">
+                                            <table class="ref-table-clean">
+                                                <thead>
+                                                    <tr>
+                                                        <th>เกณฑ์ (Criteria)</th>
+                                                        <th class="text-right">คะแนน</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>&le; 1,000</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-danger">3</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1,001 - 1,200</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-warning">2</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1,201 - 1,500</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-primary">1</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>&gt; 1,500</td>
+                                                        <td class="text-right"><span
+                                                                class="score-badge text-muted">0</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="text-right mt-2">
-                                <span class="badge badge-light border p-2 text-dark" style="font-size: 0.9rem;"
-                                    id="labScoreText">คะแนนจากผลเลือด: 0</span>
+
+                            <div class="row mt-3">
+                                <div class="col-12 text-right">
+                                    <div class="d-inline-block px-3 py-2 bg-white border rounded shadow-sm">
+                                        <small class="text-muted mr-2">คะแนนจากผลเลือด (Lab Score):</small>
+                                        <span class="font-weight-bold text-primary h5 m-0" id="labScoreText">0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1360,33 +1411,48 @@
             calculateScore();
         }
 
+        // ฟังก์ชันใหม่สำหรับคลิกที่การ์ด
+        function selectLab(type) {
+            if (type === 'albumin') {
+                document.getElementById('useAlbumin').checked = true;
+            } else {
+                document.getElementById('useTLC').checked = true;
+            }
+            toggleLabInputs();
+        }
+
+        // ปรับปรุงฟังก์ชันเดิม
         function toggleLabInputs() {
             const isAlbumin = document.getElementById('useAlbumin').checked;
-            const isTLC = document.getElementById('useTLC').checked;
 
-            const rowAlbumin = document.getElementById('rowAlbumin');
-            const rowTLC = document.getElementById('rowTLC');
+            // Elements
+            const cardAlbumin = document.getElementById('cardAlbumin');
+            const cardTLC = document.getElementById('cardTLC');
             const inputAlb = document.getElementById('valAlbumin');
             const inputTLC = document.getElementById('valTLC');
 
             if (isAlbumin) {
-                rowAlbumin.classList.add('lab-row-active');
-                rowAlbumin.classList.remove('lab-row-inactive');
+                // Active Albumin
+                cardAlbumin.classList.add('active');
+                cardAlbumin.classList.remove('inactive');
                 inputAlb.disabled = false;
-                inputAlb.focus();
+                setTimeout(() => inputAlb.focus(), 100); // Focus input
 
-                rowTLC.classList.remove('lab-row-active');
-                rowTLC.classList.add('lab-row-inactive');
+                // Inactive TLC
+                cardTLC.classList.remove('active');
+                cardTLC.classList.add('inactive');
                 inputTLC.disabled = true;
                 inputTLC.value = '';
-            } else if (isTLC) {
-                rowTLC.classList.add('lab-row-active');
-                rowTLC.classList.remove('lab-row-inactive');
+            } else {
+                // Active TLC
+                cardTLC.classList.add('active');
+                cardTLC.classList.remove('inactive');
                 inputTLC.disabled = false;
-                inputTLC.focus();
+                setTimeout(() => inputTLC.focus(), 100); // Focus input
 
-                rowAlbumin.classList.remove('lab-row-active');
-                rowAlbumin.classList.add('lab-row-inactive');
+                // Inactive Albumin
+                cardAlbumin.classList.remove('active');
+                cardAlbumin.classList.add('inactive');
                 inputAlb.disabled = true;
                 inputAlb.value = '';
             }
@@ -1395,7 +1461,10 @@
 
         function calculateLabScore() {
             let score = 0;
-            if (document.getElementById('useAlbumin').checked) {
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const isTLC = document.getElementById('useTLC').checked;
+
+            if (isAlbumin) {
                 const val = parseFloat(document.getElementById('valAlbumin').value);
                 if (!isNaN(val)) {
                     if (val <= 2.5) score = 3;
@@ -1403,7 +1472,7 @@
                     else if (val <= 3.5) score = 1;
                     else score = 0;
                 }
-            } else if (document.getElementById('useTLC').checked) {
+            } else if (isTLC) {
                 const val = parseFloat(document.getElementById('valTLC').value);
                 if (!isNaN(val)) {
                     if (val <= 1000) score = 3;
@@ -1412,9 +1481,12 @@
                     else score = 0;
                 }
             }
+
             currentLabScore = score;
-            document.getElementById('labScoreText').innerText = `คะแนนจากผลเลือด: ${score}`;
-            calculateScore();
+            // อัปเดตข้อความแสดงคะแนนเฉพาะจุด
+            document.getElementById('labScoreText').innerText = score;
+
+            calculateScore(); // เรียกคำนวณรวมทั้งหมด
         }
 
         function calculateBMI() {

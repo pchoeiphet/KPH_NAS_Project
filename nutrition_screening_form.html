@@ -575,9 +575,6 @@
 
                     <div class="form-row mt-4" id="saveScreeningRow">
                         <div class="col-12 text-right">
-                            <button type="button" class="btn btn-outline-secondary mr-2" onclick="location.reload()">
-                                <i class="fa-solid fa-rotate-left"></i> ล้างค่า
-                            </button>
                             <button type="button" class="btn btn-info shadow-sm px-4" onclick="processScreening()">
                                 <i class="fa-solid fa-floppy-disk mr-2"></i> ประมวลผลและบันทึก
                             </button>
@@ -769,7 +766,7 @@
                 resultDesc.innerText = "ผู้ป่วยมีความเสี่ยงต่อภาวะทุพโภชนาการ (Score >= 2)";
 
                 nextActionHint.classList.add('hint-risk');
-                nextActionHint.innerHTML = `<i class="far fa-bell mr-2"></i> <strong>ข้อแนะนำ:</strong> ต้องได้รับการประเมินภาวะโภชนาการ (NAF) ภายใน 24 ชม.`;
+                nextActionHint.innerHTML = `<i class="far fa-bell mr-2"></i> <strong>ข้อแนะนำ:</strong> ทำการประเมินภาวะโภชนาการต่อ หรือปรึกษานักกำหนดอาหาร/ทีมโภชนบำบัด`;
 
                 highRiskOptions.classList.remove('d-none');
             } else {
@@ -784,7 +781,7 @@
                 const nextDateStr = nextWeek.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 
                 nextActionHint.classList.add('hint-normal');
-                nextActionHint.innerHTML = `<i class="far fa-calendar-check mr-2"></i> <strong>ข้อแนะนำ:</strong> ควรคัดกรองซ้ำในอีก 7 วัน (ประมาณวันที่ ${nextDateStr})`;
+                nextActionHint.innerHTML = `<i class="far fa-calendar-check mr-2"></i> <strong>ข้อแนะนำ:</strong> ให้คัดกรองซ้ำในอีก 7 วัน (ประมาณวันที่ ${nextDateStr})`;
 
                 normalOptions.classList.remove('d-none');
             }
