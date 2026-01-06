@@ -163,6 +163,71 @@
             border: 1px solid #bbdefb;
         }
 
+        .lab-formal-box {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        .lab-choice-card {
+            background-color: #fff;
+            border: 1px solid #e2e6ea;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease-in-out;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .lab-choice-card:hover {
+            border-color: #adb5bd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* สถานะเมื่อถูกเลือก (Active) */
+        .lab-choice-card.active {
+            border: 2px solid #0056b3;
+            /* Medical Blue */
+            background-color: #f8fbff;
+        }
+
+        .lab-choice-card.active::after {
+            content: '\f00c';
+            /* Check icon from FontAwesome */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #0056b3;
+            font-size: 1.2rem;
+        }
+
+        /* สถานะเมื่อไม่ได้เลือก (Inactive) - ทำให้จางลง */
+        .lab-choice-card.inactive {
+            opacity: 0.6;
+            background-color: #fdfdfd;
+        }
+
+        .lab-header {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .lab-unit {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: normal;
+            margin-left: auto;
+        }
+
         /* Result Colors */
         .risk-low {
             background-color: #e8f5e9 !important;
@@ -1293,13 +1358,17 @@
         function setAssessmentDateTime() {
             const now = new Date();
             const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
             const thaiDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
             const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+
             document.getElementById('assessDate').value = thaiDate;
             document.getElementById('assessTime').value = time;
 
             const userNameEl = document.querySelector('.user-name');
-            if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
+            if (userNameEl) {
+                document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
+            }
 
             const baseCount = patientsData[currentHn]?.historyCount || 0;
             const currentCount = baseCount + 1;
@@ -1316,6 +1385,7 @@
             else { otherInput.disabled = true; otherInput.value = ''; }
         }
 
+        // --- Logic for Weight Mode Toggle ---
         function toggleWeightMode() {
             const isUnknown = document.getElementById('unknownWeight').checked;
             const standardSection = document.getElementById('standardWeightSection');
@@ -1324,60 +1394,69 @@
             if (isUnknown) {
                 standardSection.classList.add('hidden-section');
                 labSection.classList.remove('hidden-section');
-                currentBmiScore = 0;
+                currentBmiScore = 0; // Reset BMI Score
             } else {
                 standardSection.classList.remove('hidden-section');
                 labSection.classList.add('hidden-section');
-                currentLabScore = 0;
-                calculateBMI();
+                currentLabScore = 0; // Reset Lab Score
+                calculateBMI(); // Recalculate BMI
             }
             calculateScore();
         }
 
-        function triggerRadio(id) {
-            const radio = document.getElementById(id);
-            if (radio) {
-                radio.checked = true;
-                toggleLabInputs();
+        function selectLab(type) {
+            if (type === 'albumin') {
+                document.getElementById('useAlbumin').checked = true;
+            } else {
+                document.getElementById('useTLC').checked = true;
             }
+            toggleLabInputs();
         }
 
         function toggleLabInputs() {
             const isAlbumin = document.getElementById('useAlbumin').checked;
-            const isTLC = document.getElementById('useTLC').checked;
 
-            const rowAlbumin = document.getElementById('rowAlbumin');
-            const rowTLC = document.getElementById('rowTLC');
+            const cardAlbumin = document.getElementById('cardAlbumin');
+            const cardTLC = document.getElementById('cardTLC');
             const inputAlb = document.getElementById('valAlbumin');
             const inputTLC = document.getElementById('valTLC');
 
             if (isAlbumin) {
-                rowAlbumin.classList.add('lab-row-active');
-                rowAlbumin.classList.remove('lab-row-inactive');
+                cardAlbumin.classList.add('active');
+                cardAlbumin.classList.remove('inactive');
                 inputAlb.disabled = false;
-                inputAlb.focus();
+                inputAlb.style.pointerEvents = 'auto'; // Enable clicking
 
-                rowTLC.classList.remove('lab-row-active');
-                rowTLC.classList.add('lab-row-inactive');
+                cardTLC.classList.remove('active');
+                cardTLC.classList.add('inactive');
                 inputTLC.disabled = true;
+                inputTLC.style.pointerEvents = 'none'; // Disable clicking
                 inputTLC.value = '';
-            } else if (isTLC) {
-                rowTLC.classList.add('lab-row-active');
-                rowTLC.classList.remove('lab-row-inactive');
-                inputTLC.disabled = false;
-                inputTLC.focus();
 
-                rowAlbumin.classList.remove('lab-row-active');
-                rowAlbumin.classList.add('lab-row-inactive');
+                setTimeout(() => inputAlb.focus(), 100);
+            } else {
+                cardTLC.classList.add('active');
+                cardTLC.classList.remove('inactive');
+                inputTLC.disabled = false;
+                inputTLC.style.pointerEvents = 'auto'; // Enable clicking
+
+                cardAlbumin.classList.remove('active');
+                cardAlbumin.classList.add('inactive');
                 inputAlb.disabled = true;
+                inputAlb.style.pointerEvents = 'none'; // Disable clicking
                 inputAlb.value = '';
+
+                setTimeout(() => inputTLC.focus(), 100);
             }
             calculateLabScore();
         }
 
         function calculateLabScore() {
             let score = 0;
-            if (document.getElementById('useAlbumin').checked) {
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const isTLC = document.getElementById('useTLC').checked;
+
+            if (isAlbumin) {
                 const val = parseFloat(document.getElementById('valAlbumin').value);
                 if (!isNaN(val)) {
                     if (val <= 2.5) score = 3;
@@ -1385,7 +1464,7 @@
                     else if (val <= 3.5) score = 1;
                     else score = 0;
                 }
-            } else if (document.getElementById('useTLC').checked) {
+            } else if (isTLC) {
                 const val = parseFloat(document.getElementById('valTLC').value);
                 if (!isNaN(val)) {
                     if (val <= 1000) score = 3;
@@ -1394,8 +1473,9 @@
                     else score = 0;
                 }
             }
+
             currentLabScore = score;
-            document.getElementById('labScoreText').innerText = `คะแนนจากผลเลือด: ${score}`;
+            document.getElementById('labScoreText').innerText = score;
             calculateScore();
         }
 
