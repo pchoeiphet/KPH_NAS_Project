@@ -142,90 +142,37 @@
         }
 
         .section-label {
-            color: #33691e;
+            color: #0056b3;
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 15px;
-            border-left: 4px solid #7cb342;
+            border-left: 4px solid #0056b3;
             padding-left: 10px;
         }
 
         .patient-icon-box {
-            width: 120px;
-            height: 150px;
-            background-color: #e3f2fd;
-            color: #2C3E50;
-            border-radius: 8px;
+            width: 100px;
+            height: 120px;
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            border: 1px solid #bbdefb;
         }
 
-        .lab-formal-box {
+        .score-input {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .result-card {
+            transition: all 0.3s;
             border: 1px solid #dee2e6;
             border-radius: 4px;
-            padding: 0;
-            background-color: #fff;
-            overflow: hidden;
-        }
-
-        .lab-choice-card {
-            background-color: #fff;
-            border: 1px solid #e2e6ea;
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.2s ease-in-out;
-            height: 100%;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .lab-choice-card:hover {
-            border-color: #adb5bd;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        /* สถานะเมื่อถูกเลือก (Active) */
-        .lab-choice-card.active {
-            border: 2px solid #0056b3;
-            /* Medical Blue */
-            background-color: #f8fbff;
-        }
-
-        .lab-choice-card.active::after {
-            content: '\f00c';
-            /* Check icon from FontAwesome */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #0056b3;
-            font-size: 1.2rem;
-        }
-
-        /* สถานะเมื่อไม่ได้เลือก (Inactive) - ทำให้จางลง */
-        .lab-choice-card.inactive {
-            opacity: 0.6;
-            background-color: #fdfdfd;
-        }
-
-        .lab-header {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #343a40;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .lab-unit {
-            font-size: 0.85rem;
-            color: #6c757d;
-            font-weight: normal;
-            margin-left: auto;
         }
 
         /* Result Colors */
@@ -287,56 +234,99 @@
             font-size: 0.9rem;
         }
 
-        .ref-table-sm {
+        /* Lab Section Professional Style */
+        .lab-choice-card {
+            background-color: #fff;
+            border: 1px solid #e2e6ea;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease-in-out;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .lab-choice-card:hover {
+            border-color: #adb5bd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Active State */
+        .lab-choice-card.active {
+            border: 2px solid #0056b3;
+            background-color: #f8fbff;
+        }
+
+        .lab-choice-card.active::after {
+            content: '\f00c';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #0056b3;
+            font-size: 1.2rem;
+        }
+
+        /* Inactive State */
+        .lab-choice-card.inactive {
+            opacity: 0.6;
+            background-color: #fdfdfd;
+        }
+
+        .lab-header {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .lab-unit {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: normal;
+            margin-left: auto;
+        }
+
+        .ref-table-clean {
             width: 100%;
             font-size: 0.85rem;
-            color: #555;
             border-collapse: collapse;
         }
 
-        .ref-table-sm th {
+        .ref-table-clean th {
             text-align: left;
-            padding: 4px 8px;
-            border-bottom: 1px solid #dee2e6;
-            color: #888;
-            font-weight: 500;
+            color: #495057;
+            font-weight: 600;
+            padding: 6px 0;
+            border-bottom: 2px solid #dee2e6;
         }
 
-        .ref-table-sm td {
-            padding: 4px 8px;
+        .ref-table-clean td {
+            padding: 6px 0;
             border-bottom: 1px solid #f1f3f5;
+            color: #555;
         }
 
-        .ref-table-sm tr:last-child td {
+        .ref-table-clean tr:last-child td {
             border-bottom: none;
         }
 
-        .score-col {
+        .score-badge {
+            display: inline-block;
+            width: 24px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             color: #333;
-            width: 60px;
-        }
-
-        .lab-row-active {
-            background-color: #f0f7ff !important;
-            border-left: 4px solid #0056b3;
-        }
-
-        .lab-row-active .lab-control-area,
-        .lab-row-active .lab-ref-area {
-            background-color: transparent;
-        }
-
-        .lab-row-inactive {
-            opacity: 0.5;
-            filter: grayscale(80%);
         }
 
         .hidden-section {
             display: none;
         }
 
+        /* Checkboxes Styles */
         .symptom-box {
             background-color: #fff;
             border: 1px solid #ced4da;
@@ -362,11 +352,6 @@
             font-weight: 600;
             color: #0056b3;
             font-size: 0.85rem;
-        }
-
-        #totalScore {
-            font-family: 'Sarabun', sans-serif;
-            letter-spacing: -2px;
         }
     </style>
     </style>
