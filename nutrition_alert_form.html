@@ -151,57 +151,43 @@
         }
 
         .patient-icon-box {
-            width: 120px;
-            height: 150px;
-            background-color: #e3f2fd;
-            color: #2C3E50;
-            border-radius: 8px;
+            width: 100px;
+            height: 120px;
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            border: 1px solid #bbdefb;
         }
 
+        /* Result Colors */
         .risk-low {
             background-color: #e8f5e9 !important;
-            /* พื้นหลังเขียวอ่อน */
             color: #1b5e20 !important;
-            /* ตัวหนังสือเขียวเข้ม */
             border-left: 6px solid #43a047;
-            /* แถบสีด้านซ้าย (สำหรับแบบที่ 1) */
         }
-
-        .risk-low .status-dot {
-            color: #43a047;
-        }
-
-        /* สีจุด icon */
 
         .risk-mod {
             background-color: #fff8e1 !important;
-            /* พื้นหลังเหลืองอ่อน */
             color: #e65100 !important;
-            /* ตัวหนังสือส้มเข้ม */
             border-left: 6px solid #ffb300;
-            /* แถบสี */
-        }
-
-        .risk-mod .status-dot {
-            color: #ffb300;
         }
 
         .risk-high {
             background-color: #ffebee !important;
-            /* พื้นหลังแดงอ่อน */
             color: #b71c1c !important;
-            /* ตัวหนังสือแดงเข้ม */
             border-left: 6px solid #e53935;
-            /* แถบสี */
         }
 
-        .risk-high .status-dot {
-            color: #e53935;
+        .transition-bg {
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .input-error {
+            border-color: #dc3545;
+            background-color: #fff;
         }
 
         .bmi-display-box {
@@ -219,119 +205,66 @@
             padding: 10px 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .radio-label {
             margin-left: 8px;
             font-weight: 400;
             cursor: pointer;
-            width: 100%;
         }
 
         .radio-score {
-            float: right;
+            margin-left: auto;
             font-weight: 600;
             color: #0056b3;
             font-size: 0.9rem;
         }
 
-        .lab-formal-box {
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 0;
-            background-color: #fff;
-            overflow: hidden;
-        }
-
-        .lab-choice-card {
-            background-color: #fff;
-            border: 1px solid #e2e6ea;
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.2s ease-in-out;
-            height: 100%;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .lab-choice-card:hover {
-            border-color: #adb5bd;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        /* สถานะเมื่อถูกเลือก (Active) */
-        .lab-choice-card.active {
-            border: 2px solid #0056b3;
-            /* Medical Blue */
-            background-color: #f8fbff;
-        }
-
-        .lab-choice-card.active::after {
-            content: '\f00c';
-            /* Check icon from FontAwesome */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #0056b3;
-            font-size: 1.2rem;
-        }
-
-        /* สถานะเมื่อไม่ได้เลือก (Inactive) - ทำให้จางลง */
-        .lab-choice-card.inactive {
-            opacity: 0.6;
-            background-color: #fdfdfd;
-        }
-
-        .lab-header {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #343a40;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .lab-unit {
-            font-size: 0.85rem;
-            color: #6c757d;
-            font-weight: normal;
-            margin-left: auto;
-        }
-
-        /* ตารางเกณฑ์คะแนน */
-        .ref-table-clean {
+        .ref-table-sm {
             width: 100%;
             font-size: 0.85rem;
+            color: #555;
             border-collapse: collapse;
         }
 
-        .ref-table-clean th {
+        .ref-table-sm th {
             text-align: left;
-            color: #495057;
-            font-weight: 600;
-            padding: 6px 0;
-            border-bottom: 2px solid #dee2e6;
+            padding: 4px 8px;
+            border-bottom: 1px solid #dee2e6;
+            color: #888;
+            font-weight: 500;
         }
 
-        .ref-table-clean td {
-            padding: 6px 0;
+        .ref-table-sm td {
+            padding: 4px 8px;
             border-bottom: 1px solid #f1f3f5;
-            color: #555;
         }
 
-        .ref-table-clean tr:last-child td {
+        .ref-table-sm tr:last-child td {
             border-bottom: none;
         }
 
-        .score-badge {
-            display: inline-block;
-            width: 24px;
+        .score-col {
             text-align: center;
-            font-weight: 700;
+            font-weight: 600;
             color: #333;
+            width: 60px;
+        }
+
+        .lab-row-active {
+            background-color: #f0f7ff !important;
+            border-left: 4px solid #0056b3;
+        }
+
+        .lab-row-active .lab-control-area,
+        .lab-row-active .lab-ref-area {
+            background-color: transparent;
+        }
+
+        .lab-row-inactive {
+            opacity: 0.5;
+            filter: grayscale(80%);
         }
 
         .hidden-section {
@@ -358,19 +291,11 @@
             margin-bottom: 8px;
         }
 
-        .symptom-item:last-child {
-            margin-bottom: 0;
-        }
-
         .symptom-score {
             float: right;
             font-weight: 600;
             color: #0056b3;
             font-size: 0.85rem;
-        }
-
-        .transition-bg {
-            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
         }
 
         #totalScore {
@@ -544,10 +469,11 @@
                         </h4>
                     </div>
                     <div class="text-right">
-                        <span class="badge badge-light border p-2 text-muted"
-                            style="font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px;"
-                            id="docNoDisplay">Document No.:
-                            Loading...</span>
+                        <div class="text-right">
+                            <span class="badge p-2"
+                                style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px;"
+                                id="docNoDisplay">Document No.: Loading...</span>
+                        </div>
                     </div>
                 </div>
 
