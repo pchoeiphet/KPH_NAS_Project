@@ -142,25 +142,27 @@
         }
 
         .section-label {
-            color: #0056b3;
+            color: #33691e;
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 15px;
-            border-left: 4px solid #0056b3;
+            border-left: 4px solid #7cb342;
             padding-left: 10px;
         }
 
         .patient-icon-box {
-            width: 100px;
-            height: 120px;
-            background-color: #e9ecef;
-            color: #6c757d;
-            border-radius: 4px;
+            width: 120px;
+            height: 150px;
+            background-color: #e3f2fd;
+            color: #2C3E50;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
+            border: 1px solid #bbdefb;
         }
+
 
         .score-input {
             width: 80px;
@@ -352,6 +354,41 @@
             font-weight: 600;
             color: #0056b3;
             font-size: 0.85rem;
+        }
+
+        .form-actions-box {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-save-custom {
+            background-color: #20c997;
+            border: none;
+            color: white;
+            padding: 10px 40px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+        }
+
+        .btn-save-custom:hover {
+            background-color: #19a97e;
+        }
+
+        .btn-cancel-custom {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            color: #6c757d;
+            padding: 10px 30px;
+            font-size: 1rem;
+            border-radius: 6px;
+        }
+
+        .btn-cancel-custom:hover {
+            background-color: #f1f3f5;
         }
     </style>
     </style>
@@ -1270,15 +1307,15 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-12 text-center">
-                            <button type="button" class="btn btn-primary btn-lg shadow px-5" onclick="saveData()">
-                                <i class="fa-solid fa-save mr-2"></i> บันทึกการประเมิน
-                            </button>
-                        </div>
-                    </div>
                 </form>
+            </div>
+            <div class="form-actions-box">
+                <button type="button" class="btn btn-cancel-custom" onclick="window.history.back()">
+                    <i class="fa-solid fa-xmark mr-2"></i> ยกเลิก
+                </button>
+                <button type="button" class="btn btn-save-custom" onclick="saveData()">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
+                </button>
             </div>
         </div>
     </div>
@@ -1343,17 +1380,13 @@
         function setAssessmentDateTime() {
             const now = new Date();
             const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-
             const thaiDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
             const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
-
             document.getElementById('assessDate').value = thaiDate;
             document.getElementById('assessTime').value = time;
 
             const userNameEl = document.querySelector('.user-name');
-            if (userNameEl) {
-                document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
-            }
+            if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
 
             const baseCount = patientsData[currentHn]?.historyCount || 0;
             const currentCount = baseCount + 1;
@@ -1379,12 +1412,12 @@
             if (isUnknown) {
                 standardSection.classList.add('hidden-section');
                 labSection.classList.remove('hidden-section');
-                currentBmiScore = 0; // Reset BMI Score
+                currentBmiScore = 0;
             } else {
                 standardSection.classList.remove('hidden-section');
                 labSection.classList.add('hidden-section');
-                currentLabScore = 0; // Reset Lab Score
-                calculateBMI(); // Recalculate BMI
+                currentLabScore = 0;
+                calculateBMI();
             }
             calculateScore();
         }
@@ -1400,7 +1433,6 @@
 
         function toggleLabInputs() {
             const isAlbumin = document.getElementById('useAlbumin').checked;
-
             const cardAlbumin = document.getElementById('cardAlbumin');
             const cardTLC = document.getElementById('cardTLC');
             const inputAlb = document.getElementById('valAlbumin');
@@ -1410,12 +1442,12 @@
                 cardAlbumin.classList.add('active');
                 cardAlbumin.classList.remove('inactive');
                 inputAlb.disabled = false;
-                inputAlb.style.pointerEvents = 'auto'; // Enable clicking
+                inputAlb.style.pointerEvents = 'auto';
 
                 cardTLC.classList.remove('active');
                 cardTLC.classList.add('inactive');
                 inputTLC.disabled = true;
-                inputTLC.style.pointerEvents = 'none'; // Disable clicking
+                inputTLC.style.pointerEvents = 'none';
                 inputTLC.value = '';
 
                 setTimeout(() => inputAlb.focus(), 100);
@@ -1423,12 +1455,12 @@
                 cardTLC.classList.add('active');
                 cardTLC.classList.remove('inactive');
                 inputTLC.disabled = false;
-                inputTLC.style.pointerEvents = 'auto'; // Enable clicking
+                inputTLC.style.pointerEvents = 'auto';
 
                 cardAlbumin.classList.remove('active');
                 cardAlbumin.classList.add('inactive');
                 inputAlb.disabled = true;
-                inputAlb.style.pointerEvents = 'none'; // Disable clicking
+                inputAlb.style.pointerEvents = 'none';
                 inputAlb.value = '';
 
                 setTimeout(() => inputTLC.focus(), 100);
@@ -1507,7 +1539,6 @@
         function calculateScore() {
             let total = 0;
 
-            // 1. BMI / Lab
             if (document.getElementById('unknownWeight').checked) {
                 total += currentLabScore;
             } else {
@@ -1516,31 +1547,25 @@
                 for (let r of methodRadios) { if (r.checked) total += parseInt(r.value); }
             }
 
-            // 2. Body Shape
             const shapeRadios = document.getElementsByName('bodyShape');
             for (let r of shapeRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 3. Weight Change
             const wcRadios = document.getElementsByName('weightChange');
             for (let r of wcRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 4. Food Intake
             const typeRadios = document.getElementsByName('foodType');
             for (let r of typeRadios) { if (r.checked) total += parseInt(r.value); }
             const amtRadios = document.getElementsByName('foodAmount');
             for (let r of amtRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 5. Symptoms (Checkboxes)
             const symChecks = document.querySelectorAll('.symptom-check:checked');
             symChecks.forEach(chk => {
                 total += parseInt(chk.value);
             });
 
-            // 6. Functional Capacity (NEW)
             const accessRadios = document.getElementsByName('foodAccess');
             for (let r of accessRadios) { if (r.checked) total += parseInt(r.value); }
 
-            // 7. Underlying Disease (Checkboxes)
             const diseaseChecks = document.querySelectorAll('.disease-check:checked');
             diseaseChecks.forEach(chk => {
                 total += parseInt(chk.value);
@@ -1573,7 +1598,6 @@
         }
 
         function saveData() {
-            // Basic Validation
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
@@ -1585,7 +1609,6 @@
                 return;
             }
 
-            // ... (Save logic to localStorage/Server)
             alert('บันทึกผลการประเมินเรียบร้อย');
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
