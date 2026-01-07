@@ -674,6 +674,7 @@
                 assessDate: '-',
                 status: 'normal', scoreVal: 1, nafScore: null,
                 screenAssessor: 'พย. สมศรี ใจดี',
+                phone: '081-111-1111'
             },
             {
                 id: 2,
@@ -685,7 +686,8 @@
                 screenDate: '-',
                 screenCount: 0,
                 assessDate: '-',
-                status: 'wait_screen', scoreVal: null, nafScore: null
+                status: 'wait_screen', scoreVal: null, nafScore: null,
+                phone: '082-222-2222'
             },
             {
                 id: 3,
@@ -699,6 +701,7 @@
                 assessDate: '-',
                 status: 'wait_assess', scoreVal: 3, nafScore: null,
                 screenAssessor: 'พย. สายใจ เก่งงาน',
+                phone: '083-333-3333'
             },
             {
                 id: 4,
@@ -712,12 +715,13 @@
                 assessDate: '-',
                 status: 'normal', scoreVal: 0, nafScore: null,
                 screenAssessor: 'พย. สมศรี ใจดี',
+                phone: '084-444-4444'
             },
             {
                 id: 5,
                 bed: '106', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: 30,
-                underlying: 'ไม่มี',
+                underlying: 'ปฏิเสธโรคประจำตัว',
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '23 ธ.ค. 68 10:45 น.',
                 screenDate: '22 พ.ย. 67',
@@ -725,7 +729,8 @@
                 assessDate: '23 ธ.ค. 68',
                 status: 'assessed', scoreVal: 9, nafScore: 'B',
                 screenAssessor: 'พย. วรรณา รักดี',
-                assessAssessor: CURRENT_USER
+                assessAssessor: CURRENT_USER,
+                phone: '089-999-9999'
             },
             {
                 id: 6,
@@ -739,7 +744,8 @@
                 assessDate: '22 พ.ย. 67',
                 status: 'assessed', scoreVal: 15, nafScore: 'C',
                 screenAssessor: 'พย. สมศรี ใจดี',
-                assessAssessor: 'นักโภชนาการ ปราณี (คนอื่น)'
+                assessAssessor: 'นักโภชนาการ ปราณี (คนอื่น)',
+                phone: '085-555-5555'
             }
         ];
 
@@ -770,11 +776,11 @@
             document.getElementById('p_an').innerText = p.an;
             document.getElementById('p_name').innerText = p.name;
             document.getElementById('p_age').innerText = p.age + " ปี";
-            document.getElementById('p_ward').innerText = `${p.departmentText} / เตียง ${p.bed}`;
+            document.getElementById('p_ward').innerText = `${p.departmentText} / ${p.bed}`;
             document.getElementById('p_doctor').innerText = p.doctor;
             document.getElementById('p_admit').innerText = p.admitDate;
             document.getElementById('p_underlying').innerText = p.underlying;
-            document.getElementById('p_phone').innerText = "-";
+            document.getElementById('p_phone').innerText = p.phone || "-";
         }
 
         // --- 9-Column Table Logic ---
