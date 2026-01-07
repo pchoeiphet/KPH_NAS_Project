@@ -556,7 +556,7 @@
             <div class="col-12">
                 <div id="currentStatusCard" class="his-container d-none p-0 overflow-hidden">
                     <div class="row no-gutters">
-                        <div class="col-md-8 p-3 d-flex flex-column border-right-md">
+                        <div class="col-md-8 p-2 d-flex flex-column border-right-md">
                             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                                 <h6 class="font-weight-bold m-0 text-primary-custom">
                                     <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
@@ -845,24 +845,29 @@
                 document.getElementById('noHistory').classList.add('d-none');
 
                 history.forEach((h) => {
-                    // กำหนดสี Badge
-                    let typeBadge = h.type === 'SPENT'
-                        ? `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`
-                        : `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
+                    // Badge Color
+                    let typeBadge = '';
+                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
+                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
 
-                    // กำหนดข้อความผลลัพธ์
-                    let colSpent = '-', colNaf = '-';
+                    // Result Text
+                    let colSpent = '-';
+                    let colNaf = '-';
                     if (h.type === 'SPENT') {
                         colSpent = h.score >= 2 ? `<span class="text-warning font-weight-bold">เสี่ยง</span>` : `<span class="text-success">ปกติ</span>`;
                     } else if (h.type === 'NAF') {
-                        if (h.result.includes('Severe') || h.result.includes('C')) colNaf = `<span class="badge badge-danger">NAF C</span>`;
-                        else if (h.result.includes('Moderate') || h.result.includes('B')) colNaf = `<span class="badge badge-warning">NAF B</span>`;
+                        if (h.result.includes('Severe')) colNaf = `<span class="badge badge-danger">NAF C</span>`;
+                        else if (h.result.includes('Moderate')) colNaf = `<span class="badge badge-warning">NAF B</span>`;
                         else colNaf = `<span class="badge badge-success">NAF A</span>`;
                     }
 
-                    let displayAssessor = h.assessor === CURRENT_USER ? `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>` : h.assessor;
+                    // Assessor Highlight
+                    let displayAssessor = h.assessor;
+                    if (h.assessor === CURRENT_USER) {
+                        displayAssessor = `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>`;
+                    }
 
-                    // --- จุดที่แก้ไข: เพิ่ม &view=${h.timestamp} ในลิงก์ทั้ง 2 จุด ---
+                    // *** จุดสำคัญที่แก้ไข: เพิ่ม &view=${h.timestamp} ในลิงก์ ***
                     const row = `
                         <tr data-type="${h.type}">
                             <td>
@@ -882,7 +887,7 @@
                                     <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&view=${h.timestamp}'" title="ดูรายละเอียด">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger" onclick="alert('ดาวน์โหลด PDF: ${h.name}')" title="ดาวน์โหลด PDF">
+                                    <button class="btn btn-outline-danger" onclick="alert('จำลองการเปิดไฟล์ PDF: ${h.name}')" title="ดาวน์โหลด PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
                                 </div>
