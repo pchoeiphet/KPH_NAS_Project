@@ -556,7 +556,7 @@
             <div class="col-12">
                 <div id="currentStatusCard" class="his-container d-none p-0 overflow-hidden">
                     <div class="row no-gutters">
-                        <div class="col-md-8 p-2 d-flex flex-column border-right-md">
+                        <div class="col-md-8 p-4 d-flex flex-column border-right-md">
                             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                                 <h6 class="font-weight-bold m-0 text-primary-custom">
                                     <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
@@ -664,7 +664,7 @@
         const patients = [
             {
                 id: 1,
-                bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย 1',
+                bed: '101', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: 45,
                 underlying: 'ความดันโลหิตสูง (HT)',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
@@ -678,7 +678,7 @@
             },
             {
                 id: 2,
-                bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง 2',
+                bed: '102', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: 62,
                 underlying: 'เบาหวาน (DM), โรคไต (CKD)',
                 doctor: 'พญ. ใจดี มีเมตตา',
@@ -691,7 +691,7 @@
             },
             {
                 id: 3,
-                bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย 1',
+                bed: '103', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: 75,
                 underlying: 'ไขมันในเลือดสูง (DLP)',
                 doctor: 'นพ. เก่งกาจ วิชาการ',
@@ -705,7 +705,7 @@
             },
             {
                 id: 4,
-                bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก 3',
+                bed: '105', ward: '3', departmentText: 'ศัลยกรรมกระดูก',
                 hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: 55,
                 underlying: 'ปฏิเสธโรคประจำตัว',
                 doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
@@ -719,9 +719,9 @@
             },
             {
                 id: 5,
-                bed: '106', ward: '2', departmentText: 'อายุรกรรมหญิง 1',
+                bed: '106', ward: '2', departmentText: 'อายุรกรรมหญิง',
                 hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: 30,
-                underlying: 'ปฏิเสธโรคประจำตัว',
+                underlying: 'ไม่มี',
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '23 ธ.ค. 68 10:45 น.',
                 screenDate: '22 พ.ย. 67',
@@ -734,7 +734,7 @@
             },
             {
                 id: 6,
-                bed: '201', ward: '1', departmentText: 'อายุรกรรมชาย 1',
+                bed: '201', ward: '1', departmentText: 'อายุรกรรมชาย',
                 hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: 80,
                 underlying: 'มะเร็งปอด',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
@@ -776,21 +776,22 @@
             document.getElementById('p_an').innerText = p.an;
             document.getElementById('p_name').innerText = p.name;
             document.getElementById('p_age').innerText = p.age + " ปี";
-            document.getElementById('p_ward').innerText = `${p.departmentText} / ${p.bed}`;
+            document.getElementById('p_ward').innerText = `${p.departmentText} / เตียง ${p.bed}`;
             document.getElementById('p_doctor').innerText = p.doctor;
             document.getElementById('p_admit').innerText = p.admitDate;
             document.getElementById('p_underlying').innerText = p.underlying;
             document.getElementById('p_phone').innerText = p.phone || "-";
         }
 
-        // --- 9-Column Table Logic (แก้ไขแล้ว) ---
+        // --- 9-Column Table Logic (แก้ไขลิงก์เป็น docNo) ---
         function renderHistory(p) {
             let history = [];
 
-            // 1. Mock Data (ข้อมูลเก่า)
+            // 1. Mock Data Generation (Old Data)
             if (p.screenDate && p.screenDate !== '-') {
                 let screenScore = p.scoreVal;
                 if (p.status === 'assessed') screenScore = 3;
+
                 history.push({
                     timestamp: 1000,
                     date: p.screenDate,
@@ -798,8 +799,9 @@
                     name: 'แบบคัดกรองภาวะโภชนาการ (SPENT)',
                     score: screenScore,
                     result: screenScore >= 3 ? 'มีความเสี่ยง' : 'ปกติ',
-                    assessor: p.screenAssessor || 'พยาบาลวิชาชีพ',
-                    url: 'nutrition_screening_form.html'
+                    assessor: p.screenAssessor || 'พยาบาลวิชาชีพ (ไม่ระบุ)',
+                    url: 'nutrition_screening_form.html',
+                    docNo: 'SPENT-OLD-001' // สมมติเลขสำหรับ Mock
                 });
             }
 
@@ -807,6 +809,7 @@
                 let nafResult = 'Normal (A)';
                 if (p.nafScore === 'B') nafResult = 'Moderate (B)';
                 if (p.nafScore === 'C') nafResult = 'Severe (C)';
+
                 history.push({
                     timestamp: 2000,
                     date: p.assessDate,
@@ -815,7 +818,8 @@
                     score: p.scoreVal,
                     result: nafResult,
                     assessor: p.assessAssessor || CURRENT_USER,
-                    url: 'nutrition_alert_form.html'
+                    url: 'nutrition_alert_form.html',
+                    docNo: 'NAF-OLD-001' // สมมติเลขสำหรับ Mock
                 });
             }
 
@@ -823,16 +827,18 @@
             const storedHistory = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             const patientHistory = storedHistory.filter(item => item.hn === p.hn);
 
-            // Merge & Sort
+            // Merge Mock + Stored
             history = [...history, ...patientHistory];
+
+            // Sort by Timestamp (Oldest first)
             history.sort((a, b) => a.timestamp - b.timestamp);
 
-            // Assign Display ID
+            // Assign "Count" ID
             history = history.map((item, index) => {
                 return { ...item, displayId: index + 1 };
             });
 
-            // Reverse (Show Latest First)
+            // Reverse to show latest first
             history.reverse();
 
             // Render Table
@@ -845,35 +851,39 @@
                 document.getElementById('noHistory').classList.add('d-none');
 
                 history.forEach((h) => {
-                    // Badge Color
+                    // 2. Type Badge with COLORS
                     let typeBadge = '';
                     if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
                     else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
 
-                    // Result Text
+                    // 5 & 6 Result Columns
                     let colSpent = '-';
                     let colNaf = '-';
+
                     if (h.type === 'SPENT') {
                         colSpent = h.score >= 2 ? `<span class="text-warning font-weight-bold">เสี่ยง</span>` : `<span class="text-success">ปกติ</span>`;
                     } else if (h.type === 'NAF') {
-                        if (h.result.includes('Severe')) colNaf = `<span class="badge badge-danger">NAF C</span>`;
-                        else if (h.result.includes('Moderate')) colNaf = `<span class="badge badge-warning">NAF B</span>`;
+                        if (h.result.includes('Severe') || h.result.includes('C')) colNaf = `<span class="badge badge-danger">NAF C</span>`;
+                        else if (h.result.includes('Moderate') || h.result.includes('B')) colNaf = `<span class="badge badge-warning">NAF B</span>`;
                         else colNaf = `<span class="badge badge-success">NAF A</span>`;
                     }
 
-                    // Assessor Highlight
+                    // 7. Assessor
                     let displayAssessor = h.assessor;
                     if (h.assessor === CURRENT_USER) {
                         displayAssessor = `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>`;
                     }
 
-                    // *** จุดสำคัญที่แก้ไข: เพิ่ม &view=${h.timestamp} ในลิงก์ ***
+                    // ใช้ docNo ถ้ามี ถ้าไม่มีใช้ timestamp
+                    const viewParam = h.docNo ? `docNo=${h.docNo}` : `view=${h.timestamp}`;
+
                     const row = `
                         <tr data-type="${h.type}">
                             <td>
-                                <a href="${h.url}?hn=${p.hn}&view=${h.timestamp}" class="font-weight-bold text-dark text-decoration-none">
+                                <a href="${h.url}?hn=${p.hn}&${viewParam}" class="font-weight-bold text-dark text-decoration-none">
                                     ${h.name}
                                 </a>
+                                <div class="small text-muted">${h.docNo || '-'}</div>
                             </td>
                             <td class="text-center">${typeBadge}</td>
                             <td class="text-center text-muted">${h.displayId}</td>
@@ -884,7 +894,7 @@
                             <td><small>${h.date}</small></td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&view=${h.timestamp}'" title="ดูรายละเอียด">
+                                    <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&${viewParam}'" title="ดูรายละเอียด">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-outline-danger" onclick="alert('จำลองการเปิดไฟล์ PDF: ${h.name}')" title="ดาวน์โหลด PDF">
@@ -898,13 +908,12 @@
                 });
             }
 
+            // Update Current Status Card (Topmost status from history)
             updateCurrentStatusCard(p, history.length > 0 ? history[0] : null);
         }
 
         function updateCurrentStatusCard(p, latest) {
             const card = document.getElementById('currentStatusCard');
-
-            // ถ้าไม่มีข้อมูลล่าสุดเลย และสถานะไม่ได้รอคัดกรอง ให้ซ่อนการ์ด
             if (!latest && p.status === 'wait_screen') return;
 
             card.classList.remove('d-none');
@@ -994,14 +1003,14 @@
                     card.classList.add('his-severe');
                     els.text.innerText = 'NAF C (Severe Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-severe';
-                    els.desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
+                    els.desc.innerText = 'ขาดสารอาหารระดับรุนแรง';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-urgent">
                             <div class="d-flex">
                                 <i class="fa-solid fa-truck-medical clinical-action-icon"></i>
                                 <div>
                                     <div class="clinical-title">รักษาเร่งด่วน (24 ชม.)</div>
-                                    <p class="clinical-desc">แจ้งแพทย์และนักกำหนดอาหาร/นักโภชนาการ ให้การดูแลภายใน 24 ชั่วโมง</p>
+                                    <p class="clinical-desc">แจ้งแพทย์/นักโภชนาการ ให้การดูแลภายใน 24 ชั่วโมง</p>
                                 </div>
                             </div>
                         </div>
@@ -1011,13 +1020,13 @@
                     card.classList.add('his-risk');
                     els.text.innerText = 'NAF B (Moderate Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-risk';
-                    els.desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
+                    els.desc.innerText = 'ขาดสารอาหารระดับปานกลาง';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-overdue"> <div class="d-flex">
                                 <i class="fa-solid fa-user-doctor clinical-action-icon"></i>
                                 <div>
                                     <div class="clinical-title">ดูแลรักษา (3 วัน)</div>
-                                    <p class="clinical-desc">แจ้งแพทย์และนักกำหนดอาหาร/นักโภชนาการ ให้การดูแลภายใน 3 วัน</p>
+                                    <p class="clinical-desc">แจ้งแพทย์/นักโภชนาการ ให้การดูแลภายใน 3 วัน</p>
                                 </div>
                             </div>
                         </div>
@@ -1025,9 +1034,9 @@
                 } else {
                     // NAF A (Normal) -> สีเขียว
                     card.classList.add('his-normal');
-                    els.text.innerText = 'NAF A (Normal-Mild malnutrition)';
+                    els.text.innerText = 'NAF A (Normal/Mild)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-normal';
-                    els.desc.innerText = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
+                    els.desc.innerText = 'ภาวะโภชนาการปกติ หรือความเสี่ยงต่ำ';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-normal">
                             <div class="d-flex">
