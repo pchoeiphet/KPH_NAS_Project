@@ -1386,8 +1386,12 @@
             const userNameEl = document.querySelector('.user-name');
             if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
 
+            // คำนวณครั้งที่จากประวัติจริง
             const baseCount = patientsData[currentHn]?.historyCount || 0;
-            const currentCount = baseCount + 1;
+            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const nafHistory = history.filter(h => h.hn === currentHn && h.type === 'NAF');
+
+            const currentCount = baseCount + nafHistory.length + 1; // +1 สำหรับครั้งปัจจุบัน
             document.getElementById('assessCount').value = currentCount;
 
             const docNo = `Document No.: NAF-${currentHn}-${String(currentCount).padStart(3, '0')}`;
@@ -1401,7 +1405,6 @@
             else { otherInput.disabled = true; otherInput.value = ''; }
         }
 
-        // --- Logic for Weight Mode Toggle ---
         function toggleWeightMode() {
             const isUnknown = document.getElementById('unknownWeight').checked;
             const standardSection = document.getElementById('standardWeightSection');
@@ -1596,17 +1599,55 @@
         }
 
         function saveData() {
+            // 1. ตรวจสอบข้อมูลจำเป็น (Validation)
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
             const r = document.getElementById('anthroReported').value;
 
-            if (!h && !l && !a && !r) {
+            if (!h && !l && !a && !r && !document.getElementById('unknownWeight').checked) {
+                // ถ้าไม่ได้ติ๊ก "ไม่ทราบน้ำหนัก" และไม่ได้กรอกส่วนสูงเลย ให้เตือน
                 document.getElementById('anthroAlert').classList.remove('d-none');
                 document.getElementById('anthroSection').scrollIntoView({ behavior: "smooth", block: "center" });
                 return;
             }
 
+            // 2. เตรียมข้อมูลสำหรับบันทึก
+            const scoreText = document.getElementById('totalScore').innerText;
+            const score = parseInt(scoreText) || 0;
+            const resultText = document.getElementById('nafLevel').innerText; // เช่น "NAF A (Normal...)"
+
+            // ดึงข้อมูลวันที่และเวลา
+            const dateStr = document.getElementById('assessDate').value;
+            const timeStr = document.getElementById('assessTime').value;
+            const fullDateTime = `${dateStr} ${timeStr}`;
+
+            const assessorName = document.getElementById('assessAssessor').value;
+
+            // 3. สร้าง Object ข้อมูล (Record)
+            const newRecord = {
+                hn: currentHn, // สำคัญมาก: ต้องระบุ HN เพื่อให้ไปขึ้นถูกคน
+                type: 'NAF',   // ระบุประเภทว่าเป็น NAF
+                name: 'แบบประเมินภาวะโภชนาการ (NAF)',
+                score: score,
+                result: resultText, // หน้า Profile จะใช้ข้อความนี้ไปเช็คสี (Normal/Moderate/Severe)
+                assessor: assessorName,
+                date: fullDateTime,
+                timestamp: Date.now(), // ใช้สำหรับเรียงลำดับเวลา
+                url: 'nutrition_alert_form.html'
+            };
+
+            // 4. บันทึกลง LocalStorage
+            // ดึงประวัติเดิมออกมา ถ้าไม่มีให้สร้าง Array ว่าง
+            let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+
+            // เพิ่มข้อมูลใหม่เข้าไป
+            history.push(newRecord);
+
+            // บันทึกกลับลงเครื่อง
+            localStorage.setItem('nas_patient_history', JSON.stringify(history));
+
+            // 5. แจ้งเตือนและย้อนกลับ
             alert('บันทึกผลการประเมินเรียบร้อย');
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
