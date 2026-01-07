@@ -853,8 +853,8 @@
                 history.forEach((h) => {
                     // 2. Type Badge with COLORS
                     let typeBadge = '';
-                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
-                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
+                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`; 
+                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`; 
 
                     // 5 & 6 Result Columns
                     let colSpent = '-';
@@ -989,13 +989,13 @@
                         </div>
                     `;
                 }
-            }
+            } 
             // --- กรณีเป็น NAF (ส่วนที่เพิ่มเข้ามา) ---
             else if (activeData.type === 'NAF') {
                 els.badge.innerText = 'Latest: NAF';
                 els.badge.className = 'badge badge-light border text-success px-2';
                 els.label.innerText = 'ผลการประเมินล่าสุด (NAF)';
-
+                
                 const score = parseInt(activeData.score);
 
                 if (score >= 11) {
