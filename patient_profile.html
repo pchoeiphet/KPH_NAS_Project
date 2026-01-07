@@ -556,7 +556,7 @@
             <div class="col-12">
                 <div id="currentStatusCard" class="his-container d-none p-0 overflow-hidden">
                     <div class="row no-gutters">
-                        <div class="col-md-8 p-4 d-flex flex-column border-right-md">
+                        <div class="col-md-8 p-3 d-flex flex-column border-right-md">
                             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
                                 <h6 class="font-weight-bold m-0 text-primary-custom">
                                     <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
@@ -783,17 +783,14 @@
             document.getElementById('p_phone').innerText = p.phone || "-";
         }
 
-        // --- 9-Column Table Logic ---
+        // --- 9-Column Table Logic (แก้ไขแล้ว) ---
         function renderHistory(p) {
             let history = [];
 
-            // 1. Mock Data Generation (Old Data)
-            // ----------------------------------------------------------------
+            // 1. Mock Data (ข้อมูลเก่า)
             if (p.screenDate && p.screenDate !== '-') {
                 let screenScore = p.scoreVal;
                 if (p.status === 'assessed') screenScore = 3;
-
-                // Mock timestamp for sorting (Old)
                 history.push({
                     timestamp: 1000,
                     date: p.screenDate,
@@ -801,7 +798,7 @@
                     name: 'แบบคัดกรองภาวะโภชนาการ (SPENT)',
                     score: screenScore,
                     result: screenScore >= 3 ? 'มีความเสี่ยง' : 'ปกติ',
-                    assessor: p.screenAssessor || 'พยาบาลวิชาชีพ (ไม่ระบุ)',
+                    assessor: p.screenAssessor || 'พยาบาลวิชาชีพ',
                     url: 'nutrition_screening_form.html'
                 });
             }
@@ -810,8 +807,6 @@
                 let nafResult = 'Normal (A)';
                 if (p.nafScore === 'B') nafResult = 'Moderate (B)';
                 if (p.nafScore === 'C') nafResult = 'Severe (C)';
-
-                // Mock timestamp for sorting (Newer than screening)
                 history.push({
                     timestamp: 2000,
                     date: p.assessDate,
@@ -825,24 +820,20 @@
             }
 
             // 2. Fetch New Data from LocalStorage
-            // ----------------------------------------------------------------
             const storedHistory = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             const patientHistory = storedHistory.filter(item => item.hn === p.hn);
 
-            // Merge Mock + Stored
+            // Merge & Sort
             history = [...history, ...patientHistory];
-
-            // Sort by Date (Oldest first to assign ID correctly, then reverse for display)
             history.sort((a, b) => a.timestamp - b.timestamp);
 
-            // Assign "Count" ID
+            // Assign Display ID
             history = history.map((item, index) => {
                 return { ...item, displayId: index + 1 };
             });
 
-            // Reverse to show latest first
+            // Reverse (Show Latest First)
             history.reverse();
-
 
             // Render Table
             const tbody = document.getElementById('historyTableBody');
@@ -854,15 +845,14 @@
                 document.getElementById('noHistory').classList.add('d-none');
 
                 history.forEach((h) => {
-                    // 2. Type Badge with COLORS
+                    // Badge Color
                     let typeBadge = '';
-                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`; // Blue
-                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`; // Green
+                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
+                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
 
-                    // 5 & 6 Result Columns
+                    // Result Text
                     let colSpent = '-';
                     let colNaf = '-';
-
                     if (h.type === 'SPENT') {
                         colSpent = h.score >= 2 ? `<span class="text-warning font-weight-bold">เสี่ยง</span>` : `<span class="text-success">ปกติ</span>`;
                     } else if (h.type === 'NAF') {
@@ -871,16 +861,17 @@
                         else colNaf = `<span class="badge badge-success">NAF A</span>`;
                     }
 
-                    // 7. Assessor
+                    // Assessor Highlight
                     let displayAssessor = h.assessor;
                     if (h.assessor === CURRENT_USER) {
                         displayAssessor = `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>`;
                     }
 
+                    // *** จุดสำคัญที่แก้ไข: เพิ่ม &view=${h.timestamp} ในลิงก์ ***
                     const row = `
                         <tr data-type="${h.type}">
                             <td>
-                                <a href="${h.url}?hn=${p.hn}" class="font-weight-bold text-dark text-decoration-none">
+                                <a href="${h.url}?hn=${p.hn}&view=${h.timestamp}" class="font-weight-bold text-dark text-decoration-none">
                                     ${h.name}
                                 </a>
                             </td>
@@ -893,7 +884,7 @@
                             <td><small>${h.date}</small></td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}'" title="ดูรายละเอียด">
+                                    <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&view=${h.timestamp}'" title="ดูรายละเอียด">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-outline-danger" onclick="alert('จำลองการเปิดไฟล์ PDF: ${h.name}')" title="ดาวน์โหลด PDF">
@@ -907,7 +898,6 @@
                 });
             }
 
-            // Update Current Status Card (Topmost status from history)
             updateCurrentStatusCard(p, history.length > 0 ? history[0] : null);
         }
 
