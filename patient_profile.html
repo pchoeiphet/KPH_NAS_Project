@@ -907,9 +907,12 @@
 
         function updateCurrentStatusCard(p, latest) {
             const card = document.getElementById('currentStatusCard');
+
+            // ถ้าไม่มีข้อมูลล่าสุดเลย และสถานะไม่ได้รอคัดกรอง ให้ซ่อนการ์ด
             if (!latest && p.status === 'wait_screen') return;
 
             card.classList.remove('d-none');
+            // รีเซ็ตคลาสสีเดิมออกก่อน
             card.className = 'his-container p-0 overflow-hidden mb-4';
 
             const els = {
@@ -925,9 +928,9 @@
 
             let activeData = latest;
 
-            // If no latest (unlikely if called), fallback to p
             if (!activeData) return;
 
+            // แสดงชื่อผู้ประเมิน
             if (activeData.assessor === CURRENT_USER) {
                 els.assessor.innerHTML = `<span class="text-primary font-weight-bold">${activeData.assessor} (คุณ)</span>`;
             } else {
@@ -937,15 +940,17 @@
             els.date.innerText = activeData.date;
             els.score.innerText = activeData.score;
 
+            // --- กรณีเป็น SPENT ---
             if (activeData.type === 'SPENT') {
                 els.badge.innerText = 'Latest: SPENT';
+                els.badge.className = 'badge badge-light border text-primary px-2';
                 els.label.innerText = 'ผลการคัดกรองล่าสุด';
 
                 if (activeData.score >= 2) {
                     // High Risk
                     card.classList.add('his-risk');
                     els.text.innerText = 'มีความเสี่ยง (At Risk)';
-                    els.text.classList.add('text-his-risk');
+                    els.text.className = 'his-result mt-1 mb-2 text-his-risk';
                     els.desc.innerText = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-urgent">
@@ -954,7 +959,9 @@
                                 <div>
                                     <div class="clinical-title">ต้องประเมิน NAF</div>
                                     <p class="clinical-desc">โปรดทำแบบประเมิน Nutrition Alert Form โดยละเอียด</p>
-                                    <button class="btn btn-sm btn-warning mt-2" onclick="window.location.href='nutrition_alert_form.html?hn=${p.hn}'">ทำแบบประเมินทันที</button>
+                                    <button class="btn btn-sm btn-warning mt-2 shadow-sm" onclick="window.location.href='nutrition_alert_form.html?hn=${p.hn}'">
+                                        <i class="fa-solid fa-clipboard-list mr-1"></i> ทำแบบประเมินทันที
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -963,7 +970,7 @@
                     // Normal
                     card.classList.add('his-normal');
                     els.text.innerText = 'ปกติ (Normal)';
-                    els.text.classList.add('text-his-normal');
+                    els.text.className = 'his-result mt-1 mb-2 text-his-normal';
                     els.desc.innerText = 'ผู้ป่วยมีความเสี่ยงต่ำ ไม่จำเป็นต้องประเมิน NAF ต่อ';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-normal">
@@ -977,9 +984,66 @@
                         </div>
                     `;
                 }
-            } else {
-                // NAF Logic (Simplified for demo)
-                // ... (Logic for NAF status update similar to previous)
+            }
+            // --- กรณีเป็น NAF (ส่วนที่เพิ่มเข้ามา) ---
+            else if (activeData.type === 'NAF') {
+                els.badge.innerText = 'Latest: NAF';
+                els.badge.className = 'badge badge-light border text-success px-2';
+                els.label.innerText = 'ผลการประเมินล่าสุด (NAF)';
+
+                const score = parseInt(activeData.score);
+
+                if (score >= 11) {
+                    // NAF C (Severe) -> สีแดง
+                    card.classList.add('his-severe');
+                    els.text.innerText = 'NAF C (Severe Malnutrition)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-severe';
+                    els.desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-urgent">
+                            <div class="d-flex">
+                                <i class="fa-solid fa-truck-medical clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">รักษาเร่งด่วน (24 ชม.)</div>
+                                    <p class="clinical-desc">แจ้งแพทย์และนักกำหนดอาหาร/นักโภชนาการ ให้การดูแลภายใน 24 ชั่วโมง</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (score >= 6) {
+                    // NAF B (Moderate) -> สีเหลือง/ส้ม
+                    card.classList.add('his-risk');
+                    els.text.innerText = 'NAF B (Moderate Malnutrition)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-risk';
+                    els.desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-overdue"> <div class="d-flex">
+                                <i class="fa-solid fa-user-doctor clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ดูแลรักษา (3 วัน)</div>
+                                    <p class="clinical-desc">แจ้งแพทย์และนักกำหนดอาหาร/นักโภชนาการ ให้การดูแลภายใน 3 วัน</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // NAF A (Normal) -> สีเขียว
+                    card.classList.add('his-normal');
+                    els.text.innerText = 'NAF A (Normal-Mild malnutrition)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-normal';
+                    els.desc.innerText = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-normal">
+                            <div class="d-flex">
+                                <i class="fa-regular fa-clock clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ประเมินซ้ำ (7 วัน)</div>
+                                    <p class="clinical-desc">ติดตามผลและประเมินซ้ำภายใน 7 วัน</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             }
         }
 
