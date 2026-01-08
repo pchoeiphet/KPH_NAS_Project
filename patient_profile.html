@@ -284,6 +284,11 @@
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                         </h6>
                         <div class="form-inline mt-2 mt-md-0">
+
+                            <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="resetHistory()">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)
+                            </button>
+
                             <label class="small mr-2 text-muted">ตัวกรอง:</label>
                             <select class="custom-select custom-select-sm" id="typeFilter" onchange="filterHistory()">
                                 <option value="all">ทั้งหมด (All)</option>
@@ -737,6 +742,27 @@
                         </div>
                     `;
                 }
+            }
+        }
+
+        // --- ฟังก์ชัน Reset (ปุ่มใหม่) ---
+        function resetHistory() {
+            if (!currentPatient) return;
+
+            if (confirm(`ยืนยันการ "ล้างประวัติทั้งหมด" ของผู้ป่วย: ${currentPatient.name}?\n\n(การกระทำนี้จะลบข้อมูลที่บันทึกใหม่ และซ่อนข้อมูลประวัติเก่า เพื่อเริ่มนับ 1 ใหม่)`)) {
+                // 1. ลบข้อมูลใน LocalStorage เฉพาะของ HN นี้
+                let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+                const newHistory = history.filter(item => item.hn !== currentPatient.hn);
+                localStorage.setItem('nas_patient_history', JSON.stringify(newHistory));
+
+                // 2. ตั้ง Flag ว่าถูก Reset แล้ว (เพื่อซ่อน Mock Data)
+                localStorage.setItem('nas_reset_' + currentPatient.hn, 'true');
+
+                // 3. ล้างข้อมูลส่งต่อ (ถ้ามีค้าง)
+                localStorage.removeItem('nas_transfer_data');
+
+                alert('ล้างข้อมูลเรียบร้อย เริ่มต้นใหม่ได้ทันที');
+                window.location.reload();
             }
         }
 
