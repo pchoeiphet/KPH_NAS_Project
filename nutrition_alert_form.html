@@ -928,8 +928,9 @@
                 </form>
             </div>
             <div class="form-actions-box">
-                <button type="button" class="btn btn-cancel-custom" onclick="window.history.back()">
-                    <i class="fa-solid fa-xmark mr-2"></i> ยกเลิก
+                <button type="button" class="btn btn-secondary"
+                    onclick="window.location.href='patient_profile.html?hn=' + currentHn">
+                    ยกเลิก / ย้อนกลับ
                 </button>
                 <button type="button" class="btn btn-save-custom" onclick="saveData()">
                     <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
@@ -983,9 +984,8 @@
 
             if (patientsData[currentHn]) {
                 const p = patientsData[currentHn].info;
-                // แสดงข้อมูลส่วนหัว
                 document.getElementById('p_hn').innerText = p.hn;
-                document.getElementById('p_an').innerText = p.an;
+                document.getElementById('p_an').innerText = p.an || '-';
                 document.getElementById('p_name').innerText = p.name;
                 document.getElementById('p_age').innerText = p.age;
                 document.getElementById('p_ward').innerText = p.ward;
@@ -996,34 +996,45 @@
                 if (document.getElementById('p_phone')) document.getElementById('p_phone').innerText = p.phone;
                 if (document.getElementById('p_underlying')) document.getElementById('p_underlying').innerText = p.underlying;
 
-                // -------------------------------------------------------------
-                // *** LOGIC ดึงข้อมูลการวินิจฉัยโรค (Auto-fill) ***
-                // -------------------------------------------------------------
                 const diagnosisInput = document.getElementById('diagnosis');
+                const weightInput = document.getElementById('currentWeight');
+                const heightInput = document.getElementById('anthroHeight');
 
                 // ตรวจสอบว่ามีการฝากข้อมูลมาจากหน้าแบบคัดกรองหรือไม่?
                 const transferData = JSON.parse(localStorage.getItem('nas_transfer_data'));
 
-                if (transferData && transferData.hn === currentHn && transferData.diagnosis) {
-                    // กรณี A: มาจากแบบคัดกรอง (ต่อเนื่อง) -> เอาค่าที่ส่งมาใส่เลย
-                    diagnosisInput.value = transferData.diagnosis;
+                if (transferData && transferData.hn === currentHn) {
+                    // 1. รับค่า Diagnosis
+                    if (diagnosisInput && transferData.diagnosis) {
+                        diagnosisInput.value = transferData.diagnosis;
+                    }
 
-                    // (Optional) ล้างค่าทิ้งเมื่อใช้แล้ว เพื่อไม่ให้ค้างไปใช้กับเคสอื่นโดยไม่ตั้งใจ
-                    localStorage.removeItem('nas_transfer_data');
+                    // 2. รับค่า น้ำหนัก (ถ้ามี)
+                    if (weightInput && transferData.weight) {
+                        weightInput.value = transferData.weight;
+                    }
+
+                    // 3. รับค่า ส่วนสูง (ถ้ามี)
+                    if (heightInput && transferData.height) {
+                        heightInput.value = transferData.height;
+                    }
+
+                    // 4. สั่งคำนวณ BMI ใหม่ทันที (เพื่อให้คะแนนขึ้น)
+                    if (transferData.weight || transferData.height) {
+                        calculateBMI(); // ฟังก์ชันคำนวณในหน้า NAF
+                    }
                 } else {
-                    // กรณี B: กดทำใหม่เอง และไม่มีข้อมูลส่งมา -> ปล่อยว่างไว้ให้กรอก
-                    if (!viewDocNo) { // ถ้าไม่ใช่โหมดดูย้อนหลัง
-                        diagnosisInput.value = '';
+                    // ถ้าไม่มีข้อมูลส่งมา และไม่ใช่โหมดดูย้อนหลัง -> ให้เคลียร์ค่า
+                    if (!viewDocNo) {
+                        if (diagnosisInput) diagnosisInput.value = '';
                     }
                 }
-                // -------------------------------------------------------------
 
             } else {
                 document.getElementById('p_hn').innerText = currentHn;
                 document.getElementById('p_name').innerText = 'ไม่พบข้อมูล';
             }
 
-            // ตรวจสอบโหมดการทำงาน (ดูย้อนหลัง หรือ สร้างใหม่)
             if (viewDocNo) {
                 loadSavedData(viewDocNo);
             } else {

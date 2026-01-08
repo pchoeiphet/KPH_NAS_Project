@@ -25,7 +25,7 @@
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
-    
+
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
@@ -43,7 +43,7 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
                         style="border-radius: 12px; min-width: 250px;">
-    
+
                         <div class="dropdown-header bg-light border-bottom py-3">
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
@@ -59,7 +59,7 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <div class="p-2">
                             <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
                                 งานของฉัน</h6>
@@ -78,21 +78,22 @@
                                         style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
                             </a>
                         </div>
-    
+
                         <div class="dropdown-divider m-0"></div>
-    
+
                         <div class="p-2">
                             <a class="dropdown-item py-2 rounded" href="#">
                                 <i class="fa-solid fa-file-signature mr-2 text-warning"
                                     style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
                             </a>
                         </div>
-    
+
                         <div class="dropdown-divider m-0"></div>
-    
+
                         <div class="p-2">
                             <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
-                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px; text-align:center;"></i>
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i>
                                 ออกจากระบบ
                             </a>
                         </div>
@@ -125,8 +126,7 @@
                             </div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                <span class="font-weight-bold" id="p_name"
-                                    style="font-size: 1.1rem;">-</span>
+                                <span class="font-weight-bold" id="p_name" style="font-size: 1.1rem;">-</span>
                             </div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3">
                                 <small class="text-muted d-block">อายุ</small>
@@ -463,12 +463,12 @@
         let currentHn = '';
         let currentScore = 0;
         let currentDocNo = '';
-        let viewDocNo = null; // <-- เปลี่ยนชื่อตัวแปรจาก viewModeTs เป็น viewDocNo
+        let viewDocNo = null;
 
         document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
             currentHn = urlParams.get('hn') || '6605112';
-            viewDocNo = urlParams.get('docNo'); // <-- รับค่า parameter 'docNo' แทน 'view'
+            viewDocNo = urlParams.get('docNo');
 
             // แสดงข้อมูลผู้ป่วย
             if (patientsData[currentHn]) {
@@ -494,11 +494,11 @@
             }
         });
 
-        // ฟังก์ชันโหลดข้อมูลเก่ามาแสดง (รับ DocNo แทน Timestamp)
+        // ฟังก์ชันโหลดข้อมูลเก่ามาแสดง (รับ DocNo)
         function loadSavedData(docNo) {
             const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
 
-            // <-- ค้นหาด้วย docNo แทน timestamp
+            // <-- ค้นหาด้วย docNo
             const record = history.find(h => h.docNo === docNo);
 
             if (!record) {
@@ -718,16 +718,49 @@
         }
 
         function saveLater(isHighRisk) {
+            // 1. บันทึกข้อมูลคัดกรองลงประวัติ
             saveToLocalStorage(isHighRisk);
+
+            // --- [ส่วนส่งข้อมูลข้ามหน้า] ---
+            const diagnosisText = document.getElementById('diagnosis').value;
+
+            // ดึงน้ำหนัก/ส่วนสูง (จากหน้าคัดกรอง)
+            const weightVal = document.getElementById('currentWeight').value;
+            const heightVal = document.getElementById('heightVal').value;
+
+            const transferData = {
+                hn: currentHn,
+                diagnosis: diagnosisText,
+                weight: weightVal, // ส่งน้ำหนัก
+                height: heightVal  // ส่งส่วนสูง
+            };
+            localStorage.setItem('nas_transfer_data', JSON.stringify(transferData));
+            // -----------------------------
+
             alert(`บันทึกข้อมูลเรียบร้อย (Ref: ${currentDocNo})`);
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
 
         function openAssessment(isHighRisk) {
+            // 1. บันทึกข้อมูลคัดกรองลงประวัติ (SPENT ถูกบันทึกแล้ว ณ จุดนี้)
             saveToLocalStorage(isHighRisk);
-            window.location.href = `nutrition_alert_form.html?hn=${currentHn}`;
-        }
 
+            // --- เตรียมข้อมูลส่งข้ามหน้า ---
+            const diagnosisText = document.getElementById('diagnosis').value;
+            const weightVal = document.getElementById('currentWeight').value;
+            const heightVal = document.getElementById('heightVal').value;
+
+            const transferData = {
+                hn: currentHn,
+                diagnosis: diagnosisText,
+                weight: weightVal,
+                height: heightVal
+            };
+            localStorage.setItem('nas_transfer_data', JSON.stringify(transferData));
+            
+            // ใช้ replace เพื่อไม่ให้กด Back แล้วกลับมาหน้าคัดกรองอีก
+            window.location.replace(`nutrition_alert_form.html?hn=${currentHn}`);
+        }
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
         }
