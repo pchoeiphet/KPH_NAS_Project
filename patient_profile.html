@@ -333,6 +333,7 @@
     <script>
         const CURRENT_USER = 'เพชรลดา เชยเพ็ชร';
 
+        // ปรับข้อมูลผู้ป่วยทุกคนให้เริ่มต้นใหม่ (Clean State) เหมือนกันหมด
         const patients = [
             {
                 id: 1,
@@ -341,11 +342,9 @@
                 underlying: 'ความดันโลหิตสูง (HT)',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
                 admitDate: '15 พ.ย. 67 08:30 น.',
-                screenDate: '24 พ.ย. 67',
-                screenCount: 2,
-                assessDate: '-',
-                status: 'normal', scoreVal: 1, nafScore: null,
-                screenAssessor: 'พย. สมศรี ใจดี',
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '081-111-1111'
             },
             {
@@ -355,9 +354,8 @@
                 underlying: 'เบาหวาน (DM), โรคไต (CKD)',
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '25 พ.ย. 67 10:15 น.',
-                screenDate: '-',
-                screenCount: 0,
-                assessDate: '-',
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
                 status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '082-222-2222'
             },
@@ -368,11 +366,9 @@
                 underlying: 'ไขมันในเลือดสูง (DLP)',
                 doctor: 'นพ. เก่งกาจ วิชาการ',
                 admitDate: '18 พ.ย. 67 14:20 น.',
-                screenDate: '20 พ.ย. 67',
-                screenCount: 1,
-                assessDate: '-',
-                status: 'wait_assess', scoreVal: 3, nafScore: null,
-                screenAssessor: 'พย. สายใจ เก่งงาน',
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '083-333-3333'
             },
             {
@@ -382,11 +378,9 @@
                 underlying: 'ปฏิเสธโรคประจำตัว',
                 doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
                 admitDate: '10 พ.ย. 67 20:45 น.',
-                screenDate: '15 พ.ย. 67',
-                screenCount: 1,
-                assessDate: '-',
-                status: 'normal', scoreVal: 0, nafScore: null,
-                screenAssessor: 'พย. สมศรี ใจดี',
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '084-444-4444'
             },
             {
@@ -396,12 +390,9 @@
                 underlying: 'ไม่มี',
                 doctor: 'พญ. ใจดี มีเมตตา',
                 admitDate: '23 ธ.ค. 68 10:45 น.',
-                screenDate: '22 พ.ย. 67',
-                screenCount: 1,
-                assessDate: '23 ธ.ค. 68',
-                status: 'assessed', scoreVal: 9, nafScore: 'B',
-                screenAssessor: 'พย. วรรณา รักดี',
-                assessAssessor: CURRENT_USER,
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '089-999-9999'
             },
             {
@@ -411,12 +402,9 @@
                 underlying: 'มะเร็งปอด',
                 doctor: 'นพ. สมศักดิ์ รักษาดี',
                 admitDate: '20 พ.ย. 67 11:00 น.',
-                screenDate: '21 พ.ย. 67',
-                screenCount: 1,
-                assessDate: '22 พ.ย. 67',
-                status: 'assessed', scoreVal: 15, nafScore: 'C',
-                screenAssessor: 'พย. สมศรี ใจดี',
-                assessAssessor: 'นักโภชนาการ ปราณี (คนอื่น)',
+                // --- Reset สถานะ ---
+                screenDate: '-', screenCount: 0, assessDate: '-',
+                status: 'wait_screen', scoreVal: null, nafScore: null,
                 phone: '085-555-5555'
             }
         ];
@@ -455,81 +443,41 @@
             document.getElementById('p_phone').innerText = p.phone || "-";
         }
 
-        // --- 9-Column Table Logic (แก้ไขลิงก์เป็น docNo) ---
+        // --- ฟังก์ชัน Render History (ไม่มี Mockup แล้ว) ---
         function renderHistory(p) {
             let history = [];
 
-            // 1. Mock Data Generation (Old Data)
-            if (p.screenDate && p.screenDate !== '-') {
-                let screenScore = p.scoreVal;
-                if (p.status === 'assessed') screenScore = 3;
+            // 1. (ลบ Mock Data เก่าออกทั้งหมด)
+            // ตอนนี้จะไม่มีการสร้าง SPENT-OLD-001 หรือ NAF-OLD-001 แล้ว
 
-                history.push({
-                    timestamp: 1000,
-                    date: p.screenDate,
-                    type: 'SPENT',
-                    name: 'แบบคัดกรองภาวะโภชนาการ (SPENT)',
-                    score: screenScore,
-                    result: screenScore >= 3 ? 'มีความเสี่ยง' : 'ปกติ',
-                    assessor: p.screenAssessor || 'พยาบาลวิชาชีพ (ไม่ระบุ)',
-                    url: 'nutrition_screening_form.html',
-                    docNo: 'SPENT-OLD-001'
-                });
-            }
-
-            if (p.status === 'assessed') {
-                let nafResult = 'Normal (A)';
-                if (p.nafScore === 'B') nafResult = 'Moderate (B)';
-                if (p.nafScore === 'C') nafResult = 'Severe (C)';
-
-                history.push({
-                    timestamp: 2000,
-                    date: p.assessDate,
-                    type: 'NAF',
-                    name: 'แบบประเมินภาวะโภชนาการ (NAF)',
-                    score: p.scoreVal,
-                    result: nafResult,
-                    assessor: p.assessAssessor || CURRENT_USER,
-                    url: 'nutrition_alert_form.html',
-                    docNo: 'NAF-OLD-001'
-                });
-            }
-
-            // 2. Fetch New Data from LocalStorage
+            // 2. ดึงข้อมูลจริงจาก LocalStorage
             const storedHistory = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             const patientHistory = storedHistory.filter(item => item.hn === p.hn);
 
-            // Merge Mock + Stored
-            history = [...history, ...patientHistory];
+            // รวมข้อมูล (ตอนนี้จะมีแค่ข้อมูลใหม่)
+            history = [...patientHistory];
 
             // -----------------------------------------------------------
-            // 🔴 ส่วนที่แก้ไข: Logic การนับแยกประเภท (Fix Count)
+            // Logic การนับแยกประเภท
             // -----------------------------------------------------------
-
-            // 1. เรียงจาก "เก่า -> ใหม่" ก่อน (เพื่อให้นับ 1, 2, 3 ได้ถูกลำดับเวลา)
             history.sort((a, b) => a.timestamp - b.timestamp);
 
-            // 2. ประกาศตัวนับแยก
             let countSpent = 0;
             let countNaf = 0;
 
-            // 3. วนลูปเพื่อนับเลขตามประเภท
             history = history.map((item) => {
                 let showId = 0;
-
                 if (item.type === 'SPENT') {
-                    countSpent++;       // ถ้าเป็น SPENT ให้บวกตัวนับ SPENT
+                    countSpent++;
                     showId = countSpent;
                 } else if (item.type === 'NAF') {
-                    countNaf++;         // ถ้าเป็น NAF ให้บวกตัวนับ NAF
+                    countNaf++;
                     showId = countNaf;
                 }
-
-                // คืนค่า Object เดิม + displayId ที่ถูกต้อง
                 return { ...item, displayId: showId };
             });
 
-            // 4. เรียงกลับ "ใหม่ -> เก่า" เพื่อแสดงผล (ล่าสุดอยู่บนสุด)
+            // เรียงกลับ "ใหม่ -> เก่า"
             history.reverse();
 
             // -----------------------------------------------------------
@@ -544,12 +492,10 @@
                 document.getElementById('noHistory').classList.add('d-none');
 
                 history.forEach((h) => {
-                    // 2. Type Badge with COLORS
                     let typeBadge = '';
                     if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
                     else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
 
-                    // 5 & 6 Result Columns
                     let colSpent = '-';
                     let colNaf = '-';
 
@@ -561,13 +507,11 @@
                         else colNaf = `<span class="badge badge-success">NAF A</span>`;
                     }
 
-                    // 7. Assessor
                     let displayAssessor = h.assessor;
                     if (h.assessor === CURRENT_USER) {
                         displayAssessor = `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>`;
                     }
 
-                    // ใช้ docNo ถ้ามี ถ้าไม่มีใช้ timestamp
                     const viewParam = h.docNo ? `docNo=${h.docNo}` : `view=${h.timestamp}`;
 
                     const row = `
@@ -601,16 +545,20 @@
                 });
             }
 
-            // Update Current Status Card (Topmost status from history)
+            // Update Card
             updateCurrentStatusCard(p, history.length > 0 ? history[0] : null);
         }
 
         function updateCurrentStatusCard(p, latest) {
             const card = document.getElementById('currentStatusCard');
-            if (!latest && p.status === 'wait_screen') return;
+
+            // ถ้าไม่มีประวัติล่าสุดเลย ให้ซ่อนการ์ดไปเลย
+            if (!latest) {
+                card.classList.add('d-none');
+                return;
+            }
 
             card.classList.remove('d-none');
-            // รีเซ็ตคลาสสีเดิมออกก่อน
             card.className = 'his-container p-0 overflow-hidden mb-4';
 
             const els = {
@@ -626,9 +574,6 @@
 
             let activeData = latest;
 
-            if (!activeData) return;
-
-            // แสดงชื่อผู้ประเมิน
             if (activeData.assessor === CURRENT_USER) {
                 els.assessor.innerHTML = `<span class="text-primary font-weight-bold">${activeData.assessor} (คุณ)</span>`;
             } else {
@@ -638,14 +583,12 @@
             els.date.innerText = activeData.date;
             els.score.innerText = activeData.score;
 
-            // --- กรณีเป็น SPENT ---
             if (activeData.type === 'SPENT') {
                 els.badge.innerText = 'Latest: SPENT';
                 els.badge.className = 'badge badge-light border text-primary px-2';
                 els.label.innerText = 'ผลการคัดกรองล่าสุด';
 
                 if (activeData.score >= 2) {
-                    // High Risk
                     card.classList.add('his-risk');
                     els.text.innerText = 'มีความเสี่ยง (At Risk)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-risk';
@@ -665,7 +608,6 @@
                         </div>
                     `;
                 } else {
-                    // Normal
                     card.classList.add('his-normal');
                     els.text.innerText = 'ปกติ (Normal)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-normal';
@@ -683,7 +625,6 @@
                     `;
                 }
             }
-            // --- กรณีเป็น NAF (ส่วนที่เพิ่มเข้ามา) ---
             else if (activeData.type === 'NAF') {
                 els.badge.innerText = 'Latest: NAF';
                 els.badge.className = 'badge badge-light border text-success px-2';
@@ -692,7 +633,6 @@
                 const score = parseInt(activeData.score);
 
                 if (score >= 11) {
-                    // NAF C (Severe) -> สีแดง
                     card.classList.add('his-severe');
                     els.text.innerText = 'NAF C (Severe Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-severe';
@@ -709,7 +649,6 @@
                         </div>
                     `;
                 } else if (score >= 6) {
-                    // NAF B (Moderate) -> สีเหลือง/ส้ม
                     card.classList.add('his-risk');
                     els.text.innerText = 'NAF B (Moderate Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-risk';
@@ -725,7 +664,6 @@
                         </div>
                     `;
                 } else {
-                    // NAF A (Normal) -> สีเขียว
                     card.classList.add('his-normal');
                     els.text.innerText = 'NAF A (Normal/Mild)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-normal';
@@ -745,20 +683,14 @@
             }
         }
 
-        // --- ฟังก์ชัน Reset (ปุ่มใหม่) ---
         function resetHistory() {
             if (!currentPatient) return;
 
             if (confirm(`ยืนยันการ "ล้างประวัติทั้งหมด" ของผู้ป่วย: ${currentPatient.name}?\n\n(การกระทำนี้จะลบข้อมูลที่บันทึกใหม่ และซ่อนข้อมูลประวัติเก่า เพื่อเริ่มนับ 1 ใหม่)`)) {
-                // 1. ลบข้อมูลใน LocalStorage เฉพาะของ HN นี้
                 let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
                 const newHistory = history.filter(item => item.hn !== currentPatient.hn);
                 localStorage.setItem('nas_patient_history', JSON.stringify(newHistory));
-
-                // 2. ตั้ง Flag ว่าถูก Reset แล้ว (เพื่อซ่อน Mock Data)
                 localStorage.setItem('nas_reset_' + currentPatient.hn, 'true');
-
-                // 3. ล้างข้อมูลส่งต่อ (ถ้ามีค้าง)
                 localStorage.removeItem('nas_transfer_data');
 
                 alert('ล้างข้อมูลเรียบร้อย เริ่มต้นใหม่ได้ทันที');
