@@ -1323,85 +1323,141 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // ข้อมูลผู้ป่วย (Mock Data)
+        // ข้อมูลผู้ป่วย (Mock Data) - เพิ่ม field 'diagnosis' สำหรับโรคปัจจุบัน
         const patientsData = {
-            '6601122': { info: { hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี', rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 1 / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999' }, historyCount: 1 },
-            '6604589': { info: { hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี', rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111' }, historyCount: 2 },
-            '6603321': { info: { hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี', rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333' }, historyCount: 1 },
-            '6609888': { info: { hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี', rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444' }, historyCount: 1 },
-            '6605112': { info: { hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี', rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222' }, historyCount: 0 },
-            '6609999': { info: { hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: '80 ปี', rights: 'ข้าราชการ', underlying: 'มะเร็งปอด', doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 201', admit: '20 พ.ย. 67 11:00 น.', phone: '085-555-5555' }, historyCount: 1 }
+            '6601122': {
+                info: {
+                    hn: '6601122', an: '6700450', name: 'นางสาวมานี มีนา', age: '30 ปี',
+                    rights: 'บัตรทอง', underlying: 'ปฏิเสธโรคประจำตัว', diagnosis: 'Acute Gastroenteritis (ลำไส้อักเสบเฉียบพลัน)', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 1 / 106', admit: '20 ธ.ค. 67 10:00 น.', phone: '089-999-9999'
+                },
+                historyCount: 1
+            },
+            '6604589': {
+                info: {
+                    hn: '6604589', an: '6700123', name: 'นายสมชาย ใจดี', age: '45 ปี',
+                    rights: 'บัตรทอง', underlying: 'ความดันโลหิตสูง (HT)', diagnosis: 'Hypertensive Urgency', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 101', admit: '15 พ.ย. 67 08:30 น.', phone: '081-111-1111'
+                },
+                historyCount: 2
+            },
+            '6603321': {
+                info: {
+                    hn: '6603321', an: '6700189', name: 'นายวิชัย กล้าหาญ', age: '75 ปี',
+                    rights: 'ประกันสังคม', underlying: 'ไขมันในเลือดสูง (DLP)', diagnosis: 'Dizziness / Vertigo', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'นพ. เก่งกาจ วิชาการ', ward: 'อายุรกรรมชาย 1 / 103', admit: '18 พ.ย. 67 14:20 น.', phone: '083-333-3333'
+                },
+                historyCount: 1
+            },
+            '6609888': {
+                info: {
+                    hn: '6609888', an: '6700300', name: 'นายมั่นคง ทรงพลัง', age: '55 ปี',
+                    rights: 'ชำระเงินเอง', underlying: 'ปฏิเสธโรคประจำตัว', diagnosis: 'Fracture Shaft of Femur', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'นพ. เชี่ยวชาญ งานละเอียด', ward: 'ศัลยกรรมกระดูก 3 / 105', admit: '10 พ.ย. 67 20:45 น.', phone: '084-444-4444'
+                },
+                historyCount: 1
+            },
+            '6605112': {
+                info: {
+                    hn: '6605112', an: '6700145', name: 'นางสมหญิง รักเรียน', age: '62 ปี',
+                    rights: 'ข้าราชการ', underlying: 'เบาหวาน (DM), โรคไต (CKD)', diagnosis: 'Diabetic Ketoacidosis (DKA)', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'พญ. ใจดี มีเมตตา', ward: 'อายุรกรรมหญิง 2 / 102', admit: '25 พ.ย. 67 10:15 น.', phone: '082-222-2222'
+                },
+                historyCount: 0
+            },
+            '6609999': {
+                info: {
+                    hn: '6609999', an: '6700999', name: 'นายหนักแน่น อดทน', age: '80 ปี',
+                    rights: 'ข้าราชการ', underlying: 'มะเร็งปอด', diagnosis: 'Pneumonia (ปอดอักเสบ)', // <-- เพิ่มโรคปัจจุบัน
+                    doctor: 'นพ. สมศักดิ์ รักษาดี', ward: 'อายุรกรรมชาย 1 / 201', admit: '20 พ.ย. 67 11:00 น.', phone: '085-555-5555'
+                },
+                historyCount: 1
+            }
         };
 
         let currentHn = '';
         let currentBmiScore = 0;
         let currentLabScore = 0;
-        let currentDocNo = ''; // เก็บเลขที่เอกสาร
-        let viewDocNo = null;  // รับค่าเลขที่เอกสารเพื่อดูย้อนหลัง
+        let currentDocNo = '';
+        let viewDocNo = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(window.location.search);
             currentHn = params.get('hn') || '6605112';
-            viewDocNo = params.get('docNo'); // รับค่า docNo จาก URL
-            
-            // แสดงข้อมูลผู้ป่วย
-            if(patientsData[currentHn]) {
+            viewDocNo = params.get('docNo');
+
+            if (patientsData[currentHn]) {
                 const p = patientsData[currentHn].info;
+                // แสดงข้อมูลส่วนหัว
                 document.getElementById('p_hn').innerText = p.hn;
                 document.getElementById('p_an').innerText = p.an;
                 document.getElementById('p_name').innerText = p.name;
                 document.getElementById('p_age').innerText = p.age;
                 document.getElementById('p_ward').innerText = p.ward;
                 document.getElementById('p_rights').innerText = p.rights;
+
+                // แสดงข้อมูลเพิ่มเติม
+                if (document.getElementById('p_doctor')) document.getElementById('p_doctor').innerText = p.doctor;
+                if (document.getElementById('p_admit')) document.getElementById('p_admit').innerText = p.admit;
+                if (document.getElementById('p_phone')) document.getElementById('p_phone').innerText = p.phone;
+                if (document.getElementById('p_underlying')) document.getElementById('p_underlying').innerText = p.underlying;
+
+                // *** Auto-fill การวินิจฉัยโรค (ดึงจาก diagnosis ไม่ใช่ underlying) ***
+                const diagnosisInput = document.getElementById('diagnosis');
+                if (diagnosisInput && !diagnosisInput.value) {
+                    diagnosisInput.value = p.diagnosis || '';
+                }
+
             } else {
                 document.getElementById('p_hn').innerText = currentHn;
                 document.getElementById('p_name').innerText = 'ไม่พบข้อมูล';
             }
 
             if (viewDocNo) {
-                // --- VIEW MODE (ดูย้อนหลัง) ---
                 loadSavedData(viewDocNo);
             } else {
-                // --- NEW MODE (สร้างใหม่) ---
                 setAssessmentDateTime();
             }
         });
 
-        // ฟังก์ชันโหลดข้อมูลเก่า (ใช้ DocNo)
+        // --- Helper: Generate Random ID ---
+        function generateDocNo(prefix, hn) {
+            // สุ่ม Doc ID แบบง่ายๆ (Timestamp + Random) หรือใช้ Logic เดิมแบบ Sequential ก็ได้
+            // ในที่นี้ขอใช้แบบ Sequential ตามที่เคยตกลงกันไว้ล่าสุดครับ
+            return null; // จะไปคำนวณใน setAssessmentDateTime
+        }
+
+        // --- View Mode Logic ---
         function loadSavedData(docNo) {
             const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
-            // ค้นหาด้วย docNo
             const record = history.find(h => h.docNo === docNo);
 
             if (!record) {
-                alert('ไม่พบข้อมูลเอกสารหมายเลข: ' + docNo);
+                alert('ไม่พบข้อมูลเอกสาร: ' + docNo);
                 return;
             }
 
-            // 1. แสดงลายน้ำและข้อมูลทั่วไป
             document.getElementById('viewModeWatermark').style.display = 'block';
             document.getElementById('assessAssessor').value = record.assessor;
             const dt = record.date.split(' ');
-            if(dt.length >= 3) document.getElementById('assessDate').value = dt.slice(0, 3).join(' ');
-            if(dt.length >= 4) document.getElementById('assessTime').value = dt[3];
-            
-            // ตั้งค่าเลขที่เอกสาร
+            if (dt.length >= 3) document.getElementById('assessDate').value = dt.slice(0, 3).join(' ');
+            if (dt.length >= 4) document.getElementById('assessTime').value = dt[3];
+
             currentDocNo = record.docNo;
             document.getElementById('docNoDisplay').innerText = `Document No.: ${currentDocNo}`;
-            
-            // คำนวณครั้งที่ (Count)
-            const nafHistory = history.filter(h => h.hn === currentHn && h.type === 'NAF');
-            nafHistory.sort((a,b) => a.timestamp - b.timestamp);
-            const index = nafHistory.findIndex(h => h.docNo === docNo);
-            const count = (patientsData[currentHn]?.historyCount || 0) + index + 1;
-            document.getElementById('assessCount').value = count;
 
-            // 2. คืนค่าข้อมูลในฟอร์ม (สำคัญ)
+            // แสดงครั้งที่
+            const nafHistory = history.filter(h => h.hn === currentHn && h.type === 'NAF');
+            nafHistory.sort((a, b) => a.timestamp - b.timestamp);
+            const index = nafHistory.findIndex(h => h.docNo === docNo);
+            document.getElementById('assessCount').value = (index >= 0) ? (index + 1) : '-';
+
+            // คืนค่า Form
             if (record.formData) {
                 record.formData.forEach(item => {
                     const el = document.getElementById(item.id);
                     if (el) {
-                        if (el.type === 'checkbox' || el.type === 'radio') {
+                        if (item.type === 'checkbox' || item.type === 'radio') {
                             el.checked = item.checked;
                         } else {
                             el.value = item.value;
@@ -1410,21 +1466,18 @@
                 });
             }
 
-            // 3. คำนวณผลลัพธ์ใหม่เพื่อให้หน้าจออัปเดต
-            calculateBMI(); 
-            if(document.getElementById('unknownWeight').checked) toggleWeightMode();
-            if(document.getElementById('useAlbumin').checked) selectLab('albumin');
-            if(document.getElementById('useTLC').checked) selectLab('tlc');
+            // Trigger Calculations
+            calculateBMI();
+            if (document.getElementById('unknownWeight').checked) toggleWeightMode();
+            if (document.getElementById('useAlbumin').checked) selectLab('albumin');
+            if (document.getElementById('useTLC').checked) selectLab('tlc');
             toggleOtherSource();
-            // จัดการช่อง Other ของโรค
             const otherMod = document.getElementById('disOtherMod');
-            if(otherMod && otherMod.checked) document.getElementById('disOtherModText').disabled = false;
+            if (otherMod && otherMod.checked) document.getElementById('disOtherModText').disabled = false;
             const otherSev = document.getElementById('disOtherSev');
-            if(otherSev && otherSev.checked) document.getElementById('disOtherSevText').disabled = false;
+            if (otherSev && otherSev.checked) document.getElementById('disOtherSevText').disabled = false;
 
-            calculateScore(); 
-
-            // 4. ล็อคหน้าจอ
+            calculateScore();
             disableForm();
         }
 
@@ -1432,21 +1485,26 @@
             const form = document.getElementById('nafForm');
             const elements = form.querySelectorAll('input, select, textarea, button');
             elements.forEach(el => {
-                el.disabled = true;
-                if(el.type === 'checkbox' || el.type === 'radio') {
-                    el.onclick = function() { return false; };
+                if (!el.classList.contains('btn-cancel-custom') && !el.onclick?.toString().includes('history.back')) {
+                    el.disabled = true;
+                }
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.onclick = function () { return false; };
                 }
             });
-            // ปิดการ์ด Lab
             document.querySelectorAll('.lab-choice-card').forEach(el => {
                 el.style.pointerEvents = 'none';
                 el.classList.add('read-only-overlay');
             });
-            // สลับปุ่ม
+            // ซ่อนปุ่ม Save
+            const saveBtn = document.querySelector('.btn-save-custom');
+            if (saveBtn) saveBtn.style.display = 'none';
+            // แสดงปุ่ม Back แบบเต็ม
             document.getElementById('footerActions').classList.add('d-none');
             document.getElementById('footerBackOnly').classList.remove('d-none');
         }
 
+        // --- New Mode Logic ---
         function setAssessmentDateTime() {
             const now = new Date();
             const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -1454,24 +1512,22 @@
             const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
             document.getElementById('assessDate').value = thaiDate;
             document.getElementById('assessTime').value = time;
-            
-            const userNameEl = document.querySelector('.user-name');
-            if(userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
 
-            // คำนวณครั้งที่และสร้าง DocNo ใหม่
+            const userNameEl = document.querySelector('.user-name');
+            if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
+
             const baseCount = patientsData[currentHn]?.historyCount || 0;
             const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             const nafHistory = history.filter(h => h.hn === currentHn && h.type === 'NAF');
-            const currentCount = baseCount + nafHistory.length + 1; 
-            
+            const currentCount = baseCount + nafHistory.length + 1;
             document.getElementById('assessCount').value = currentCount;
-            
-            // สร้าง DocNo ใหม่
+
+            // Sequential DocNo
             currentDocNo = `NAF-${currentHn}-${String(currentCount).padStart(3, '0')}`;
             document.getElementById('docNoDisplay').innerText = `Document No.: ${currentDocNo}`;
         }
 
-        // --- Helper Functions ---
+        // --- Helper Functions (เหมือนเดิม) ---
         function toggleOtherSource() {
             const isOther = document.getElementById('source3').checked;
             const otherInput = document.getElementById('otherSourceText');
@@ -1484,16 +1540,17 @@
             const labSection = document.getElementById('labSection');
             if (isUnknown) {
                 standardSection.classList.add('hidden-section'); labSection.classList.remove('hidden-section');
-                currentBmiScore = 0; 
+                currentBmiScore = 0;
             } else {
                 standardSection.classList.remove('hidden-section'); labSection.classList.add('hidden-section');
-                currentLabScore = 0; calculateBMI(); 
+                currentLabScore = 0; calculateBMI();
             }
             calculateScore();
         }
 
         function selectLab(type) {
-            document.getElementById(type === 'albumin' ? 'useAlbumin' : 'useTLC').checked = true;
+            if (type === 'albumin') document.getElementById('useAlbumin').checked = true;
+            else document.getElementById('useTLC').checked = true;
             toggleLabInputs();
         }
 
@@ -1520,16 +1577,22 @@
 
         function calculateLabScore() {
             let score = 0;
-            if (document.getElementById('useAlbumin').checked) {
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const isTLC = document.getElementById('useTLC').checked;
+            if (isAlbumin) {
                 const val = parseFloat(document.getElementById('valAlbumin').value);
-                if (!isNaN(val)) { if (val <= 2.5) score = 3; else if (val <= 2.9) score = 2; else if (val <= 3.5) score = 1; else score = 0; }
-            } else if (document.getElementById('useTLC').checked) {
+                if (!isNaN(val)) {
+                    if (val <= 2.5) score = 3; else if (val <= 2.9) score = 2; else if (val <= 3.5) score = 1; else score = 0;
+                }
+            } else if (isTLC) {
                 const val = parseFloat(document.getElementById('valTLC').value);
-                if (!isNaN(val)) { if (val <= 1000) score = 3; else if (val <= 1200) score = 2; else if (val <= 1500) score = 1; else score = 0; }
+                if (!isNaN(val)) {
+                    if (val <= 1000) score = 3; else if (val <= 1200) score = 2; else if (val <= 1500) score = 1; else score = 0;
+                }
             }
             currentLabScore = score;
             document.getElementById('labScoreText').innerText = score;
-            calculateScore(); 
+            calculateScore();
         }
 
         function calculateBMI() {
@@ -1554,9 +1617,9 @@
 
         function toggleOtherDisease(checkbox, inputId) {
             const input = document.getElementById(inputId);
-            if(input) {
+            if (input) {
                 input.disabled = !checkbox.checked;
-                if(!checkbox.checked) input.value = '';
+                if (!checkbox.checked) input.value = '';
             }
         }
 
@@ -1565,10 +1628,10 @@
             if (document.getElementById('unknownWeight').checked) total += currentLabScore;
             else {
                 total += currentBmiScore;
-                document.getElementsByName('weightMethod').forEach(r => { if(r.checked) total += parseInt(r.value); });
+                document.getElementsByName('weightMethod').forEach(r => { if (r.checked) total += parseInt(r.value); });
             }
             ['bodyShape', 'weightChange', 'foodType', 'foodAmount', 'foodAccess'].forEach(name => {
-                document.getElementsByName(name).forEach(r => { if(r.checked) total += parseInt(r.value); });
+                document.getElementsByName(name).forEach(r => { if (r.checked) total += parseInt(r.value); });
             });
             document.querySelectorAll('.symptom-check:checked, .disease-check:checked').forEach(chk => {
                 total += parseInt(chk.value);
@@ -1597,17 +1660,15 @@
             }
         }
 
-        // --- ฟังก์ชันบันทึกข้อมูล (Save) ---
         function saveData() {
-            // Check Validation
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
             const r = document.getElementById('anthroReported').value;
-            
+
             if (!h && !l && !a && !r && !document.getElementById('unknownWeight').checked) {
                 document.getElementById('anthroAlert').classList.remove('d-none');
-                document.getElementById('anthroSection').scrollIntoView({behavior: "smooth", block: "center"});
+                document.getElementById('anthroSection').scrollIntoView({ behavior: "smooth", block: "center" });
                 return;
             }
 
@@ -1640,8 +1701,8 @@
                 result: resultText,
                 assessor: assessorName,
                 date: `${dateStr} ${timeStr}`,
-                docNo: currentDocNo, // บันทึกเลขที่เอกสาร
-                timestamp: Date.now(), 
+                docNo: currentDocNo,
+                timestamp: Date.now(),
                 url: 'nutrition_alert_form.html',
                 formData: formData // บันทึกรายละเอียดการกรอก
             };
@@ -1650,7 +1711,7 @@
             history.push(newRecord);
             localStorage.setItem('nas_patient_history', JSON.stringify(history));
 
-            alert('บันทึกผลการประเมินเรียบร้อย');
+            alert(`บันทึกข้อมูลเรียบร้อย (Ref: ${currentDocNo})`);
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
     </script>

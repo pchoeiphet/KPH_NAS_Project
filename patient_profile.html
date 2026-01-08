@@ -776,7 +776,7 @@
             document.getElementById('p_an').innerText = p.an;
             document.getElementById('p_name').innerText = p.name;
             document.getElementById('p_age').innerText = p.age + " ปี";
-            document.getElementById('p_ward').innerText = `${p.departmentText} / เตียง ${p.bed}`;
+            document.getElementById('p_ward').innerText = `${p.departmentText} / ${p.bed}`;
             document.getElementById('p_doctor').innerText = p.doctor;
             document.getElementById('p_admit').innerText = p.admitDate;
             document.getElementById('p_underlying').innerText = p.underlying;
@@ -801,7 +801,7 @@
                     result: screenScore >= 3 ? 'มีความเสี่ยง' : 'ปกติ',
                     assessor: p.screenAssessor || 'พยาบาลวิชาชีพ (ไม่ระบุ)',
                     url: 'nutrition_screening_form.html',
-                    docNo: 'SPENT-OLD-001' // สมมติเลขสำหรับ Mock
+                    docNo: 'SPENT-OLD-001'
                 });
             }
 
@@ -819,7 +819,7 @@
                     result: nafResult,
                     assessor: p.assessAssessor || CURRENT_USER,
                     url: 'nutrition_alert_form.html',
-                    docNo: 'NAF-OLD-001' // สมมติเลขสำหรับ Mock
+                    docNo: 'NAF-OLD-001'
                 });
             }
 
@@ -830,16 +830,37 @@
             // Merge Mock + Stored
             history = [...history, ...patientHistory];
 
-            // Sort by Timestamp (Oldest first)
+            // -----------------------------------------------------------
+            // 🔴 ส่วนที่แก้ไข: Logic การนับแยกประเภท (Fix Count)
+            // -----------------------------------------------------------
+
+            // 1. เรียงจาก "เก่า -> ใหม่" ก่อน (เพื่อให้นับ 1, 2, 3 ได้ถูกลำดับเวลา)
             history.sort((a, b) => a.timestamp - b.timestamp);
 
-            // Assign "Count" ID
-            history = history.map((item, index) => {
-                return { ...item, displayId: index + 1 };
+            // 2. ประกาศตัวนับแยก
+            let countSpent = 0;
+            let countNaf = 0;
+
+            // 3. วนลูปเพื่อนับเลขตามประเภท
+            history = history.map((item) => {
+                let showId = 0;
+
+                if (item.type === 'SPENT') {
+                    countSpent++;       // ถ้าเป็น SPENT ให้บวกตัวนับ SPENT
+                    showId = countSpent;
+                } else if (item.type === 'NAF') {
+                    countNaf++;         // ถ้าเป็น NAF ให้บวกตัวนับ NAF
+                    showId = countNaf;
+                }
+
+                // คืนค่า Object เดิม + displayId ที่ถูกต้อง
+                return { ...item, displayId: showId };
             });
 
-            // Reverse to show latest first
+            // 4. เรียงกลับ "ใหม่ -> เก่า" เพื่อแสดงผล (ล่าสุดอยู่บนสุด)
             history.reverse();
+
+            // -----------------------------------------------------------
 
             // Render Table
             const tbody = document.getElementById('historyTableBody');
@@ -853,8 +874,8 @@
                 history.forEach((h) => {
                     // 2. Type Badge with COLORS
                     let typeBadge = '';
-                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`; 
-                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`; 
+                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
+                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
 
                     // 5 & 6 Result Columns
                     let colSpent = '-';
@@ -989,13 +1010,13 @@
                         </div>
                     `;
                 }
-            } 
+            }
             // --- กรณีเป็น NAF (ส่วนที่เพิ่มเข้ามา) ---
             else if (activeData.type === 'NAF') {
                 els.badge.innerText = 'Latest: NAF';
                 els.badge.className = 'badge badge-light border text-success px-2';
                 els.label.innerText = 'ผลการประเมินล่าสุด (NAF)';
-                
+
                 const score = parseInt(activeData.score);
 
                 if (score >= 11) {
@@ -1003,7 +1024,7 @@
                     card.classList.add('his-severe');
                     els.text.innerText = 'NAF C (Severe Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-severe';
-                    els.desc.innerText = 'ขาดสารอาหารระดับรุนแรง';
+                    els.desc.innerText = 'มีภาวะทุพโภชนาการรุนแรง';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-urgent">
                             <div class="d-flex">
@@ -1020,7 +1041,7 @@
                     card.classList.add('his-risk');
                     els.text.innerText = 'NAF B (Moderate Malnutrition)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-risk';
-                    els.desc.innerText = 'ขาดสารอาหารระดับปานกลาง';
+                    els.desc.innerText = 'พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการปานกลาง';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-overdue"> <div class="d-flex">
                                 <i class="fa-solid fa-user-doctor clinical-action-icon"></i>
@@ -1036,7 +1057,7 @@
                     card.classList.add('his-normal');
                     els.text.innerText = 'NAF A (Normal/Mild)';
                     els.text.className = 'his-result mt-1 mb-2 text-his-normal';
-                    els.desc.innerText = 'ภาวะโภชนาการปกติ หรือความเสี่ยงต่ำ';
+                    els.desc.innerText = ' มีความเสี่ยงต่อการเกิดภาวะทุพโภชนาการน้อย';
                     els.action.innerHTML = `
                         <div class="clinical-action-box status-normal">
                             <div class="d-flex">
