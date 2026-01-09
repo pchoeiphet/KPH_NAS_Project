@@ -1267,6 +1267,7 @@
         }
 
         function saveData() {
+            // 1. ตรวจสอบข้อมูลจำเป็น (Validation)
             const h = document.getElementById('anthroHeight').value;
             const l = document.getElementById('anthroLength').value;
             const a = document.getElementById('anthroArmSpan').value;
@@ -1278,6 +1279,7 @@
                 return;
             }
 
+            // 2. เก็บข้อมูล Input ทั้งหมด
             const formData = [];
             const inputs = document.querySelectorAll('input, select, textarea');
             inputs.forEach(el => {
@@ -1288,10 +1290,30 @@
                 }
             });
 
+            // -------------------------------------------------------------
+            // จุดที่แก้ไข: แยก "เวลาที่เลือก" กับ "เวลาปัจจุบัน" ออกจากกัน
+            // -------------------------------------------------------------
+
+            // A. เวลาประเมิน (Assessment Time) - เอามาจาก Input ที่ User แก้ไขได้
+            const assessDateStr = document.getElementById('assessDate').value;
+            const assessTimeStr = document.getElementById('assessTime').value;
+            const userSelectedDateTime = `${assessDateStr} ${assessTimeStr}`;
+
+            // B. เวลาบันทึกจริง (System Time) - สร้างใหม่เดี๋ยวนั้น User แก้ไม่ได้
+            const now = new Date();
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const realDateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
+            // เติมวินาทีเข้าไปด้วย จะได้เห็นชัดว่าคนละเวลากัน
+            const realTimeStr = now.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' น.';
+            const systemSavedTime = `${realDateStr} ${realTimeStr}`;
+
+            // -------------------------------------------------------------
+
             const scoreText = document.getElementById('totalScore').innerText;
             const resultText = document.getElementById('nafLevel').innerText;
-            const dateStr = document.getElementById('assessDate').value;
-            const timeStr = document.getElementById('assessTime').value;
             const assessorName = document.getElementById('assessAssessor').value;
 
             const newRecord = {
@@ -1301,18 +1323,27 @@
                 score: parseInt(scoreText) || 0,
                 result: resultText,
                 assessor: assessorName,
-                date: `${dateStr} ${timeStr}`,
-                docNo: currentDocNo,
+
+                // 1. เวลาสำหรับแสดงผลในประวัติ (ยึดตามที่ User เลือก)
+                date: userSelectedDateTime,
+
+                // 2. เวลาสำหรับตรวจสอบ (Audit) ว่าบันทึกจริงตอนไหน
+                realSavedTime: systemSavedTime,
+
+                // 3. เวลาสำหรับ Sorting
                 timestamp: Date.now(),
+
+                docNo: currentDocNo,
                 url: 'nutrition_alert_form.html',
                 formData: formData
             };
 
+            // 4. บันทึกลง LocalStorage
             let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             history.push(newRecord);
             localStorage.setItem('nas_patient_history', JSON.stringify(history));
 
-            alert(`บันทึกข้อมูลเรียบร้อย (Ref: ${currentDocNo})`);
+            alert(`บันทึกข้อมูลเรียบร้อย\nเวลาประเมิน: ${userSelectedDateTime}\nเวลาบันทึกระบบ: ${systemSavedTime}`);
             window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
     </script>

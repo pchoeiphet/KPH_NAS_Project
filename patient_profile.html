@@ -528,7 +528,7 @@
                             <td class="text-center">${colSpent}</td>
                             <td class="text-center">${colNaf}</td>
                             <td><small class="text-muted">${displayAssessor}</small></td>
-                            <td><small>${h.date}</small></td>
+                            <td><small>${h.realSavedTime || h.date}</small></td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&${viewParam}'" title="ดูรายละเอียด">
@@ -580,7 +580,7 @@
                 els.assessor.innerText = activeData.assessor;
             }
 
-            els.date.innerText = activeData.date;
+            els.date.innerText = activeData.realSavedTime || activeData.date;
             els.score.innerText = activeData.score;
 
             if (activeData.type === 'SPENT') {

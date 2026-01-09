@@ -665,8 +665,15 @@
                 }
             });
 
-            const dateStr = document.getElementById('screenDate').value;
-            const timeStr = document.getElementById('screenTime').value;
+            const now = new Date();
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const thaiDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
+            const time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+
+            // อัปเดตค่าในหน้าจอให้ user เห็นด้วยว่าบันทึกเวลาไหน
+            document.getElementById('screenDate').value = thaiDate;
+            document.getElementById('screenTime').value = time;
+
             const assessorName = document.getElementById('screenAssessor').value;
             const notes = document.getElementById('screenNotes').value;
 
@@ -683,8 +690,8 @@
                 notes: notes,
                 diagnosis: diagnosisText,
                 docNo: currentDocNo,
-                date: `${dateStr} ${timeStr}`,
-                timestamp: Date.now(),
+                date: `${thaiDate} ${time}`, // ใช้เวลาที่เพิ่งคำนวณใหม่
+                timestamp: Date.now(), // ใช้ Timestamp ปัจจุบัน (สำหรับการเรียงลำดับ)
                 url: 'nutrition_screening_form.html',
                 formData: formData
             };
@@ -737,7 +744,6 @@
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
         }
-    </script>
     </script>
 </body>
 
