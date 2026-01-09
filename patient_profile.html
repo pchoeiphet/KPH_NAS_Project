@@ -310,6 +310,7 @@
                                         <th style="width: 100px" class="text-center">ผลการประเมิน (NAF)</th>
                                         <th style="width: 100px">ผู้ประเมิน</th>
                                         <th style="width: 100px">วัน/เวลาที่บันทึก</th>
+                                        <th style="width: 120px" class="text-center">สถานะเอกสาร</th>
                                         <th style="width: 110px;" class="text-center">เอกสาร</th>
                                     </tr>
                                 </thead>
@@ -447,21 +448,15 @@
         function renderHistory(p) {
             let history = [];
 
-            // 1. (ลบ Mock Data เก่าออกทั้งหมด)
-            // ตอนนี้จะไม่มีการสร้าง SPENT-OLD-001 หรือ NAF-OLD-001 แล้ว
-
-            // 2. ดึงข้อมูลจริงจาก LocalStorage
+            // ดึงข้อมูลจริงจาก LocalStorage
             const storedHistory = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
             const patientHistory = storedHistory.filter(item => item.hn === p.hn);
 
             // รวมข้อมูล (ตอนนี้จะมีแค่ข้อมูลใหม่)
             history = [...patientHistory];
-
-            // -----------------------------------------------------------
-            // Logic การนับแยกประเภท
-            // -----------------------------------------------------------
             history.sort((a, b) => a.timestamp - b.timestamp);
 
+            // กำหนดหมายเลขครั้งที่แยกตามประเภท
             let countSpent = 0;
             let countNaf = 0;
 
@@ -493,8 +488,54 @@
 
                 history.forEach((h) => {
                     let typeBadge = '';
-                    if (h.type === 'SPENT') typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
-                    else typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
+                    if (h.type === 'SPENT') {
+                        typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
+                    } else {
+                        typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
+                    }
+
+
+                    let docStatus = '';
+
+                    if (h.type === 'NAF') {
+                        // กรณี NAF: แค่บอกว่าบันทึกเสร็จแล้ว (สีเทา เพื่อไม่ให้แย่งซีนงานที่ด่วน)
+                        docStatus = `
+        <span class="text-muted" style="font-size: 0.9rem;">
+            <i class="fa-solid fa-file-circle-check mr-1"></i> บันทึกแล้ว
+        </span>
+    `;
+                    }
+                    else if (h.type === 'SPENT') {
+                        if (h.score >= 2) {
+                            // เช็คว่ามีใบ NAF ตามมาทีหลังหรือไม่
+                            const hasFollowUp = history.some(compare =>
+                                compare.type === 'NAF' && compare.timestamp > h.timestamp
+                            );
+
+                            if (hasFollowUp) {
+                                // กรณีเสี่ยง แต่ทำ NAF แล้ว (จบงาน)
+                                docStatus = `
+                <span class="text-success font-weight-bold" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-check-double mr-1"></i> ประเมินต่อแล้ว
+                </span>
+            `;
+                            } else {
+                                // กรณีเสี่ยง และยังไม่ทำ NAF (งานค้าง) -> เน้นสีส้ม/เหลือง
+                                docStatus = `
+                <span class="text-warning font-weight-bold" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-hourglass-half mr-1 fa-spin-hover"></i> รอประเมิน NAF
+                </span>
+            `;
+                            }
+                        } else {
+                            // กรณีปกติ (จบงาน)
+                            docStatus = `
+            <span class="text-success" style="font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-check mr-1"></i> คัดกรองแล้ว
+            </span>
+        `;
+                        }
+                    }
 
                     let colSpent = '-';
                     let colNaf = '-';
@@ -529,6 +570,9 @@
                             <td class="text-center">${colNaf}</td>
                             <td><small class="text-muted">${displayAssessor}</small></td>
                             <td><small>${h.realSavedTime || h.date}</small></td>
+
+                            <td class="text-center">${docStatus}</td>
+                            
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&${viewParam}'" title="ดูรายละเอียด">
