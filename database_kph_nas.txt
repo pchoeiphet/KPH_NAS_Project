@@ -4,7 +4,7 @@ database ของ KPH_NAS
 patients - patients_id, patients_hn, patients_name (ควรแยกนามสกุลกะชื่อไหม?),pateints_dob, patients_id_card, patients_drug_allergy, patients_congenital_disease (โรคประจำตัว), patients_phone, patients_gender
 
 2.Admissions - ข้อมูลการเข้ารักษา
-admissions - admissions_id, admissions_an, patients_id, admit_datetime (วันเวลาที่เข้า), discharge_datetime (วันเวลาที่ออก), ward_id, bed_number, primary_diagnosis, doctor_id (แพทย์เจ้าของไข้ในรอบนี้)
+admissions - admissions_id, admissions_an, patients_id, admit_datetime (วันเวลาที่เข้า), discharge_datetime (วันเวลาที่ออก), ward_id, bed_number, doctor_id (แพทย์เจ้าของไข้ในรอบนี้), discharge_datetime, status, created_at
 
 3.สิทธิการรักษา
 health_insurance - health_insurance_id, health_insurance_name (สิทธิบัตรทอง, ประกันสังคม, สิทธิผู้สูงอายุ, สิทธิข้าราชการ, สิทธิ UC)
@@ -77,10 +77,10 @@ symptom_problem - symptom_problem_id, symptom_problem_name, symptom_problem_type
 disease - disease_id, disease_name, disease_type, disease_score
 
 14.ประวัติการคัดกรอง
-ืnutrition_screening - nutrition_screening_id, admissions_an, patients_hn, assessed_at, ward_id, initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method, q1_weight_loss, 	q2_eat_less, q3_bmi_abnormal, q4_critical, nutrition_screening_result, assessor_name, assessed_at
+ืnutrition_screening - nutrition_screening_id, admissions_an, patients_hn, doc_no (UNIQUE), screening_datetime,screening_seq, initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method, q1_weight_loss, 	q2_eat_less, q3_bmi_abnormal, q4_critical, screening_result, notes, assessor_name, created_at
 
 15.ประวัติการประเมิน
-nutririon_assessment - nutrition_assessment_id, admissions_an, patients_hn, received_date, initial_diagnosis, info_source, other_source, height_measure, body_length, arm_span, height_relative, weight, bmi, bmi_score, is_no_weight, lab_method, albumin_val, tlc_val, lab_score, weight_option_id, patient_shape_id , weight_change_4_week_id, food_type_id, food_amount_id, food_access_id, total_score, risk_level, assessor_name, assessed_at, updated_at
+nutririon_assessment - nutrition_assessment_id, admissions_an, patients_hn,doc_no (UNIQUE), initial_diagnosis, info_source, other_source, height_measure, body_length, arm_span, height_relative, weight, bmi, bmi_score, is_no_weight, lab_method, albumin_val, tlc_val, lab_score, weight_option_id, patient_shape_id , weight_change_4_week_id, food_type_id, food_amount_id, food_access_id, total_score, naf_level, assessor_name, assessment_datetime, created_at
 
 16.บันทึกโรคที่เป็น
 disease_saved - nutrition_assessment_id, disease_id, disease_other_name, disease_type, disease_score
