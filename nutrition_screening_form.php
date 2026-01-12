@@ -77,26 +77,85 @@ try {
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
+                    onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
                         <div class="user-profile-btn">
-                            <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
-                            <div class="user-info d-none d-md-block">
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
                                 <div class="user-name">เพชรลดา เชยเพ็ชร</div>
                                 <div class="user-role">นักโภชนาการ</div>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-muted mr-2"></i>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2">
-                        <a class="dropdown-item text-danger" href="#" onclick="confirmLogout()">ออกจากระบบ</a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px;">
+
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i>
+                                ออกจากระบบ
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>
