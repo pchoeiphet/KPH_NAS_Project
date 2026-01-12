@@ -1,27 +1,82 @@
 <?php
-require_once 'connect.php';
+require_once 'connect_db.php';
+date_default_timezone_set('Asia/Bangkok');
 
-function h($string)
-{
-    return htmlspecialchars($string ?? "", ENT_QUOTES, 'UTF-8');
+$hn = $_GET['hn'] ?? '';
+$an = $_GET['an'] ?? '';
+$ref_screening = $_GET['ref_screening'] ?? '';
+
+if (empty($hn) || empty($an)) {
+    die("Error: ไม่พบข้อมูล HN หรือ AN");
 }
 
-$hn = isset($_GET['hn']) ? $_GET['hn'] : '';
-if (empty($hn)) die("ไม่พบรหัสผู้ป่วย (HN)");
-
-// ดึงข้อมูลผู้ป่วย (Code เดิม)
 try {
-    $sql = "SELECT * FROM patients WHERE patients_hn = :hn";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':hn' => $hn]);
+    // 1. ดึงข้อมูลผู้ป่วย
+    $sql_patient = "
+        SELECT 
+            p.patients_hn, p.patients_firstname, p.patients_lastname, 
+            p.patients_dob, p.patients_congenital_disease,
+            a.admissions_an, a.admit_datetime, a.bed_number,
+            w.ward_name, d.doctor_name, h.health_insurance_name
+        FROM patients p
+        JOIN admissions a ON p.patients_id = a.patients_id
+        LEFT JOIN wards w ON a.ward_id = w.ward_id
+        LEFT JOIN doctor d ON a.doctor_id = d.doctor_id
+        LEFT JOIN health_insurance h ON a.health_insurance_id = h.health_insurance_id
+        WHERE p.patients_hn = :hn AND a.admissions_an = :an
+        LIMIT 1
+    ";
+    $stmt = $conn->prepare($sql_patient);
+    $stmt->execute([':hn' => $hn, ':an' => $an]);
     $patient = $stmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$patient) die("ไม่พบข้อมูลผู้ป่วย");
 
-    // คำนวณอายุและวันที่ (เหมือนไฟล์แรก)
-    $dob = new DateTime($patient['patients_dob']);
-    $now = new DateTime();
-    $age = $now->diff($dob);
-    $age_text = $age->y . " ปี " . $age->m . " เดือน";
+    // คำนวณอายุ
+    $age = '-';
+    if (!empty($patient['patients_dob'])) {
+        $dob = new DateTime($patient['patients_dob']);
+        $now = new DateTime();
+        $diff = $now->diff($dob);
+        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน ' . $diff->d . ' วัน';
+    }
+
+    // สร้างเลขที่เอกสาร NAF
+    $stmt_seq = $conn->prepare("SELECT COUNT(*) as count FROM nutrition_assessment WHERE patients_hn = :hn");
+    $stmt_seq->execute([':hn' => $hn]);
+    $count = $stmt_seq->fetch(PDO::FETCH_ASSOC)['count'];
+    $naf_seq = $count + 1;
+    $doc_no_show = 'NAF-' . $patient['patients_hn'] . '-' . str_pad($naf_seq, 3, '0', STR_PAD_LEFT);
+
+    // --------------------------------------------------------------------------------
+    // ส่วนดึงข้อมูล Master Data (สำหรับข้อ 5 ขึ้นไป)
+    // --------------------------------------------------------------------------------
+
+    // ฟังก์ชันช่วยดึงข้อมูล (เพื่อลดโค้ดซ้ำ)
+    function fetchMasterData($conn, $table, $id_col)
+    {
+        try {
+            $sql = "SELECT * FROM $table ORDER BY $id_col ASC";
+            return $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return []; // กรณีไม่มีตาราง ให้คืนค่าว่างป้องกัน Error
+        }
+    }
+
+    // 5. รูปร่าง (patient_shape)
+    $shapes = fetchMasterData($conn, 'patient_shape', 'patient_shape_id');
+
+    // 6. น้ำหนักเปลี่ยน (weight_change_4_week)
+    $weight_changes = fetchMasterData($conn, 'weight_change_4_week', 'weight_change_4_week_id');
+
+    // 7.1 ประเภทอาหาร (food_type)
+    $food_types = fetchMasterData($conn, 'food_type', 'food_type_id');
+
+    // 7.2 ปริมาณอาหาร (food_amount)
+    $food_amounts = fetchMasterData($conn, 'food_amount', 'food_amount_id');
+
+    // (Option) ถ้ามีตาราง symptoms หรือ food_access ก็ดึงเพิ่มตรงนี้ได้
+
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -32,559 +87,1375 @@ try {
 
 <head>
     <meta charset="UTF-8">
-    <title>แบบประเมินภาวะโภชนาการ (Assessment)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบประเมินภาวะโภชนาการ (NAF)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/nutrition_alert_form.css">
 </head>
 
-<body>
-    <nav class="navbar">
-        <div class="navbar-left">
-            <a class="navbar-brand" href="index.php">
-                <img src="img/logo_kph.jpg" class="brand-logo" alt="KPH Logo" onerror="this.style.display='none'">
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
                 <div class="brand-text">
-                    <span class="brand-title">ระบบประเมินภาวะโภชนาการ</span>
-                    <span class="brand-subtitle">Nutrition Alert Form - โรงพยาบาลกำแพงเพชร</span>
+                    <h1>ระบบประเมินภาวะโภชนาการ</h1>
+                    <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
-        </div>
-        <div class="navbar-right">
-            <div class="user-profile" id="userDropdownTrigger">
-                <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
-                <div class="user-info">
-                    <span class="user-name">เพชรลดา เชยเพ็ชร</span>
-                    <span class="user-role">นักโภชนาการ</span>
-                </div>
-                <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color:#999; margin-left: 5px;"></i>
-            </div>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <div class="dropdown-user-header"><small>ผู้ใช้งานระบบ</small><br><strong>เพชรลดา เชยเพ็ชร</strong>
-                </div>
-                <a href="#" class="dropdown-item"><i class="fa-regular fa-id-card"></i> ข้อมูลผู้ใช้งาน</a>
-                <a href="#" class="dropdown-item"><i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ</a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item text-danger" onclick="confirmLogout()"><i
-                        class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
-            </div>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <span class="navbar-text text-muted small mr-2">
+                        <i class="fa-solid fa-user-doctor mr-1"></i> เพชรลดา เชยเพ็ชร
+                    </span>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="patient-banner">
-        <div class="patient-container">
-            <div class="patient-icon-box"><i class="fa-solid fa-user"></i></div>
-            <div class="patient-details">
-                <div class="section-header"><i class="fa-solid fa-hospital-user"></i> ข้อมูลผู้ป่วย</div>
-                <div class="patient-grid">
-                    <div class="info-item">
-                        <span class="info-label">HN</span>
-                        <span class="info-value"><?php echo h($patient['patients_hn']); ?></span>
-                    </div>
+    <div class="container-fluid mt-3 pt-5 pb-5 px-lg-5">
 
-                    <div class="info-item">
-                        <span class="info-label">AN</span>
-                        <span class="info-value"><?php echo h($patient['patients_an']); ?></span>
-                    </div>
+        <form id="nafForm" method="POST" action="nutrition_assessment_save.php">
+            <input type="hidden" name="hn" value="<?= $hn ?>">
+            <input type="hidden" name="an" value="<?= $an ?>">
+            <input type="hidden" name="doc_no" value="<?= $doc_no_show ?>">
+            <input type="hidden" name="naf_seq" value="<?= $naf_seq ?>">
+            <input type="hidden" name="ref_screening_doc" value="<?= $ref_screening ?>">
 
-                    <div class="info-item">
-                        <span class="info-label">ชื่อ - นามสกุล</span>
-                        <span class="info-value"><?php echo h($patient['patients_name']); ?></span>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">อายุ</span>
-                        <span class="info-value"><?php echo h($age_text); ?></span>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">สิทธิการรักษา</span>
-                        <span class="info-value"><?php echo h($patient['medical_rights']); ?></span>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">หอผู้ป่วย / เตียง</span>
-                        <span class="info-value">
-                            <?php echo h($patient['ward_name']); ?> /
-                            <strong>เตียง <?php echo h($patient['bed_number']); ?></strong>
-                        </span>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">วันที่ Admit</span>
-                        <span class="info-value"><?php echo h($admit_date); ?></span>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">เบอร์โทรศัพท์</span>
-                        <span class="info-value"><?php echo h($patient['patients_phone']); ?></span>
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-auto">
+                            <div class="patient-icon-box"><i class="fa-solid fa-user-injured"></i></div>
+                        </div>
+                        <div class="col">
+                            <h5 class="text-primary-custom font-weight-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย</h5>
+                            <div class="row">
+                                <div class="col-6 col-md-3 col-lg-2 mb-2"><small class="text-muted d-block">HN</small><span class="font-weight-bold"><?= $patient['patients_hn'] ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-2"><small class="text-muted d-block">AN</small><span class="font-weight-bold"><?= $patient['admissions_an'] ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-2"><small class="text-muted d-block">ชื่อ-สกุล</small><span class="font-weight-bold text-primary"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-2"><small class="text-muted d-block">อายุ</small><span class="font-weight-bold"><?= $age ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-2"><small class="text-muted d-block">สิทธิ</small><span class="font-weight-bold"><?= $patient['health_insurance_name'] ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-2"><small class="text-muted d-block">แพทย์</small><span class="font-weight-bold"><?= $patient['doctor_name'] ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-2"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold"><?= $patient['ward_name'] ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-3 mb-2"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold"><?= $patient['patients_congenital_disease'] ?></span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div class="mb-4">
+                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" onclick="window.history.back()">
+                    <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
+                </button>
+            </div>
+
+            <div class="card form-card mb-5">
+                <div class="form-header-box">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h4 class="mb-1 font-weight-bold text-dark" style="color: #33691e;">แบบประเมินภาวะโภชนาการ (NAF)
+                            </h4>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-right">
+                                <span class="badge p-2"
+                                    style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.5px;"
+                                    id="docNoDisplay">Document No.: Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white font-weight-bold text-muted"
+                                        style="color: #33691e;">ครั้งที่</span>
+                                </div>
+                                <input type="text" class="form-control text-center font-weight-bold text-success"
+                                    id="assessCount" value="-" readonly style="background-color: #fff; font-size: 1.1rem;">
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white font-weight-bold text-muted"><i
+                                            class="far fa-calendar-alt mr-1"></i> วันที่</span>
+                                </div>
+                                <input type="text" class="form-control text-center" id="assessDate" readonly
+                                    style="background-color: #fff;">
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white font-weight-bold text-muted"><i
+                                            class="far fa-clock mr-1"></i> เวลา</span>
+                                </div>
+                                <input type="text" class="form-control text-center" id="assessTime" readonly
+                                    style="background-color: #fff;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white font-weight-bold text-muted"><i
+                                            class="fa-solid fa-user-pen mr-1"></i> ผู้ประเมิน</span>
+                                </div>
+                                <input type="text" class="form-control text-center text-primary" id="assessAssessor"
+                                    readonly style="background-color: #f0f7ff; font-weight: 500;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form id="nafForm">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis)</label>
+                            <input type="text" class="form-control" id="diagnosis" placeholder="ระบุการวินิจฉัยโรค...">
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">2. ข้อมูลได้จาก (Source of Information)</label>
+                            <div class="d-flex align-items-center">
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="source1" name="infoSource" class="custom-control-input"
+                                        value="patient" checked onchange="toggleOtherSource()">
+                                    <label class="custom-control-label" for="source1">ผู้ป่วย</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="source2" name="infoSource" class="custom-control-input"
+                                        value="relative" onchange="toggleOtherSource()">
+                                    <label class="custom-control-label" for="source2">ญาติ</label>
+                                </div>
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <div class="custom-control custom-radio custom-control-inline mr-2">
+                                        <input type="radio" id="source3" name="infoSource" class="custom-control-input"
+                                            value="other" onchange="toggleOtherSource()">
+                                        <label class="custom-control-label" for="source3">อื่นๆ</label>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" id="otherSourceText"
+                                        placeholder="ระบุอื่นๆ..." disabled style="max-width: 300px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">3. สัดส่วนร่างกาย (Anthropometry)</label>
+                            <p class="text-muted small mb-3"><i class="fas fa-info-circle mr-1"></i>
+                                กรุณากรอกข้อมูลส่วนสูง/ความยาวตัว
+                                อย่างน้อย 1 ช่อง</p>
+                            <div class="row" id="anthroSection">
+                                <div class="col-md-6 col-lg-3 mb-3">
+                                    <label class="small text-muted font-weight-bold">ส่วนสูง (Height)</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control anthro-input" id="anthroHeight"
+                                            placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text small">ซม.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-3">
+                                    <label class="small text-muted font-weight-bold">วัดความยาวตัว (Length)</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control anthro-input" id="anthroLength"
+                                            placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text small">ซม.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-3">
+                                    <label class="small text-muted font-weight-bold">Arm Span</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control anthro-input" id="anthroArmSpan"
+                                            placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text small">ซม.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-3">
+                                    <label class="small text-muted font-weight-bold">ญาติบอก (Reported)</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control anthro-input"
+                                            id="anthroReported" placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text small">ซม.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="anthroAlert" class="alert alert-danger py-2 d-none" role="alert">
+                                <i class="fas fa-exclamation-triangle mr-2"></i> กรุณาระบุข้อมูลส่วนสูง/ความยาวตัว อย่างน้อย
+                                1 ช่อง
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="section-label mb-0">4. น้ำหนักและค่าดัชนีมวลกาย (Weight & BMI)</label>
+
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="unknownWeight"
+                                        onchange="toggleWeightMode()">
+                                    <label class="custom-control-label text-danger font-weight-bold" for="unknownWeight">
+                                        ไม่ทราบน้ำหนัก (ประเมินด้วยผลเลือด)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="standardWeightSection" class="fade-in">
+                                <div class="row">
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.1" class="form-control" id="currentWeight"
+                                                placeholder="0.0" oninput="calculateBMI()">
+                                            <div class="input-group-append"><span class="input-group-text">กก.</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control bmi-display-box" id="bmiValue" value="-"
+                                                readonly>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text small" id="bmiScoreText"
+                                                    style="background-color: #e9ecef; font-weight: 500;">Score: 0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก
+                                        (Method)</label>
+                                    <div class="radio-group-container">
+                                        <div class="custom-control custom-radio custom-control-inline mr-4">
+                                            <input type="radio" id="wmLying" name="weightMethod"
+                                                class="custom-control-input" value="1" onchange="calculateScore()">
+                                            <label class="custom-control-label" for="wmLying">ชั่งในท่านอน (1 คะแนน)</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline mr-4">
+                                            <input type="radio" id="wmStanding" name="weightMethod"
+                                                class="custom-control-input" value="0" checked onchange="calculateScore()">
+                                            <label class="custom-control-label" for="wmStanding">ชั่งในท่ายืน (0
+                                                คะแนน)</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline mr-4">
+                                            <input type="radio" id="wmCannot" name="weightMethod"
+                                                class="custom-control-input" value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label" for="wmCannot">ชั่งไม่ได้ (0 คะแนน)</label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="wmReported" name="weightMethod"
+                                                class="custom-control-input" value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label" for="wmReported">ญาติบอก (0 คะแนน)</label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2
+                                        คะแนน),
+                                        17-18 (1 คะแนน),
+                                        18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div id="labSection" class="hidden-section fade-in">
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <div class="lab-choice-card inactive" id="cardAlbumin"
+                                            onclick="selectLab('albumin')">
+
+                                            <input type="radio" id="useAlbumin" name="labChoice" value="albumin"
+                                                class="d-none" onchange="toggleLabInputs()">
+
+                                            <div class="lab-header">
+                                                <i class="fas fa-vial text-primary mr-2"></i> 1. Albumin
+                                                <span class="lab-unit">(g/dl)</span>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                                <div class="input-group">
+                                                    <input type="number" step="0.1" class="form-control" id="valAlbumin"
+                                                        placeholder="เช่น 3.2" disabled oninput="calculateLabScore()"
+                                                        onclick="event.stopPropagation()">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white text-muted">g/dl</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <table class="ref-table-clean">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>เกณฑ์ (Criteria)</th>
+                                                            <th class="text-right">คะแนน</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>&le; 2.5</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-danger">3</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>2.6 - 2.9</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-warning">2</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>3.0 - 3.5</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-primary">1</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>&gt; 3.5</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-muted">0</span></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="lab-choice-card inactive" id="cardTLC" onclick="selectLab('tlc')">
+
+                                            <input type="radio" id="useTLC" name="labChoice" value="tlc" class="d-none"
+                                                onchange="toggleLabInputs()">
+
+                                            <div class="lab-header">
+                                                <i class="fas fa-microscope text-primary mr-2"></i> 2. TLC
+                                                <span class="lab-unit">(cells/mm³)</span>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="valTLC"
+                                                        placeholder="เช่น 1200" disabled oninput="calculateLabScore()"
+                                                        onclick="event.stopPropagation()">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white text-muted">cells</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <table class="ref-table-clean">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>เกณฑ์ (Criteria)</th>
+                                                            <th class="text-right">คะแนน</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>&le; 1,000</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-danger">3</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>1,001 - 1,200</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-warning">2</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>1,201 - 1,500</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-primary">1</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>&gt; 1,500</td>
+                                                            <td class="text-right"><span
+                                                                    class="score-badge text-muted">0</span></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12 text-right">
+                                        <div class="d-inline-block px-3 py-2 bg-white border rounded shadow-sm">
+                                            <small class="text-muted mr-2">คะแนนจากผลเลือด (Lab Score):</small>
+                                            <span class="font-weight-bold text-primary h5 m-0" id="labScoreText">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">5. รูปร่างของผู้ป่วย (Body Shape)</label>
+                            <div class="radio-group-container">
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="shapeVeryThin" name="bodyShape" class="custom-control-input"
+                                        value="2" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="shapeVeryThin">ผอมมาก (2 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="shapeThin" name="bodyShape" class="custom-control-input"
+                                        value="1" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="shapeThin">ผอม (1 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="shapeObese" name="bodyShape" class="custom-control-input"
+                                        value="1" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="shapeObese">อ้วนมาก (1 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="shapeNormal" name="bodyShape" class="custom-control-input"
+                                        value="0" checked onchange="calculateScore()">
+                                    <label class="custom-control-label" for="shapeNormal">ปกติ-อ้วนปานกลาง (0 คะแนน)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change in 4 weeks)</label>
+                            <div class="radio-group-container">
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="wcDecrease" name="weightChange" class="custom-control-input"
+                                        value="2" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="wcDecrease">ลดลง / ผอมลง (2 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="wcIncrease" name="weightChange" class="custom-control-input"
+                                        value="1" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="wcIncrease">เพิ่มขึ้น / อ้วนขึ้น (1
+                                        คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline mr-4">
+                                    <input type="radio" id="wcUnknown" name="weightChange" class="custom-control-input"
+                                        value="0" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="wcUnknown">ไม่ทราบ (0 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="wcSame" name="weightChange" class="custom-control-input"
+                                        value="0" checked onchange="calculateScore()">
+                                    <label class="custom-control-label" for="wcSame">คงเดิม (0 คะแนน)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">7. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา</label>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-secondary font-weight-bold mb-2">7.1 ลักษณะของอาหาร (Type)</h6>
+                                    <div class="radio-group-container">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="foodWatery" name="foodType" class="custom-control-input"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="foodWatery">
+                                                อาหารน้ำๆ <span class="radio-score">(2 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="foodLiquid" name="foodType" class="custom-control-input"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="foodLiquid">
+                                                อาหารเหลวๆ <span class="radio-score">(2 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="foodSoft" name="foodType" class="custom-control-input"
+                                                value="1" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="foodSoft">
+                                                อาหารนุ่มกว่าปกติ <span class="radio-score">(1 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="foodNormal" name="foodType" class="custom-control-input"
+                                                value="0" checked onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="foodNormal">
+                                                อาหารเหมือนปกติ <span class="radio-score">(0 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-secondary font-weight-bold mb-2">7.2 ปริมาณอาหารที่กิน (Amount)</h6>
+                                    <div class="radio-group-container">
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="amtVeryLittle" name="foodAmount"
+                                                class="custom-control-input" value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="amtVeryLittle">
+                                                กินน้อยมาก <span class="radio-score">(2 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="amtLess" name="foodAmount" class="custom-control-input"
+                                                value="1" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="amtLess">
+                                                กินน้อยลง <span class="radio-score">(1 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="amtMore" name="foodAmount" class="custom-control-input"
+                                                value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="amtMore">
+                                                กินมากขึ้น <span class="radio-score">(0 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="amtNormal" name="foodAmount"
+                                                class="custom-control-input" value="0" checked onchange="calculateScore()">
+                                            <label class="custom-control-label radio-label" for="amtNormal">
+                                                กินเท่าปกติ <span class="radio-score">(0 คะแนน)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา </label>
+                            <p class="text-muted small mb-2"><i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ
+                                (Select all that
+                                apply)</p>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="symptom-box h-100">
+                                        <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check" id="symChoke"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symChoke">สำลัก <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check" id="symDiff"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100"
+                                                for="symDiff">เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check"
+                                                id="symNormalSwallow" value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symNormalSwallow">ปกติ <span
+                                                    class="symptom-score">(0 คะแนน)</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="symptom-box h-100">
+                                        <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check"
+                                                id="symDiarrhea" value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symDiarrhea">ท้องเสีย <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check" id="symPain"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symPain">ปวดท้อง <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check"
+                                                id="symNormalGI" value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symNormalGI">ปกติ <span
+                                                    class="symptom-score">(0 คะแนน)</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="symptom-box h-100">
+                                        <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check" id="symVomit"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symVomit">อาเจียน <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check" id="symNausea"
+                                                value="2" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symNausea">คลื่นไส้ <span
+                                                    class="symptom-score">(2 คะแนน)</span></label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input symptom-check"
+                                                id="symNormalEat" value="0" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="symNormalEat">ปกติ <span
+                                                    class="symptom-score">(0 คะแนน)</span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
+                            <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="accessBedridden" name="foodAccess" class="custom-control-input"
+                                        value="2" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="accessBedridden">นอนติดเตียง (2 คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="accessAssist" name="foodAccess" class="custom-control-input"
+                                        value="1" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="accessAssist">ต้องมีผู้ช่วยบ้าง (1
+                                        คะแนน)</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="accessSedentary" name="foodAccess" class="custom-control-input"
+                                        value="0" onchange="calculateScore()">
+                                    <label class="custom-control-label" for="accessSedentary">นั่งๆนอนๆ (0 คะแนน )</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="accessNormal" name="foodAccess" class="custom-control-input"
+                                        value="0" checked onchange="calculateScore()">
+                                    <label class="custom-control-label" for="accessNormal">ปกติ (0 คะแนน)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-4">
+                            <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease)</label>
+                            <p class="text-muted small mb-2"><i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ
+                                (Select all that
+                                apply)</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="symptom-box h-100" style="border-left: 4px solid #ffc107;">
+                                        <div class="symptom-category-title text-warning text-dark font-weight-bold">
+                                            10.1 โรคที่มีความรุนแรงน้อยถึงปานกลาง (3 คะแนน)
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disDm"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disDm">DM (เบาหวาน)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disCkd"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disCkd">CKD-ESRD
+                                                (ไตเรื้อรัง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disSeptic"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disSeptic">Septicemia
+                                                (ติดเชื้อในกระแสเลือด)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disCancer"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disCancer">Solid cancer
+                                                (มะเร็งทั่วไป)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disChf"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disChf">Chronic heart failure
+                                                (หัวใจล้มเหลวเรื้อรัง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disHip"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disHip">Hip fracture
+                                                (ข้อสะโพกหัก)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disCopd"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disCopd">COPD
+                                                (ปอดอุดกั้นเรื้อรัง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disHeadMod" value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disHeadMod">Severe head injury
+                                                (บาดเจ็บที่ศีรษะรุนแรง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disBurn"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disBurn">&gt;= 2 of burn
+                                                (แผลไฟไหม้ระดับ 2
+                                                ขึ้นไป)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disCld"
+                                                value="3" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disCld">CLD/Cirrhosis/Hepatic
+                                                encephalopathy
+                                                (ตับเรื้อรัง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disOtherMod" value="3"
+                                                onchange="toggleOtherDisease(this, 'disOtherModText'); calculateScore()">
+                                            <label class="custom-control-label w-100" for="disOtherMod">อื่นๆ
+                                                (Other)</label>
+                                            <input type="text" class="form-control form-control-sm mt-1"
+                                                id="disOtherModText" placeholder="ระบุ..." disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="symptom-box h-100" style="border-left: 4px solid #dc3545;">
+                                        <div class="symptom-category-title text-danger font-weight-bold">
+                                            10.2 โรคที่มีความรุนแรงมาก (6 คะแนน)
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disPneuSev" value="6" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disPneuSev">Severe pneumonia
+                                                (ปอดบวมขั้นรุนแรง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disCrit"
+                                                value="6" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disCrit">Critically ill
+                                                (ผู้ป่วยวิกฤติ)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disMultiFx" value="6" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disMultiFx">Multiple fracture
+                                                (กระดูกหักหลายตำแหน่ง)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disStrokeSev" value="6" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disStrokeSev">Stroke/CVA
+                                                (อัมพาต)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check" id="disHemato"
+                                                value="6" onchange="calculateScore()">
+                                            <label class="custom-control-label w-100" for="disHemato">Malignant hematologic
+                                                disease/Bone marrow
+                                                transplant (มะเร็งเม็ดเลือด/ปลูกถ่ายไขกระดูก)</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox symptom-item">
+                                            <input type="checkbox" class="custom-control-input disease-check"
+                                                id="disOtherSev" value="6"
+                                                onchange="toggleOtherDisease(this, 'disOtherSevText'); calculateScore()">
+                                            <label class="custom-control-label w-100" for="disOtherSev">อื่นๆ
+                                                (Other)</label>
+                                            <input type="text" class="form-control form-control-sm mt-1"
+                                                id="disOtherSevText" placeholder="ระบุ..." disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
+                            <div class="row no-gutters">
+                                <div
+                                    class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
+                                    <h6 class="text-muted font-weight-bold text-uppercase mb-2"
+                                        style="font-size: 0.8rem; letter-spacing: 1px;">
+                                        TOTAL SCORE</h6>
+                                    <div class="d-flex align-items-baseline">
+                                        <h1 class="display-3 font-weight-bold text-dark mb-0" id="totalScore"
+                                            style="line-height: 1;">0</h1>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div id="nafResultBox"
+                                        class="h-100 p-4 d-flex flex-column justify-content-center risk-low transition-bg">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-circle mr-2 status-dot" style="font-size: 0.8rem;"></i>
+                                            <h5 class="font-weight-bold mb-0" id="nafLevel">NAF A (Normal-Mild malnutrition)
+                                            </h5>
+                                        </div>
+                                        <p class="mb-0 text-dark" id="nafDesc" style="opacity: 0.85; line-height: 1.6;">
+                                            ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ
+                                            พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="form-actions-box">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="window.location.href='patient_profile.html?hn=' + currentHn">
+                        ยกเลิก / ย้อนกลับ
+                    </button>
+                    <button type="button" class="btn btn-save-custom" onclick="saveData()">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
+                    </button>
+                </div>
+            </div>
     </div>
 
-    <div class="main-content" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
-
-        <form class="form-card" id="assessmentForm" onsubmit="event.preventDefault(); saveAssessment();">
-            <div class="section-title"><i class="fa-regular fa-id-card"></i> 1. ข้อมูลทั่วไปของผู้ป่วย</div>
-            <div class="form-row">
-                <div class="col-4">
-                    <div class="form-group"><label class="form-label">ชื่อ - นามสกุล</label><input type="text"
-                            class="form-control" value="นายสมชาย รักสุขภาพ" readonly></div>
-                </div>
-                <div class="col-2">
-                    <div class="form-group"><label class="form-label">เพศ</label><select class="form-control">
-                            <option>ชาย</option>
-                            <option>หญิง</option>
-                        </select></div>
-                </div>
-                <div class="col-2">
-                    <div class="form-group"><label class="form-label">อายุ (ปี)</label><input type="text"
-                            class="form-control" value="54" readonly></div>
-                </div>
-                <div class="col-4">
-                    <div class="form-group"><label class="form-label">HN</label><input type="text"
-                            class="form-control" value="6612345" readonly></div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-5">
-                    <div class="form-group">
-                        <label class="form-label">วันที่รับ (Date of Admission)</label>
-                        <input type="date" class="form-control" value="2023-10-10" readonly>
-                    </div>
-                </div>
-
-                <div class="col-7">
-                    <div class="form-group">
-                        <label class="form-label">การวินิจฉัยโรคเบื้องต้น (Diagnosis)</label>
-                        <input type="text" class="form-control" placeholder="ระบุการวินิจฉัยโรค..."
-                            value="Pneumonia">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row mt-3">
-                <div class="col-12">
-                    <div class="form-group">
-                        <label class="form-label">ข้อมูลจาก (Source of Information)</label>
-                        <div class="radio-group-container">
-                            <div class="radio-wrapper-compact"
-                                style="display: flex; align-items: center; gap: 15px;">
-
-                                <label class="radio-label" style="margin:0; cursor: pointer;">
-                                    <input type="radio" name="source_info" value="patient" checked
-                                        onchange="toggleSourceInput()">
-                                    ผู้ป่วย
-                                </label>
-
-                                <label class="radio-label" style="margin:0; cursor: pointer;">
-                                    <input type="radio" name="source_info" value="relative"
-                                        onchange="toggleSourceInput()">
-                                    ญาติ
-                                </label>
-
-                                <label class="radio-label"
-                                    style="margin:0; cursor: pointer; display: flex; align-items: center;">
-                                    <input type="radio" name="source_info" value="other" id="sourceOther"
-                                        onchange="toggleSourceInput()">
-                                    &nbsp;อื่นๆ&nbsp;
-                                    <input type="text" id="sourceOtherText" class="form-control input-inline-small"
-                                        style="width: 200px; height: 30px;" placeholder="ระบุ..." disabled>
-                                </label>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="section-divider"></div>
-
-            <div class="section-title"><i class="fa-solid fa-ruler-vertical"></i> 2. ส่วนสูง/ ความยาวตัว</div>
-            <div class="form-row">
-                <div class="col-3">
-                    <div class="form-group"><label class="form-label">1. วัดส่วนสูง (ซม.)</label><input
-                            type="number" id="assessHeight" class="form-control" placeholder="ระบุ..."
-                            oninput="calcAssessBMI()"></div>
-                </div>
-                <div class="col-3">
-                    <div class="form-group"><label class="form-label">2. วัดความยาวตัว (ซม.)</label><input
-                            type="number" class="form-control" placeholder="ระบุ..."></div>
-                </div>
-                <div class="col-3">
-                    <div class="form-group"><label class="form-label">3. Arm span (ซม.)</label><input type="number"
-                            class="form-control" placeholder="ระบุ..."></div>
-                </div>
-                <div class="col-3">
-                    <div class="form-group"><label class="form-label">4. ญาติบอก (ซม.)</label><input type="number"
-                            class="form-control" placeholder="ระบุ..."></div>
-                </div>
-            </div>
-            <div class="section-divider"></div>
-
-            <div class="section-title"><i class="fa-solid fa-weight-scale"></i> 3. น้ำหนักและค่าดัชนีมวลกาย</div>
-            <div class="form-row">
-                <div class="col-4">
-                    <div class="form-group"><label class="form-label">น้ำหนัก (กก.)</label><input type="number"
-                            id="assessWeight" class="form-control" placeholder="ระบุ..." oninput="calcAssessBMI()">
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="form-group"><label class="form-label">ดัชนีมวลกาย (BMI)</label><input type="text"
-                            id="assessBMI" class="form-control bmi-box" readonly placeholder="รอคำนวณ..."></div>
-                </div>
-                <div class="col-4"></div>
-            </div>
-            <div class="form-row">
-                <div class="col-12">
-                    <div class="form-group"><label class="form-label">วิธีชั่งน้ำหนัก</label>
-                        <div class="radio-group-container">
-                            <div class="radio-wrapper"><label class="radio-label"><input type="radio"
-                                        name="assessWeightMethod" value="lying"> ชั่งในท่านอน</label><label
-                                    class="radio-label"><input type="radio" name="assessWeightMethod"
-                                        value="standing"> ชั่งในท่ายืน</label><label class="radio-label"><input
-                                        type="radio" name="assessWeightMethod" value="cannot">
-                                    ชั่งไม่ได้</label><label class="radio-label"><input type="radio"
-                                        name="assessWeightMethod" value="relative"> ญาติบอก</label></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col-12">
-                    <div class="reference-note"><strong>เกณฑ์การให้คะแนน BMI:</strong>
-                        < 17.0 (2 คะแนน) | 17.0 - 18.0 (1 คะแนน) | 18.1 - 29.9 (0 คะแนน) | ≥ 30.0 (1 คะแนน) </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-person"></i> 4. รูปร่างของผู้ป่วย</div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="form-group"><label class="form-label">ลักษณะรูปร่าง</label>
-                            <div class="radio-group-container">
-                                <div class="radio-wrapper"><label class="radio-label"><input type="radio"
-                                            name="bodyShape" value="2"> ผอมมาก</label><label
-                                        class="radio-label"><input type="radio" name="bodyShape" value="1">
-                                        ผอม</label><label class="radio-label"><input type="radio" name="bodyShape"
-                                            value="1"> อ้วนมาก</label><label class="radio-label"><input type="radio"
-                                            name="bodyShape" value="0"> ปกติ-อ้วนปานกลาง</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="reference-note"><strong>เกณฑ์คะแนน:</strong> ผอมมาก (2 คะแนน) | ผอม, อ้วนมาก (1
-                            คะแนน) | ปกติ-อ้วนปานกลาง (0 คะแนน)</div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-arrow-trend-down"></i> 5. น้ำหนักเปลี่ยนใน 4
-                    สัปดาห์</div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="form-group"><label class="form-label">ในช่วง 4 สัปดาห์ที่ผ่านมา
-                                น้ำหนักมีการเปลี่ยนแปลงอย่างไร?</label>
-                            <div class="radio-group-container">
-                                <div class="radio-wrapper"><label class="radio-label"><input type="radio"
-                                            name="weightChange" value="2"> ลดลง / ผอมลง</label><label
-                                        class="radio-label"><input type="radio" name="weightChange" value="1">
-                                        เพิ่มขึ้น / อ้วนขึ้น</label><label class="radio-label"><input type="radio"
-                                            name="weightChange" value="0"> ไม่ทราบ</label><label
-                                        class="radio-label"><input type="radio" name="weightChange" value="0">
-                                        คงเดิม</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="reference-note"><strong>เกณฑ์คะแนน:</strong> ลดลง (2 คะแนน) | เพิ่มขึ้น (1
-                            คะแนน) | ไม่ทราบ, คงเดิม (0 คะแนน)</div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-utensils"></i> 6. อาหารที่กินในช่วง 2
-                    สัปดาห์ที่ผ่านมา</div>
-                <div class="form-row">
-                    <div class="col-6">
-                        <div class="form-group"><label class="form-label">6.1 ลักษณะอาหาร</label>
-                            <div class="radio-group-container" style="height: auto; padding: 10px 15px;">
-                                <div class="radio-wrapper"
-                                    style="flex-direction: column; gap: 10px; align-items: flex-start;"><label
-                                        class="radio-label"><input type="radio" name="foodType" value="2"> อาหารน้ำๆ
-                                        (2 คะแนน)</label><label class="radio-label"><input type="radio"
-                                            name="foodType" value="2"> อาหารเหลวๆ (2 คะแนน)</label><label
-                                        class="radio-label"><input type="radio" name="foodType" value="1">
-                                        อาหารนุ่มกว่าปกติ (1 คะแนน)</label><label class="radio-label"><input
-                                            type="radio" name="foodType" value="0"> อาหารเหมือนปกติ (0
-                                        คะแนน)</label></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="form-group"><label class="form-label">6.2 ปริมาณที่กิน</label>
-                            <div class="radio-group-container" style="height: auto; padding: 10px 15px;">
-                                <div class="radio-wrapper"
-                                    style="flex-direction: column; gap: 10px; align-items: flex-start;"><label
-                                        class="radio-label"><input type="radio" name="foodQty" value="2"> กินน้อยมาก
-                                        (2 คะแนน)</label><label class="radio-label"><input type="radio"
-                                            name="foodQty" value="1"> กินน้อยลง (1 คะแนน)</label><label
-                                        class="radio-label"><input type="radio" name="foodQty" value="0"> กินมากขึ้น
-                                        (0 คะแนน)</label><label class="radio-label"><input type="radio"
-                                            name="foodQty" value="0"> กินเท่าปกติ (0 คะแนน)</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-wheelchair"></i> 7. ความสามารถในการเข้าถึงอาหาร
-                </div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="form-group"><label class="form-label">สถานะการเคลื่อนไหว</label>
-                            <div class="radio-group-container">
-                                <div class="radio-wrapper"><label class="radio-label"><input type="radio"
-                                            name="foodAccess" value="2"> นอนติดเตียง</label><label
-                                        class="radio-label"><input type="radio" name="foodAccess" value="1">
-                                        ต้องมีผู้ช่วยบ้าง</label><label class="radio-label"><input type="radio"
-                                            name="foodAccess" value="0"> นั่งๆ นอนๆ</label><label
-                                        class="radio-label"><input type="radio" name="foodAccess" value="0">
-                                        ปกติ</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="reference-note"><strong>เกณฑ์คะแนน:</strong> นอนติดเตียง (2) | ต้องมีผู้ช่วย (1)
-                            | นั่งๆ นอนๆ, ปกติ (0)</div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-notes-medical"></i> 8. อาการต่อเนื่อง > 2 สัปดาห์
-                </div>
-                <div class="form-row">
-                    <div class="col-12">
-                        <div class="form-group"
-                            style="margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 15px;">
-                            <label class="form-label"
-                                style="font-weight: 700; color: #0D47A1;">ปัญหาทางการเคี้ยว/กลืนอาหาร</label>
-                            <div class="radio-group-container" style="min-height: 0;">
-                                <div class="radio-wrapper" style="flex-direction: column; align-items: flex-start;">
-                                    <label class="radio-label"><input type="checkbox" name="symptom_choke_assess"
-                                            value="2"> สำลัก (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox" name="symptom_swallow_assess"
-                                            value="2"> เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox" name="symptom_swallow_normal"
-                                            value="0"> กลืนได้ปกติ (0 คะแนน)</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group"
-                            style="margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 15px;">
-                            <label class="form-label"
-                                style="font-weight: 700; color: #0D47A1;">ปัญหาระบบทางเดินอาหาร</label>
-                            <div class="radio-group-container" style="min-height: 0;">
-                                <div class="radio-wrapper" style="flex-direction: column; align-items: flex-start;">
-                                    <label class="radio-label"><input type="checkbox" name="symptom_diarrhea_assess"
-                                            value="2"> ท้องเสีย (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox" name="symptom_pain_assess"
-                                            value="2"> ปวดท้อง (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox"
-                                            name="symptom_digestive_normal" value="0"> ปกติ (0 คะแนน)</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label"
-                                style="font-weight: 700; color: #0D47A1;">ปัญหาระหว่างกินอาหาร</label>
-                            <div class="radio-group-container" style="min-height: 0;">
-                                <div class="radio-wrapper" style="flex-direction: column; align-items: flex-start;">
-                                    <label class="radio-label"><input type="checkbox" name="symptom_vomit_assess"
-                                            value="2"> อาเจียน (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox" name="symptom_nausea_assess"
-                                            value="2"> คลื่นไส้ (2 คะแนน)</label>
-                                    <label class="radio-label"><input type="checkbox" name="symptom_eating_normal"
-                                            value="0"> ปกติ (0 คะแนน)</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="reference-note" style="margin-top: 10px;">* หมายเหตุ: เลือกได้หลายข้อ
-                            หากมีอาการใดอาการหนึ่ง จะได้คะแนนตามเกณฑ์</div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-bed-pulse"></i> 9. โรคที่เป็นอยู่ (เลือกได้หลายข้อ)
-                </div>
-                <div class="form-row">
-                    <div class="col-12 col-md-6">
-                        <div class="form-group h-100">
-                            <label class="form-label"
-                                style="color: #F57C00; border-bottom: 2px solid #FFE0B2; padding-bottom: 5px; margin-bottom: 15px;"><i
-                                    class="fa-solid fa-circle-exclamation"></i> โรคที่มีความรุนแรงน้อยถึงปานกลาง (3
-                                คะแนน)</label>
-                            <div class="checkbox-list">
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="dm"> DM (เบาหวาน)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="ckd"> CKD-ESRD (ไตเรื้อรัง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="chf"> Chronic heart failure (หัวใจล้มเหลวเรื้อรัง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="copd"> COPD (ปอดอุดกั้นเรื้อรัง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="septicemia"> Septicemia (ติดเชื้อในกระแสเลือด)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="cancer"> Solid cancer (มะเร็งทั่วไป)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="hip_fracture"> Hip fracture (ข้อสะโพกหัก)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="burn"> >= 2 of burn (แผลไฟไหม้ระดับ 2 ขึ้นไป)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="liver"> CLD/Cirrhosis/Hepatic encaph (ตับเรื้อรัง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate"
-                                        value="head_injury"> Severe head injury (บาดเจ็บที่ศีรษะรุนแรง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_moderate_other"
-                                        value="other" id="diseaseModOther"
-                                        onchange="toggleDiseaseInput('diseaseModOther', 'diseaseModOtherText')">
-                                    อื่นๆ (ระบุ) <input type="text" id="diseaseModOtherText"
-                                        class="form-control input-inline-small" style="width: 150px!important;"
-                                        disabled></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="form-group h-100">
-                            <label class="form-label"
-                                style="color: #c62828; border-bottom: 2px solid #ffcdd2; padding-bottom: 5px; margin-bottom: 15px;"><i
-                                    class="fa-solid fa-triangle-exclamation"></i> โรคที่มีความรุนแรงมาก (6
-                                คะแนน)</label>
-                            <div class="checkbox-list">
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe"
-                                        value="pneumonia"> Severe pneumonia (ปอดบวมขั้นรุนแรง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe"
-                                        value="critical"> Critically Ill (ผู้ป่วยวิกฤต)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe"
-                                        value="fracture"> Multiple fracture (กระดูกหักหลายตำแหน่ง)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe"
-                                        value="stroke"> Stroke/CVA (อัมพาต)</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe"
-                                        value="hematologic"> Malignant hematologic disease/Bone marrow
-                                    transplant</label>
-                                <label class="checkbox-item"><input type="checkbox" name="disease_severe_other"
-                                        value="other" id="diseaseSevOther"
-                                        onchange="toggleDiseaseInput('diseaseSevOther', 'diseaseSevOtherText')">
-                                    อื่นๆ (ระบุ) <input type="text" id="diseaseSevOtherText"
-                                        class="form-control input-inline-small" style="width: 150px!important;"
-                                        disabled></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="section-title"><i class="fa-solid fa-square-poll-vertical"></i> สรุปผลการประเมิน (NAF
-                    Score)</div>
-                <div class="summary-card-container">
-                    <div class="summary-card risk-color-neutral" id="scoreCardBox">
-                        <div class="summary-card-title">คะแนนรวม</div>
-                        <div class="summary-card-value" id="realTimeScore">0</div>
-                        <div class="summary-card-desc">คะแนน</div>
-                    </div>
-                    <div class="summary-card risk-color-neutral" id="riskCardBox">
-                        <div class="summary-card-title">ระดับความเสี่ยง</div>
-                        <div class="summary-card-value" style="font-size: 2rem;" id="realTimeRiskLabel">-</div>
-                        <div class="summary-card-desc" id="realTimeRiskGroup">รอผลการประเมิน</div>
-                    </div>
-                </div>
-                <div
-                    style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 25px;">
-                    <strong>คำแนะนำ:</strong> <span
-                        id="realTimeRiskDetail">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อดูผลลัพธ์</span>
-                </div>
-
-                <div class="form-row">
-                    <div class="col-12" style="text-align: right;">
-                        <div style="display: flex; justify-content: flex-end; gap: 15px;">
-                            <button type="submit" class="btn-submit">
-                                <i class="fa-solid fa-check-circle"></i> บันทึกและเสร็จสิ้น
-                            </button>
-                            <button type="button" class="btn-outline" onclick="window.print()">
-                                <i class="fa-solid fa-file-pdf"></i> พิมพ์ PDF
-                            </button>
-                        </div>
-                    </div>
-                </div>
-        </form>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <script>
-        // โค้ด JS คำนวณคะแนน (ยกมาจากไฟล์เดิม)
-        document.addEventListener('DOMContentLoaded', initRealTimeCalculation);
+        const patientsData = {
+            '6601122': {
+                info: {
+                    hn: '6601122',
+                    an: '6700450',
+                    name: 'นางสาวมานี มีนา',
+                    age: '30 ปี',
+                    rights: 'บัตรทอง',
+                    underlying: 'ปฏิเสธโรคประจำตัว',
+                    doctor: 'พญ. ใจดี มีเมตตา',
+                    ward: 'อายุรกรรมหญิง 1 / 106',
+                    admit: '20 ธ.ค. 67 10:00 น.',
+                    phone: '089-999-9999'
+                },
+                historyCount: 0
+            },
+            '6604589': {
+                info: {
+                    hn: '6604589',
+                    an: '6700123',
+                    name: 'นายสมชาย ใจดี',
+                    age: '45 ปี',
+                    rights: 'บัตรทอง',
+                    underlying: 'ความดันโลหิตสูง (HT)',
+                    doctor: 'นพ. สมศักดิ์ รักษาดี',
+                    ward: 'อายุรกรรมชาย 1 / 101',
+                    admit: '15 พ.ย. 67 08:30 น.',
+                    phone: '081-111-1111'
+                },
+                historyCount: 0
+            },
+            '6603321': {
+                info: {
+                    hn: '6603321',
+                    an: '6700189',
+                    name: 'นายวิชัย กล้าหาญ',
+                    age: '75 ปี',
+                    rights: 'ประกันสังคม',
+                    underlying: 'ไขมันในเลือดสูง (DLP)',
+                    doctor: 'นพ. เก่งกาจ วิชาการ',
+                    ward: 'อายุรกรรมชาย 1 / 103',
+                    admit: '18 พ.ย. 67 14:20 น.',
+                    phone: '083-333-3333'
+                },
+                historyCount: 0
+            },
+            '6609888': {
+                info: {
+                    hn: '6609888',
+                    an: '6700300',
+                    name: 'นายมั่นคง ทรงพลัง',
+                    age: '55 ปี',
+                    rights: 'ชำระเงินเอง',
+                    underlying: 'ปฏิเสธโรคประจำตัว',
+                    doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
+                    ward: 'ศัลยกรรมกระดูก 3 / 105',
+                    admit: '10 พ.ย. 67 20:45 น.',
+                    phone: '084-444-4444'
+                },
+                historyCount: 0
+            },
+            '6605112': {
+                info: {
+                    hn: '6605112',
+                    an: '6700145',
+                    name: 'นางสมหญิง รักเรียน',
+                    age: '62 ปี',
+                    rights: 'ข้าราชการ',
+                    underlying: 'เบาหวาน (DM), โรคไต (CKD)',
+                    doctor: 'พญ. ใจดี มีเมตตา',
+                    ward: 'อายุรกรรมหญิง 2 / 102',
+                    admit: '25 พ.ย. 67 10:15 น.',
+                    phone: '082-222-2222'
+                },
+                historyCount: 0
+            },
+            '6609999': {
+                info: {
+                    hn: '6609999',
+                    an: '6700999',
+                    name: 'นายหนักแน่น อดทน',
+                    age: '80 ปี',
+                    rights: 'ข้าราชการ',
+                    underlying: 'มะเร็งปอด',
+                    doctor: 'นพ. สมศักดิ์ รักษาดี',
+                    ward: 'อายุรกรรมชาย 1 / 201',
+                    admit: '20 พ.ย. 67 11:00 น.',
+                    phone: '085-555-5555'
+                },
+                historyCount: 0
+            }
+        };
 
-        function initRealTimeCalculation() {
-            const allInputs = document.querySelectorAll('#assessmentForm input');
-            allInputs.forEach(input => {
-                input.addEventListener('change', updateRealTimeScore);
-                input.addEventListener('input', updateRealTimeScore);
+        let currentHn = '';
+        let currentBmiScore = 0;
+        let currentLabScore = 0;
+        let currentDocNo = '';
+        let viewDocNo = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            currentHn = params.get('hn') || '6605112';
+            viewDocNo = params.get('docNo');
+
+            if (patientsData[currentHn]) {
+                const p = patientsData[currentHn].info;
+                document.getElementById('p_hn').innerText = p.hn;
+                document.getElementById('p_an').innerText = p.an;
+                document.getElementById('p_name').innerText = p.name;
+                document.getElementById('p_age').innerText = p.age;
+                document.getElementById('p_ward').innerText = p.ward;
+                document.getElementById('p_rights').innerText = p.rights;
+
+                if (document.getElementById('p_doctor')) document.getElementById('p_doctor').innerText = p.doctor;
+                if (document.getElementById('p_admit')) document.getElementById('p_admit').innerText = p.admit;
+                if (document.getElementById('p_phone')) document.getElementById('p_phone').innerText = p.phone;
+                if (document.getElementById('p_underlying')) document.getElementById('p_underlying').innerText = p.underlying;
+
+                // รับค่า Diagnosis + Weight + Height
+                const diagnosisInput = document.getElementById('diagnosis');
+                const weightInput = document.getElementById('currentWeight');
+                const heightInput = document.getElementById('anthroHeight');
+
+                const transferData = JSON.parse(localStorage.getItem('nas_transfer_data'));
+
+                if (transferData && transferData.hn === currentHn) {
+                    // 1. รับค่า Diagnosis
+                    if (diagnosisInput && transferData.diagnosis) diagnosisInput.value = transferData.diagnosis;
+
+                    // 2. รับค่า น้ำหนัก
+                    if (weightInput && transferData.weight) weightInput.value = transferData.weight;
+
+                    // 3. รับค่า ส่วนสูง
+                    if (heightInput && transferData.height) heightInput.value = transferData.height;
+
+                    // 4. คำนวณ BMI ทันที
+                    if (transferData.weight || transferData.height) calculateBMI();
+
+                } else {
+                    if (!viewDocNo) {
+                        if (diagnosisInput) diagnosisInput.value = '';
+                    }
+                }
+
+            } else {
+                document.getElementById('p_hn').innerText = currentHn;
+                document.getElementById('p_name').innerText = 'ไม่พบข้อมูล';
+            }
+
+            if (viewDocNo) {
+                loadSavedData(viewDocNo);
+            } else {
+                setAssessmentDateTime();
+            }
+        });
+
+        function setAssessmentDateTime() {
+            const now = new Date();
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const thaiDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
+            const time = now.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' น.';
+            document.getElementById('assessDate').value = thaiDate;
+            document.getElementById('assessTime').value = time;
+
+            const userNameEl = document.querySelector('.user-name');
+            if (userNameEl) document.getElementById('assessAssessor').value = userNameEl.innerText.trim();
+
+            const baseCount = patientsData[currentHn]?.historyCount || 0;
+            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const nafHistory = history.filter(h => h.hn === currentHn && h.type === 'NAF');
+            const currentCount = baseCount + nafHistory.length + 1;
+            document.getElementById('assessCount').value = currentCount;
+
+            currentDocNo = `NAF-${currentHn}-${String(currentCount).padStart(3, '0')}`;
+            document.getElementById('docNoDisplay').innerText = `Document No.: ${currentDocNo}`;
+        }
+
+        function loadSavedData(docNo) {
+            const history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const record = history.find(r => r.docNo === docNo);
+
+            if (!record) {
+                alert('ไม่พบข้อมูลเอกสาร: ' + docNo);
+                return;
+            }
+
+            const watermark = document.getElementById('viewModeWatermark');
+            if (watermark) watermark.style.display = 'block';
+
+            currentDocNo = record.docNo;
+            document.getElementById('docNoDisplay').innerText = `Document No.: ${currentDocNo}`;
+            document.getElementById('assessAssessor').value = record.assessor;
+
+            const dt = record.date.split(' ');
+            if (dt.length >= 3) document.getElementById('assessDate').value = dt.slice(0, 3).join(' ');
+            if (dt.length >= 4) document.getElementById('assessTime').value = dt[3];
+
+            if (record.formData) {
+                record.formData.forEach(item => {
+                    const el = document.getElementById(item.id);
+                    if (el) {
+                        if (item.type === 'checkbox' || item.type === 'radio') {
+                            el.checked = item.checked;
+                        } else {
+                            el.value = item.value;
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('unknownWeight').checked) toggleWeightMode();
+            if (document.getElementById('useAlbumin').checked) selectLab('albumin');
+            if (document.getElementById('useTLC').checked) selectLab('tlc');
+            toggleOtherSource();
+
+            const otherMod = document.getElementById('disOtherMod');
+            if (otherMod && otherMod.checked) document.getElementById('disOtherModText').disabled = false;
+            const otherSev = document.getElementById('disOtherSev');
+            if (otherSev && otherSev.checked) document.getElementById('disOtherSevText').disabled = false;
+
+            calculateBMI();
+            calculateLabScore();
+            calculateScore();
+            disableForm();
+        }
+
+        function disableForm() {
+            document.querySelectorAll('input, select, textarea, button').forEach(el => {
+                if (!el.classList.contains('btn-cancel-custom') && !el.onclick?.toString().includes('history.back')) {
+                    el.disabled = true;
+                }
+                if (el.type === 'checkbox' || el.type === 'radio') el.onclick = function() {
+                    return false;
+                };
+            });
+            const saveBtn = document.querySelector('.btn-save-custom');
+            if (saveBtn) saveBtn.style.display = 'none';
+            const footerActions = document.getElementById('footerActions');
+            const footerBackOnly = document.getElementById('footerBackOnly');
+            if (footerActions) footerActions.classList.add('d-none');
+            if (footerBackOnly) footerBackOnly.classList.remove('d-none');
+            document.querySelectorAll('.lab-choice-card').forEach(el => {
+                el.classList.add('read-only-overlay');
+                el.style.pointerEvents = 'none';
             });
         }
 
-        function calcAssessBMI() {
-            const weight = parseFloat(document.getElementById('assessWeight').value);
-            const height = parseFloat(document.getElementById('assessHeight').value);
-            const bmiBox = document.getElementById('assessBMI');
-            if (weight > 0 && height > 0) {
-                const hM = height / 100;
-                const bmi = weight / (hM * hM);
-                bmiBox.value = bmi.toFixed(2);
+        function toggleOtherSource() {
+            const isOther = document.getElementById('source3').checked;
+            const otherInput = document.getElementById('otherSourceText');
+            if (isOther) {
+                otherInput.disabled = false;
             } else {
-                bmiBox.value = '';
+                otherInput.disabled = true;
+                otherInput.value = '';
             }
-            updateRealTimeScore();
         }
 
-        function getScore() {
-            let totalScore = 0;
-            // 1. BMI Logic
-            const bmiVal = parseFloat(document.getElementById('assessBMI').value);
-            if (!isNaN(bmiVal)) {
-                if (bmiVal < 17.0) totalScore += 2;
-                else if (bmiVal >= 17.0 && bmiVal <= 18.0) totalScore += 1;
-                else if (bmiVal >= 30.0) totalScore += 1;
+        function toggleWeightMode() {
+            const isUnknown = document.getElementById('unknownWeight').checked;
+            const standardSection = document.getElementById('standardWeightSection');
+            const labSection = document.getElementById('labSection');
+            if (isUnknown) {
+                standardSection.classList.add('hidden-section');
+                labSection.classList.remove('hidden-section');
+                currentBmiScore = 0;
+            } else {
+                standardSection.classList.remove('hidden-section');
+                labSection.classList.add('hidden-section');
+                currentLabScore = 0;
+                calculateBMI();
             }
-            // ... (ใส่ Logic ส่วนอื่นๆ ตามไฟล์เดิม) ...
-            return totalScore;
+            calculateScore();
         }
 
-        function updateRealTimeScore() {
-            const score = getScore();
-            document.getElementById('realTimeScore').innerText = score;
-
-            const label = document.getElementById('realTimeRiskLabel');
-            if (score <= 5) label.innerText = "NAF A (Normal)";
-            else if (score <= 10) label.innerText = "NAF B (Moderate)";
-            else label.innerText = "NAF C (Severe)";
+        function selectLab(type) {
+            if (type === 'albumin') document.getElementById('useAlbumin').checked = true;
+            else document.getElementById('useTLC').checked = true;
+            toggleLabInputs();
         }
 
-        function saveAssessment() {
-            // ส่งข้อมูลบันทึก (AJAX)
-            alert('บันทึกข้อมูลการประเมินเรียบร้อย');
-            window.location.href = 'index.php'; // หรือกลับหน้า Profile
+        function toggleLabInputs() {
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const cardAlbumin = document.getElementById('cardAlbumin');
+            const cardTLC = document.getElementById('cardTLC');
+            const inputAlb = document.getElementById('valAlbumin');
+            const inputTLC = document.getElementById('valTLC');
+
+            if (isAlbumin) {
+                cardAlbumin.classList.add('active');
+                cardAlbumin.classList.remove('inactive');
+                inputAlb.disabled = false;
+                inputAlb.style.pointerEvents = 'auto';
+                cardTLC.classList.remove('active');
+                cardTLC.classList.add('inactive');
+                inputTLC.disabled = true;
+                inputTLC.style.pointerEvents = 'none';
+                inputTLC.value = '';
+            } else {
+                cardTLC.classList.add('active');
+                cardTLC.classList.remove('inactive');
+                inputTLC.disabled = false;
+                inputTLC.style.pointerEvents = 'auto';
+                cardAlbumin.classList.remove('active');
+                cardAlbumin.classList.add('inactive');
+                inputAlb.disabled = true;
+                inputAlb.style.pointerEvents = 'none';
+                inputAlb.value = '';
+            }
+            calculateLabScore();
+        }
+
+        function calculateLabScore() {
+            let score = 0;
+            const isAlbumin = document.getElementById('useAlbumin').checked;
+            const isTLC = document.getElementById('useTLC').checked;
+            if (isAlbumin) {
+                const val = parseFloat(document.getElementById('valAlbumin').value);
+                if (!isNaN(val)) {
+                    if (val <= 2.5) score = 3;
+                    else if (val <= 2.9) score = 2;
+                    else if (val <= 3.5) score = 1;
+                    else score = 0;
+                }
+            } else if (isTLC) {
+                const val = parseFloat(document.getElementById('valTLC').value);
+                if (!isNaN(val)) {
+                    if (val <= 1000) score = 3;
+                    else if (val <= 1200) score = 2;
+                    else if (val <= 1500) score = 1;
+                    else score = 0;
+                }
+            }
+            currentLabScore = score;
+            document.getElementById('labScoreText').innerText = score;
+            calculateScore();
+        }
+
+        function calculateBMI() {
+            if (document.getElementById('unknownWeight').checked) return;
+            let h = parseFloat(document.getElementById('anthroHeight').value);
+            if (!h) h = parseFloat(document.getElementById('anthroLength').value);
+            if (!h) h = parseFloat(document.getElementById('anthroArmSpan').value);
+            if (!h) h = parseFloat(document.getElementById('anthroReported').value);
+            const w = parseFloat(document.getElementById('currentWeight').value);
+
+            if (h > 0 && w > 0) {
+                const heightM = h / 100;
+                const bmi = w / (heightM * heightM);
+                document.getElementById('bmiValue').value = bmi.toFixed(2);
+                let score = 0;
+                if (bmi < 17.0) score = 2;
+                else if (bmi >= 17.0 && bmi <= 18.0) score = 1;
+                else if (bmi > 18.0 && bmi <= 29.9) score = 0;
+                else if (bmi >= 30.0) score = 1;
+                currentBmiScore = score;
+                document.getElementById('bmiScoreText').innerText = `Score: ${score}`;
+            } else {
+                document.getElementById('bmiValue').value = '-';
+                currentBmiScore = 0;
+                document.getElementById('bmiScoreText').innerText = `Score: 0`;
+            }
+            calculateScore();
+        }
+
+        function toggleOtherDisease(checkbox, inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.disabled = !checkbox.checked;
+                if (checkbox.checked) input.focus();
+                else input.value = '';
+            }
+        }
+
+        function calculateScore() {
+            let total = 0;
+            if (document.getElementById('unknownWeight').checked) {
+                total += currentLabScore;
+            } else {
+                total += currentBmiScore;
+                const methodRadios = document.getElementsByName('weightMethod');
+                for (let r of methodRadios) {
+                    if (r.checked) total += parseInt(r.value);
+                }
+            }
+            const shapeRadios = document.getElementsByName('bodyShape');
+            for (let r of shapeRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+            const wcRadios = document.getElementsByName('weightChange');
+            for (let r of wcRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+            const typeRadios = document.getElementsByName('foodType');
+            for (let r of typeRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+            const amtRadios = document.getElementsByName('foodAmount');
+            for (let r of amtRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+            const symChecks = document.querySelectorAll('.symptom-check:checked');
+            symChecks.forEach(chk => {
+                total += parseInt(chk.value);
+            });
+            const accessRadios = document.getElementsByName('foodAccess');
+            for (let r of accessRadios) {
+                if (r.checked) total += parseInt(r.value);
+            }
+            const diseaseChecks = document.querySelectorAll('.disease-check:checked');
+            diseaseChecks.forEach(chk => {
+                total += parseInt(chk.value);
+            });
+
+            document.getElementById('totalScore').innerText = total;
+            updateResult(total);
+        }
+
+        function updateResult(score) {
+            const box = document.getElementById('nafResultBox');
+            const level = document.getElementById('nafLevel');
+            const desc = document.getElementById('nafDesc');
+            box.classList.remove('risk-low', 'risk-mod', 'risk-high');
+            if (score <= 5) {
+                box.classList.add('risk-low');
+                level.innerText = 'NAF A (Normal-Mild malnutrition)';
+                desc.innerText = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
+            } else if (score <= 10) {
+                box.classList.add('risk-mod');
+                level.innerText = 'NAF B (Moderate malnutrition)';
+                desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
+            } else {
+                box.classList.add('risk-high');
+                level.innerText = 'NAF C (Severe malnutrition)';
+                desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
+            }
+        }
+
+        function saveData() {
+            // 1. ตรวจสอบข้อมูลจำเป็น (Validation)
+            const h = document.getElementById('anthroHeight').value;
+            const l = document.getElementById('anthroLength').value;
+            const a = document.getElementById('anthroArmSpan').value;
+            const r = document.getElementById('anthroReported').value;
+
+            if (!h && !l && !a && !r && !document.getElementById('unknownWeight').checked) {
+                document.getElementById('anthroAlert').classList.remove('d-none');
+                document.getElementById('anthroSection').scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+                return;
+            }
+
+            // 2. เก็บข้อมูล Input ทั้งหมด
+            const formData = [];
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(el => {
+                if (el.id) {
+                    formData.push({
+                        id: el.id,
+                        type: el.type,
+                        value: el.value,
+                        checked: el.checked
+                    });
+                }
+            });
+
+            // -------------------------------------------------------------
+            // จุดที่แก้ไข: แยก "เวลาที่เลือก" กับ "เวลาปัจจุบัน" ออกจากกัน
+            // -------------------------------------------------------------
+
+            // A. เวลาประเมิน (Assessment Time) - เอามาจาก Input ที่ User แก้ไขได้
+            const assessDateStr = document.getElementById('assessDate').value;
+            const assessTimeStr = document.getElementById('assessTime').value;
+            const userSelectedDateTime = `${assessDateStr} ${assessTimeStr}`;
+
+            // B. เวลาบันทึกจริง (System Time) - สร้างใหม่เดี๋ยวนั้น User แก้ไม่ได้
+            const now = new Date();
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const realDateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`;
+            // เติมวินาทีเข้าไปด้วย จะได้เห็นชัดว่าคนละเวลากัน
+            const realTimeStr = now.toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' น.';
+            const systemSavedTime = `${realDateStr} ${realTimeStr}`;
+
+            // -------------------------------------------------------------
+
+            const scoreText = document.getElementById('totalScore').innerText;
+            const resultText = document.getElementById('nafLevel').innerText;
+            const assessorName = document.getElementById('assessAssessor').value;
+
+            const newRecord = {
+                hn: currentHn,
+                type: 'NAF',
+                name: 'แบบประเมินภาวะโภชนาการ (NAF)',
+                score: parseInt(scoreText) || 0,
+                result: resultText,
+                assessor: assessorName,
+
+                // 1. เวลาสำหรับแสดงผลในประวัติ (ยึดตามที่ User เลือก)
+                date: userSelectedDateTime,
+
+                // 2. เวลาสำหรับตรวจสอบ (Audit) ว่าบันทึกจริงตอนไหน
+                realSavedTime: systemSavedTime,
+
+                // 3. เวลาสำหรับ Sorting
+                timestamp: Date.now(),
+
+                docNo: currentDocNo,
+                url: 'nutrition_alert_form.html',
+                formData: formData
+            };
+
+            // 4. บันทึกลง LocalStorage
+            let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            history.push(newRecord);
+            localStorage.setItem('nas_patient_history', JSON.stringify(history));
+
+            alert(`บันทึกข้อมูลเรียบร้อย\nเวลาประเมิน: ${userSelectedDateTime}\nเวลาบันทึกระบบ: ${systemSavedTime}`);
+            window.location.href = `patient_profile.html?hn=${currentHn}`;
         }
     </script>
 </body>

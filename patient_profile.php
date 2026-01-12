@@ -40,12 +40,12 @@ try {
 
     if (!$patient) die("ไม่พบข้อมูลผู้ป่วยในระบบ");
 
-    $age_display = '-';
+    $age = '-';
     if (!empty($patient['patients_dob'])) {
         $dob = new DateTime($patient['patients_dob']);
         $now = new DateTime();
         $diff = $now->diff($dob);
-        $age_display = $diff->y . ' ปี ' . $diff->m . ' เดือน';
+        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน ' . $diff->d . ' วัน';
     }
 
     $admit_date = '-';
@@ -233,7 +233,7 @@ if ($latest_screening) {
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold"><?= $patient['patients_hn'] ?></span></div>
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold"><?= $patient['admissions_an'] ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold text-primary-custom" style="font-size: 1.1rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block">อายุ</small><span class="font-weight-bold"><?= $age_display ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block">อายุ</small><span class="font-weight-bold"><?= $age ?></span></div>
                             <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold"><?= $patient['health_insurance_name'] ?: '-' ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold"><?= $patient['doctor_name'] ?: '-' ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย / เตียง</small><span class="font-weight-bold"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span></div>
