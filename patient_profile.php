@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูลผู้ป่วย | โรงพยาบาลกำแพงเพชร</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/patient_profile.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
+                    onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>ระบบประเมินภาวะโภชนาการ</h1>
+                    <small>Nutrition Alert System (NAS)</small>
+                </div>
+            </a>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        <div class="user-profile-btn">
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
+                                <div class="user-name">เพชรลดา เชยเพ็ชร</div>
+                                <div class="user-role">นักโภชนาการ</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px;">
+
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i>
+                                ออกจากระบบ
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-lg-5 mt-4">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-auto">
+                        <div class="patient-icon-box"><i class="fa-solid fa-user-injured"></i></div>
+                    </div>
+                    <div class="col">
+                        <h5 class="text-primary-custom font-weight-bold mb-3 border-bottom pb-2 d-inline-block">
+                            <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                                <small class="text-muted d-block">HN</small>
+                                <span class="font-weight-bold" id="p_hn">-</span>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                                <small class="text-muted d-block">AN</small>
+                                <span class="font-weight-bold" id="p_an">-</span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">ชื่อ - นามสกุล</small>
+                                <span class="font-weight-bold text-primary-custom" id="p_name"
+                                    style="font-size: 1.1rem;">-</span>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3">
+                                <small class="text-muted d-block">อายุ</small>
+                                <span class="font-weight-bold" id="p_age">-</span>
+                            </div>
+                            <div class="col-6 col-md-8 col-lg-2 mb-3">
+                                <small class="text-muted d-block">สิทธิการรักษา</small>
+                                <span class="font-weight-bold" id="p_rights">สิทธิข้าราชการ</span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
+                                <span class="font-weight-bold" id="p_doctor">-</span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
+                                <span class="font-weight-bold" id="p_ward">-</span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">วันที่ Admit</small>
+                                <span class="font-weight-bold" id="p_admit">-</span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">เบอร์โทรศัพท์</small>
+                                <span class="font-weight-bold" id="p_phone">-</span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                                <small class="text-muted d-block">โรคประจำตัว</small>
+                                <span class="font-weight-bold" id="p_underlying">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="index.html" class="btn btn-outline-secondary btn-sm" style="border-radius: 4px;">
+                <i class="fa-solid fa-chevron-left mr-1"></i> กลับหน้าหลัก
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary px-4 shadow-sm dropdown-toggle" data-toggle="dropdown"
+                    style="background-color: #0d47a1; border-color: #0d47a1; border-radius: 4px; height: 45px; font-size: 1rem;">
+                    <i class="fa-solid fa-folder-plus mr-2"></i> เพิ่มไฟล์เอกสารใหม่
+                </button>
+                <div class="dropdown-menu dropdown-menu-right border shadow-sm p-0 mt-1"
+                    style="min-width: 380px; border-radius: 4px; border-color: #ced4da;">
+                    <div class="bg-light px-3 py-2 border-bottom">
+                        <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">
+                            เลือกประเภทเอกสาร
+                        </small>
+                    </div>
+
+                    <a href="javascript:void(0)" class="dropdown-item py-3 px-3 menu-action-link border-bottom"
+                        id="menu_spent" onclick="handleAction('SPENT', 'nutrition_screening_form.html')">
+                        <div class="d-flex">
+                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
+                                style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
+                                <i class="fa-solid fa-file-medical fa-lg"></i>
+                            </div>
+                            <div class="w-100">
+                                <span class="font-weight-bold text-dark title-text"
+                                    style="font-size: 1rem;">แบบคัดกรองภาวะโภชนาการ</span>
+                                <small class="text-muted sub-text d-block mb-1">SPENT Nutrition Screening Tool</small>
+                                <div class="reason-text d-none mt-1"
+                                    style="font-size: 0.75rem; background-color: #fff5f5; color: #c00; border: 1px solid #fcc; padding: 4px 8px; border-radius: 2px;">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="javascript:void(0)" class="dropdown-item py-3 px-3 menu-action-link" id="menu_naf"
+                        onclick="handleAction('NAF', 'nutrition_alert_form.html')">
+                        <div class="d-flex">
+                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
+                                style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
+                                <i class="fa-solid fa-clipboard-user fa-lg"></i>
+                            </div>
+                            <div class="w-100">
+                                <span class="font-weight-bold text-dark title-text"
+                                    style="font-size: 1rem;">แบบประเมินภาวะโภชนาการ</span>
+                                <small class="text-muted sub-text d-block mb-1">Nutrition Alert Form (NAF)</small>
+                                <div class="reason-text d-none mt-1"
+                                    style="font-size: 0.75rem; background-color: #fff5f5; color: #c00; border: 1px solid #fcc; padding: 4px 8px; border-radius: 2px;">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div id="currentStatusCard" class="his-container d-none p-0 overflow-hidden">
+                    <div class="row no-gutters">
+                        <div class="col-md-8 p-4 d-flex flex-column border-right-md">
+                            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                <h6 class="font-weight-bold m-0 text-primary-custom">
+                                    <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
+                                </h6>
+                                <span id="cur_source_badge"
+                                    class="badge badge-light border text-muted font-weight-normal px-2">-</span>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="flex-grow-1 pr-3">
+                                    <small class="text-uppercase text-muted font-weight-bold" id="cur_type_label"
+                                        style="font-size: 0.75rem;">-</small>
+                                    <h4 id="cur_status_text" class="his-result mt-1 mb-2" style="font-size: 1.5rem;">-
+                                    </h4>
+                                    <p id="cur_status_desc" class="text-muted"
+                                        style="font-size: 0.95rem; line-height: 1.5;">-
+                                    </p>
+                                </div>
+                                <div class="text-center pl-3 border-left">
+                                    <div class="score-circle shadow-sm bg-white mx-auto mb-1"
+                                        style="width: 60px; height: 60px; font-size: 1.6rem;">
+                                        <span id="cur_score_val">-</span>
+                                    </div>
+                                    <small class="text-muted font-weight-bold"
+                                        style="font-size: 0.7rem;">คะแนนรวม</small>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto">
+                                <div class="d-flex align-items-center bg-light rounded p-2" style="font-size: 0.85rem;">
+                                    <div class="mr-4 d-flex align-items-center">
+                                        <i class="fa-regular fa-calendar text-muted mr-2"></i>
+                                        <span id="cur_date_text" class="font-weight-medium text-dark">-</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa-solid fa-user-nurse text-muted mr-2"></i>
+                                        <span id="cur_assessor_text" class="font-weight-medium text-dark">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 p-4 d-flex flex-column justify-content-center bg-white">
+                            <div class="w-100">
+                                <h6 class="text-muted font-weight-bold text-uppercase mb-3"
+                                    style="font-size: 0.75rem; letter-spacing: 1px;">
+                                    สิ่งดำเนินการถัดไป (Next Action)
+                                </h6>
+                                <div id="cur_next_action" class="w-100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border shadow-sm mb-5">
+                    <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary-custom">
+                            <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
+                        </h6>
+                        <div class="form-inline mt-2 mt-md-0">
+
+                            <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="resetHistory()">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)
+                            </button>
+
+                            <label class="small mr-2 text-muted">ตัวกรอง:</label>
+                            <select class="custom-select custom-select-sm" id="typeFilter" onchange="filterHistory()">
+                                <option value="all">ทั้งหมด (All)</option>
+                                <option value="SPENT">แบบคัดกรองภาวะโภชนาการ (SPENT)</option>
+                                <option value="NAF">แบบประเมินภาวะโภชนาการ (NAF)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 200px;">รายการบันทึก</th>
+                                        <th style="width: 80px;" class="text-center">ประเภท</th>
+                                        <th style="width: 60px;" class="text-center">ครั้งที่</th>
+                                        <th style="width: 60px;" class="text-center">คะแนน</th>
+                                        <th style="width: 100px" class="text-center">ผลการคัดกรอง (SPENT)</th>
+                                        <th style="width: 100px" class="text-center">ผลการประเมิน (NAF)</th>
+                                        <th style="width: 100px">ผู้ประเมิน</th>
+                                        <th style="width: 100px">วัน/เวลาที่บันทึก</th>
+                                        <th style="width: 120px" class="text-center">สถานะเอกสาร</th>
+                                        <th style="width: 110px;" class="text-center">เอกสาร</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="noHistory" class="text-center py-4 d-none">
+                            <p class="text-muted mb-0">ยังไม่มีประวัติการประเมิน</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        const CURRENT_USER = 'เพชรลดา เชยเพ็ชร';
+
+        // ปรับข้อมูลผู้ป่วยทุกคนให้เริ่มต้นใหม่ (Clean State) เหมือนกันหมด
+        const patients = [{
+                id: 1,
+                bed: '101',
+                ward: '1',
+                departmentText: 'อายุรกรรมชาย',
+                hn: '6604589',
+                an: '6700123',
+                name: 'นายสมชาย ใจดี',
+                age: 45,
+                underlying: 'ความดันโลหิตสูง (HT)',
+                doctor: 'นพ. สมศักดิ์ รักษาดี',
+                admitDate: '15 พ.ย. 67 08:30 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '081-111-1111'
+            },
+            {
+                id: 2,
+                bed: '102',
+                ward: '2',
+                departmentText: 'อายุรกรรมหญิง',
+                hn: '6605112',
+                an: '6700145',
+                name: 'นางสมหญิง รักเรียน',
+                age: 62,
+                underlying: 'เบาหวาน (DM), โรคไต (CKD)',
+                doctor: 'พญ. ใจดี มีเมตตา',
+                admitDate: '25 พ.ย. 67 10:15 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '082-222-2222'
+            },
+            {
+                id: 3,
+                bed: '103',
+                ward: '1',
+                departmentText: 'อายุรกรรมชาย',
+                hn: '6603321',
+                an: '6700189',
+                name: 'นายวิชัย กล้าหาญ',
+                age: 75,
+                underlying: 'ไขมันในเลือดสูง (DLP)',
+                doctor: 'นพ. เก่งกาจ วิชาการ',
+                admitDate: '18 พ.ย. 67 14:20 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '083-333-3333'
+            },
+            {
+                id: 4,
+                bed: '105',
+                ward: '3',
+                departmentText: 'ศัลยกรรมกระดูก',
+                hn: '6609888',
+                an: '6700300',
+                name: 'นายมั่นคง ทรงพลัง',
+                age: 55,
+                underlying: 'ปฏิเสธโรคประจำตัว',
+                doctor: 'นพ. เชี่ยวชาญ งานละเอียด',
+                admitDate: '10 พ.ย. 67 20:45 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '084-444-4444'
+            },
+            {
+                id: 5,
+                bed: '106',
+                ward: '2',
+                departmentText: 'อายุรกรรมหญิง',
+                hn: '6601122',
+                an: '6700450',
+                name: 'นางสาวมานี มีนา',
+                age: 30,
+                underlying: 'ไม่มี',
+                doctor: 'พญ. ใจดี มีเมตตา',
+                admitDate: '23 ธ.ค. 68 10:45 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '089-999-9999'
+            },
+            {
+                id: 6,
+                bed: '201',
+                ward: '1',
+                departmentText: 'อายุรกรรมชาย',
+                hn: '6609999',
+                an: '6700999',
+                name: 'นายหนักแน่น อดทน',
+                age: 80,
+                underlying: 'มะเร็งปอด',
+                doctor: 'นพ. สมศักดิ์ รักษาดี',
+                admitDate: '20 พ.ย. 67 11:00 น.',
+                // --- Reset สถานะ ---
+                screenDate: '-',
+                screenCount: 0,
+                assessDate: '-',
+                status: 'wait_screen',
+                scoreVal: null,
+                nafScore: null,
+                phone: '085-555-5555'
+            }
+        ];
+
+        let currentPatient = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const hn = params.get('hn');
+
+            if (hn) {
+                currentPatient = patients.find(p => p.hn === hn);
+                if (currentPatient) {
+                    renderPatientData(currentPatient);
+                    renderHistory(currentPatient);
+                    updateMenuActions(currentPatient);
+                } else {
+                    alert('ไม่พบข้อมูลผู้ป่วย');
+                    window.location.href = 'index.html';
+                }
+            } else {
+                alert('ไม่พบรหัสผู้ป่วย (HN)');
+                window.location.href = 'index.html';
+            }
+        });
+
+        function renderPatientData(p) {
+            document.getElementById('p_hn').innerText = p.hn;
+            document.getElementById('p_an').innerText = p.an;
+            document.getElementById('p_name').innerText = p.name;
+            document.getElementById('p_age').innerText = p.age + " ปี";
+            document.getElementById('p_ward').innerText = `${p.departmentText} / ${p.bed}`;
+            document.getElementById('p_doctor').innerText = p.doctor;
+            document.getElementById('p_admit').innerText = p.admitDate;
+            document.getElementById('p_underlying').innerText = p.underlying;
+            document.getElementById('p_phone').innerText = p.phone || "-";
+        }
+
+        // --- ฟังก์ชัน Render History (ไม่มี Mockup แล้ว) ---
+        function renderHistory(p) {
+            let history = [];
+
+            // ดึงข้อมูลจริงจาก LocalStorage
+            const storedHistory = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+            const patientHistory = storedHistory.filter(item => item.hn === p.hn);
+
+            // รวมข้อมูล (ตอนนี้จะมีแค่ข้อมูลใหม่)
+            history = [...patientHistory];
+            history.sort((a, b) => a.timestamp - b.timestamp);
+
+            // กำหนดหมายเลขครั้งที่แยกตามประเภท
+            let countSpent = 0;
+            let countNaf = 0;
+
+            history = history.map((item) => {
+                let showId = 0;
+                if (item.type === 'SPENT') {
+                    countSpent++;
+                    showId = countSpent;
+                } else if (item.type === 'NAF') {
+                    countNaf++;
+                    showId = countNaf;
+                }
+                return {
+                    ...item,
+                    displayId: showId
+                };
+            });
+
+            // เรียงกลับ "ใหม่ -> เก่า"
+            history.reverse();
+
+            // -----------------------------------------------------------
+
+            // Render Table
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            if (history.length === 0) {
+                document.getElementById('noHistory').classList.remove('d-none');
+            } else {
+                document.getElementById('noHistory').classList.add('d-none');
+
+                history.forEach((h) => {
+                    let typeBadge = '';
+                    if (h.type === 'SPENT') {
+                        typeBadge = `<span class="badge badge-primary" style="width: 60px;">SPENT</span>`;
+                    } else {
+                        typeBadge = `<span class="badge badge-success" style="width: 60px;">NAF</span>`;
+                    }
+
+
+                    let docStatus = '';
+
+                    if (h.type === 'NAF') {
+                        // กรณี NAF: แค่บอกว่าบันทึกเสร็จแล้ว (สีเทา เพื่อไม่ให้แย่งซีนงานที่ด่วน)
+                        docStatus = `
+        <span class="text-muted" style="font-size: 0.9rem;">
+            <i class="fa-solid fa-file-circle-check mr-1"></i> บันทึกแล้ว
+        </span>
+    `;
+                    } else if (h.type === 'SPENT') {
+                        if (h.score >= 2) {
+                            // เช็คว่ามีใบ NAF ตามมาทีหลังหรือไม่
+                            const hasFollowUp = history.some(compare =>
+                                compare.type === 'NAF' && compare.timestamp > h.timestamp
+                            );
+
+                            if (hasFollowUp) {
+                                // กรณีเสี่ยง แต่ทำ NAF แล้ว (จบงาน)
+                                docStatus = `
+                <span class="text-success font-weight-bold" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-check-double mr-1"></i> ประเมินต่อแล้ว
+                </span>
+            `;
+                            } else {
+                                // กรณีเสี่ยง และยังไม่ทำ NAF (งานค้าง) -> เน้นสีส้ม/เหลือง
+                                docStatus = `
+                <span class="text-warning font-weight-bold" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-hourglass-half mr-1 fa-spin-hover"></i> รอประเมิน NAF
+                </span>
+            `;
+                            }
+                        } else {
+                            // กรณีปกติ (จบงาน)
+                            docStatus = `
+            <span class="text-success" style="font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-check mr-1"></i> คัดกรองแล้ว
+            </span>
+        `;
+                        }
+                    }
+
+                    let colSpent = '-';
+                    let colNaf = '-';
+
+                    if (h.type === 'SPENT') {
+                        colSpent = h.score >= 2 ? `<span class="text-warning font-weight-bold">เสี่ยง</span>` : `<span class="text-success">ปกติ</span>`;
+                    } else if (h.type === 'NAF') {
+                        if (h.result.includes('Severe') || h.result.includes('C')) colNaf = `<span class="badge badge-danger">NAF C</span>`;
+                        else if (h.result.includes('Moderate') || h.result.includes('B')) colNaf = `<span class="badge badge-warning">NAF B</span>`;
+                        else colNaf = `<span class="badge badge-success">NAF A</span>`;
+                    }
+
+                    let displayAssessor = h.assessor;
+                    if (h.assessor === CURRENT_USER) {
+                        displayAssessor = `<span class="text-primary font-weight-bold">${h.assessor} (คุณ)</span>`;
+                    }
+
+                    const viewParam = h.docNo ? `docNo=${h.docNo}` : `view=${h.timestamp}`;
+
+                    const row = `
+                        <tr data-type="${h.type}">
+                            <td>
+                                <a href="${h.url}?hn=${p.hn}&${viewParam}" class="font-weight-bold text-dark text-decoration-none">
+                                    ${h.name}
+                                </a>
+                                <div class="small text-muted">${h.docNo || '-'}</div>
+                            </td>
+                            <td class="text-center">${typeBadge}</td>
+                            <td class="text-center text-muted">${h.displayId}</td>
+                            <td class="text-center font-weight-bold">${h.score}</td>
+                            <td class="text-center">${colSpent}</td>
+                            <td class="text-center">${colNaf}</td>
+                            <td><small class="text-muted">${displayAssessor}</small></td>
+                            <td><small>${h.realSavedTime || h.date}</small></td>
+
+                            <td class="text-center">${docStatus}</td>
+                            
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-info" onclick="window.location.href='${h.url}?hn=${p.hn}&${viewParam}'" title="ดูรายละเอียด">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="alert('จำลองการเปิดไฟล์ PDF: ${h.name}')" title="ดาวน์โหลด PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            // Update Card
+            updateCurrentStatusCard(p, history.length > 0 ? history[0] : null);
+        }
+
+        function updateCurrentStatusCard(p, latest) {
+            const card = document.getElementById('currentStatusCard');
+
+            // ถ้าไม่มีประวัติล่าสุดเลย ให้ซ่อนการ์ดไปเลย
+            if (!latest) {
+                card.classList.add('d-none');
+                return;
+            }
+
+            card.classList.remove('d-none');
+            card.className = 'his-container p-0 overflow-hidden mb-4';
+
+            const els = {
+                badge: document.getElementById('cur_source_badge'),
+                label: document.getElementById('cur_type_label'),
+                text: document.getElementById('cur_status_text'),
+                desc: document.getElementById('cur_status_desc'),
+                score: document.getElementById('cur_score_val'),
+                date: document.getElementById('cur_date_text'),
+                assessor: document.getElementById('cur_assessor_text'),
+                action: document.getElementById('cur_next_action')
+            };
+
+            let activeData = latest;
+
+            if (activeData.assessor === CURRENT_USER) {
+                els.assessor.innerHTML = `<span class="text-primary font-weight-bold">${activeData.assessor} (คุณ)</span>`;
+            } else {
+                els.assessor.innerText = activeData.assessor;
+            }
+
+            els.date.innerText = activeData.realSavedTime || activeData.date;
+            els.score.innerText = activeData.score;
+
+            if (activeData.type === 'SPENT') {
+                els.badge.innerText = 'Latest: SPENT';
+                els.badge.className = 'badge badge-light border text-primary px-2';
+                els.label.innerText = 'ผลการคัดกรองล่าสุด';
+
+                if (activeData.score >= 2) {
+                    card.classList.add('his-risk');
+                    els.text.innerText = 'มีความเสี่ยง (At Risk)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-risk';
+                    els.desc.innerText = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-urgent">
+                            <div class="d-flex">
+                                <i class="fa-solid fa-user-md clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ต้องประเมิน NAF</div>
+                                    <p class="clinical-desc">โปรดทำแบบประเมิน Nutrition Alert Form โดยละเอียด</p>
+                                    <button class="btn btn-sm btn-warning mt-2 shadow-sm" onclick="window.location.href='nutrition_alert_form.html?hn=${p.hn}'">
+                                        <i class="fa-solid fa-clipboard-list mr-1"></i> ทำแบบประเมินทันที
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.classList.add('his-normal');
+                    els.text.innerText = 'ปกติ (Normal)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-normal';
+                    els.desc.innerText = 'ผู้ป่วยมีความเสี่ยงต่ำ ไม่จำเป็นต้องประเมิน NAF ต่อ';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-normal">
+                            <div class="d-flex">
+                                <i class="fa-solid fa-check-circle clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ติดตามผล (Follow up)</div>
+                                    <p class="clinical-desc">ประเมินซ้ำอีกครั้งใน 7 วัน (Re-screen)</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (activeData.type === 'NAF') {
+                els.badge.innerText = 'Latest: NAF';
+                els.badge.className = 'badge badge-light border text-success px-2';
+                els.label.innerText = 'ผลการประเมินล่าสุด (NAF)';
+
+                const score = parseInt(activeData.score);
+
+                if (score >= 11) {
+                    card.classList.add('his-severe');
+                    els.text.innerText = 'NAF C (Severe Malnutrition)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-severe';
+                    els.desc.innerText = 'มีภาวะทุพโภชนาการรุนแรง';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-urgent">
+                            <div class="d-flex">
+                                <i class="fa-solid fa-truck-medical clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">รักษาเร่งด่วน (24 ชม.)</div>
+                                    <p class="clinical-desc">แจ้งแพทย์/นักโภชนาการ ให้การดูแลภายใน 24 ชั่วโมง</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (score >= 6) {
+                    card.classList.add('his-risk');
+                    els.text.innerText = 'NAF B (Moderate Malnutrition)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-risk';
+                    els.desc.innerText = 'พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการปานกลาง';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-overdue"> <div class="d-flex">
+                                <i class="fa-solid fa-user-doctor clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ดูแลรักษา (3 วัน)</div>
+                                    <p class="clinical-desc">แจ้งแพทย์/นักโภชนาการ ให้การดูแลภายใน 3 วัน</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.classList.add('his-normal');
+                    els.text.innerText = 'NAF A (Normal/Mild)';
+                    els.text.className = 'his-result mt-1 mb-2 text-his-normal';
+                    els.desc.innerText = ' มีความเสี่ยงต่อการเกิดภาวะทุพโภชนาการน้อย';
+                    els.action.innerHTML = `
+                        <div class="clinical-action-box status-normal">
+                            <div class="d-flex">
+                                <i class="fa-regular fa-clock clinical-action-icon"></i>
+                                <div>
+                                    <div class="clinical-title">ประเมินซ้ำ (7 วัน)</div>
+                                    <p class="clinical-desc">ติดตามผลและประเมินซ้ำภายใน 7 วัน</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function resetHistory() {
+            if (!currentPatient) return;
+
+            if (confirm(`ยืนยันการ "ล้างประวัติทั้งหมด" ของผู้ป่วย: ${currentPatient.name}?\n\n(การกระทำนี้จะลบข้อมูลที่บันทึกใหม่ และซ่อนข้อมูลประวัติเก่า เพื่อเริ่มนับ 1 ใหม่)`)) {
+                let history = JSON.parse(localStorage.getItem('nas_patient_history')) || [];
+                const newHistory = history.filter(item => item.hn !== currentPatient.hn);
+                localStorage.setItem('nas_patient_history', JSON.stringify(newHistory));
+                localStorage.setItem('nas_reset_' + currentPatient.hn, 'true');
+                localStorage.removeItem('nas_transfer_data');
+
+                alert('ล้างข้อมูลเรียบร้อย เริ่มต้นใหม่ได้ทันที');
+                window.location.reload();
+            }
+        }
+
+        function updateMenuActions(p) {
+            const menuSpent = document.getElementById('menu_spent');
+            const menuNaf = document.getElementById('menu_naf');
+            menuSpent.classList.remove('disabled-action');
+            menuNaf.classList.remove('disabled-action');
+        }
+
+        function filterHistory() {
+            const filter = document.getElementById('typeFilter').value;
+            const rows = document.getElementById('historyTableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const type = rows[i].getAttribute('data-type');
+                if (filter === 'all' || type === filter) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function handleAction(type, url) {
+            if (currentPatient) {
+                window.location.href = `${url}?hn=${currentPatient.hn}`;
+            }
+        }
+
+        function confirmLogout() {
+            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>
