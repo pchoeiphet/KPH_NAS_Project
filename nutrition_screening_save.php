@@ -34,7 +34,7 @@ if ($total_score < 2) {
 
     if ($redirect_to_naf === 'true') {
         // กด "ทำการประเมินต่อ"
-        $screening_status = 'มีความเสี่ยง'; // หรือสถานะ 'กำลังประเมิน' ตามบริบท
+        $screening_status = 'กำลังประเมิน'; // หรือสถานะ 'กำลังประเมิน' ตามบริบท
         $has_assessment = 1;
         // *หมายเหตุ: assessment_doc_no จะถูก update ภายหลังเมื่อบันทึกฟอร์ม NAF เสร็จ
     } else {
