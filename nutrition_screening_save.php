@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 doc_no, admissions_an, patients_hn, screening_datetime, screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
-                nutrition_screening_result, notes, assessor_name
+                screening_result, notes, assessor_name
             ) VALUES (
                 :doc_no, :an, :hn, NOW(), :seq,
                 :diagnosis, :weight, :normal_weight, :height, :bmi, :method,
