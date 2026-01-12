@@ -40,7 +40,6 @@ try {
 
     if (!$patient) die("ไม่พบข้อมูลผู้ป่วยในระบบ");
 
-    // คำนวณอายุ
     $age_display = '-';
     if (!empty($patient['patients_dob'])) {
         $dob = new DateTime($patient['patients_dob']);
@@ -49,14 +48,13 @@ try {
         $age_display = $diff->y . ' ปี ' . $diff->m . ' เดือน';
     }
 
-    // วันที่ Admit
     $admit_date = '-';
     if (!empty($patient['admit_datetime'])) {
         $date = new DateTime($patient['admit_datetime']);
         $admit_date = $date->format('d/m/Y');
     }
 
-    // 2. ดึงประวัติทั้งหมด (SPENT)
+    // 2. ดึงประวัติ (SPENT)
     $sql_history = "
         SELECT * FROM nutrition_screening 
         WHERE nutrition_screening.patients_hn = :hn 
@@ -69,78 +67,49 @@ try {
     die("Error: " . $e->getMessage());
 }
 
-// ฟังก์ชันแปลงวันที่
+// ฟังก์ชันแปลงวันที่ (แก้ไขเพิ่ม "น." ตรงนี้)
 function thaiDate($datetime)
 {
     if (!$datetime) return '-';
     $time = strtotime($datetime);
     $thai_year = date('Y', $time) + 543;
-    return date('d/m/', $time) . $thai_year . ' ' . date('H:i', $time);
+    // เพิ่ม . ' น.' ต่อท้ายเวลา
+    return date('d/m/', $time) . $thai_year . ' ' . date('H:i', $time) . ' น.';
 }
 
-// ------------------------------------------------------------------
-// Logic สำหรับ "สถานะโภชนาการปัจจุบัน" (Current Status Card)
-// ------------------------------------------------------------------
-$latest_screening = $history_list[0] ?? null; // ข้อมูลล่าสุด
-
-// ค่า Default (กรณีไม่มีประวัติ)
+// Logic Current Status
+$latest_screening = $history_list[0] ?? null;
 $cur_title = 'ยังไม่มีข้อมูลการคัดกรอง';
 $cur_desc = 'กรุณาทำแบบคัดกรอง SPENT เป็นครั้งแรก';
 $cur_score = '-';
 $cur_date = '-';
 $cur_assessor = '-';
-$cur_color_class = 'text-muted'; // สีข้อความสถานะ
+$cur_color_class = 'text-muted';
 $next_action_html = '<div class="alert alert-secondary mb-0 p-2 text-center" style="font-size: 0.9rem;"><i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบคัดกรอง SPENT</div>';
 
 if ($latest_screening) {
-    // มีประวัติ
     $cur_score_val = ($latest_screening['q1_weight_loss'] + $latest_screening['q2_eat_less'] + $latest_screening['q3_bmi_abnormal'] + $latest_screening['q4_critical']);
     $cur_score = $cur_score_val;
     $cur_date = thaiDate($latest_screening['screening_datetime']);
     $cur_assessor = $latest_screening['assessor_name'];
-    $cur_status_db = $latest_screening['screening_status'] ?? ''; // e.g. 'รอทำแบบประเมิน'
+    $cur_status_db = $latest_screening['screening_status'] ?? '';
 
     if ($cur_score_val >= 2) {
-        // เสี่ยง
         $cur_title = 'มีความเสี่ยง (At Risk)';
-        $cur_desc = 'ผู้ป่วยมีความเสี่ยงต่อภาวะขาดสารอาหาร';
+        $cur_desc = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
         $cur_color_class = 'text-danger';
-
-        // Next Action Logic
         if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_screening['assessment_doc_no'])) {
-            // ทำ NAF แล้ว
-            $next_action_html = '
-                <div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;">
-                    <h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6>
-                    <small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small>
-                </div>';
+            $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
         } else {
-            // ยังไม่ทำ NAF (รอทำ)
-            $next_action_html = '
-                <div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
-                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
-                    <p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p>
-                    <button class="btn btn-sm btn-danger px-3 disabled" style="opacity: 0.7; cursor: not-allowed;">
-                        <i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF
-                    </button>
-                </div>';
+            $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;"><h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6><p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p><button class="btn btn-sm btn-danger px-3 disabled" style="opacity: 0.7; cursor: not-allowed;"><i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF</button></div>';
         }
     } else {
-        // ปกติ
         $cur_title = 'ภาวะโภชนาการปกติ (Normal)';
         $cur_desc = 'ไม่พบความเสี่ยงในขณะนี้';
         $cur_color_class = 'text-success';
-
-        // Next Action: คัดกรองซ้ำ 7 วัน
         $next_rescreen_ts = strtotime($latest_screening['screening_datetime']) + (7 * 24 * 60 * 60);
         $next_rescreen_date = date('d/m/', $next_rescreen_ts) . (date('Y', $next_rescreen_ts) + 543);
-
-        $next_action_html = '
-            <div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;">
-                <h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6>
-                <small class="text-dark">ควรทำการคัดกรองซ้ำในอีก 7 วัน</small><br>
-                <strong class="text-success" style="font-size: 0.9rem;">(วันที่ ' . $next_rescreen_date . ')</strong>
-            </div>';
+        $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6><small class="text-dark">ควรทำการคัดกรองซ้ำในอีก 7 วัน</small><br><strong class="text-success" style="font-size: 0.9rem;">(วันที่ ' . $next_rescreen_date . ')</strong></div>';
     }
 }
 ?>
@@ -163,33 +132,92 @@ if ($latest_screening) {
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
+                    onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
                         <div class="user-profile-btn">
-                            <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
-                            <div class="user-info d-none d-md-block">
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
                                 <div class="user-name">เพชรลดา เชยเพ็ชร</div>
                                 <div class="user-role">นักโภชนาการ</div>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-muted mr-2"></i>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2">
-                        <a class="dropdown-item text-danger" href="#" onclick="confirmLogout()">ออกจากระบบ</a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px;">
+
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
+                                        เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1"
+                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
+                                งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
+                                href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
+                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
+                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
+                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2"
+                                    style="width:20px; text-align:center;"></i>
+                                ออกจากระบบ
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <div class="container-fluid mt-3 pt-5 pb-5 px-lg-5">
+    <div class="container-fluid px-lg-5 mt-4">
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
@@ -202,50 +230,16 @@ if ($latest_screening) {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                                <small class="text-muted d-block">HN</small>
-                                <span class="font-weight-bold"><?= $patient['patients_hn'] ?></span>
-                            </div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                                <small class="text-muted d-block">AN</small>
-                                <span class="font-weight-bold"><?= $patient['admissions_an'] ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                <span class="font-weight-bold text-primary-custom" style="font-size: 1.1rem;">
-                                    <?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?>
-                                </span>
-                            </div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3">
-                                <small class="text-muted d-block">อายุ</small>
-                                <span class="font-weight-bold"><?= $age_display ?></span>
-                            </div>
-                            <div class="col-6 col-md-8 col-lg-2 mb-3">
-                                <small class="text-muted d-block">สิทธิการรักษา</small>
-                                <span class="font-weight-bold"><?= $patient['health_insurance_name'] ?: '-' ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
-                                <span class="font-weight-bold"><?= $patient['doctor_name'] ?: '-' ?></span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                <span class="font-weight-bold">
-                                    <?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?>
-                                </span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">วันที่ Admit</small>
-                                <span class="font-weight-bold"><?= $admit_date ?></span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                <span class="font-weight-bold"><?= $patient['patients_phone'] ?: '-' ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3 mb-3">
-                                <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold"><?= $patient['patients_congenital_disease'] ?: '-' ?></span>
-                            </div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold"><?= $patient['patients_hn'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold"><?= $patient['admissions_an'] ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold text-primary-custom" style="font-size: 1.1rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block">อายุ</small><span class="font-weight-bold"><?= $age_display ?></span></div>
+                            <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold"><?= $patient['health_insurance_name'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold"><?= $patient['doctor_name'] ?: '-' ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย / เตียง</small><span class="font-weight-bold"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold"><?= $admit_date ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold"><?= $patient['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold"><?= $patient['patients_congenital_disease'] ?: '-' ?></span></div>
                         </div>
                     </div>
                 </div>
@@ -261,20 +255,13 @@ if ($latest_screening) {
                     style="background-color: #0d47a1; border-color: #0d47a1; border-radius: 4px; height: 45px; font-size: 1rem;">
                     <i class="fa-solid fa-folder-plus mr-2"></i> เพิ่มไฟล์เอกสารใหม่
                 </button>
-                <div class="dropdown-menu dropdown-menu-right border shadow-sm p-0 mt-1"
-                    style="min-width: 380px; border-radius: 4px; border-color: #ced4da;">
+                <div class="dropdown-menu dropdown-menu-right border shadow-sm p-0 mt-1" style="min-width: 380px; border-radius: 4px;">
                     <div class="bg-light px-3 py-2 border-bottom">
-                        <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">
-                            เลือกประเภทเอกสาร
-                        </small>
+                        <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">เลือกประเภทเอกสาร</small>
                     </div>
-                    <a href="nutrition_screening_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>"
-                        class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_screening_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
-                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
-                                style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
-                                <i class="fa-solid fa-file-medical fa-lg"></i>
-                            </div>
+                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;"><i class="fa-solid fa-file-medical fa-lg"></i></div>
                             <div class="w-100">
                                 <span class="font-weight-bold text-dark title-text" style="font-size: 1rem;">แบบคัดกรองภาวะโภชนาการ</span>
                                 <small class="text-muted sub-text d-block mb-1">SPENT Nutrition Screening Tool</small>
@@ -283,10 +270,7 @@ if ($latest_screening) {
                     </a>
                     <a href="#" class="dropdown-item py-3 px-3 menu-action-link disabled" onclick="return false;">
                         <div class="d-flex">
-                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box"
-                                style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
-                                <i class="fa-solid fa-clipboard-user fa-lg"></i>
-                            </div>
+                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;"><i class="fa-solid fa-clipboard-user fa-lg"></i></div>
                             <div class="w-100">
                                 <span class="font-weight-bold text-dark title-text" style="font-size: 1rem;">แบบประเมินภาวะโภชนาการ</span>
                                 <small class="text-muted sub-text d-block mb-1">Nutrition Alert Form (NAF)</small>
@@ -303,53 +287,32 @@ if ($latest_screening) {
                     <div class="row no-gutters">
                         <div class="col-md-8 p-4 d-flex flex-column border-right-md">
                             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-                                <h6 class="font-weight-bold m-0 text-primary-custom">
-                                    <i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน
-                                </h6>
+                                <h6 class="font-weight-bold m-0 text-primary-custom"><i class="fa-solid fa-clipboard-check mr-2"></i>สถานะโภชนาการปัจจุบัน</h6>
                                 <span class="badge badge-light border text-muted font-weight-normal px-2">ข้อมูลล่าสุด</span>
                             </div>
-
                             <div class="d-flex align-items-start mb-3">
                                 <div class="flex-grow-1 pr-3">
-                                    <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">
-                                        ผลการคัดกรอง (SPENT)
-                                    </small>
-                                    <h4 class="mt-1 mb-2 <?= $cur_color_class ?>" style="font-size: 1.5rem; font-weight: 700;">
-                                        <?= $cur_title ?>
-                                    </h4>
-                                    <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5;">
-                                        <?= $cur_desc ?>
-                                    </p>
+                                    <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">ผลการคัดกรอง (SPENT)</small>
+                                    <h4 class="mt-1 mb-2 <?= $cur_color_class ?>" style="font-size: 1.5rem; font-weight: 700;"><?= $cur_title ?></h4>
+                                    <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5;"><?= $cur_desc ?></p>
                                 </div>
                                 <div class="text-center pl-3 border-left">
-                                    <div class="rounded-circle shadow-sm bg-white mx-auto mb-1 d-flex align-items-center justify-content-center"
-                                        style="width: 60px; height: 60px; font-size: 1.6rem; border: 3px solid #f8f9fa;">
+                                    <div class="rounded-circle shadow-sm bg-white mx-auto mb-1 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.6rem; border: 3px solid #f8f9fa;">
                                         <span class="<?= $cur_color_class ?> font-weight-bold"><?= $cur_score ?></span>
                                     </div>
                                     <small class="text-muted font-weight-bold" style="font-size: 0.7rem;">คะแนนรวม</small>
                                 </div>
                             </div>
-
                             <div class="mt-auto">
                                 <div class="d-flex align-items-center bg-light rounded p-2" style="font-size: 0.85rem;">
-                                    <div class="mr-4 d-flex align-items-center">
-                                        <i class="fa-regular fa-calendar text-muted mr-2"></i>
-                                        <span class="font-weight-medium text-dark"><?= $cur_date ?></span>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-user-nurse text-muted mr-2"></i>
-                                        <span class="font-weight-medium text-dark"><?= $cur_assessor ?></span>
-                                    </div>
+                                    <div class="mr-4 d-flex align-items-center"><i class="fa-regular fa-calendar text-muted mr-2"></i><span class="font-weight-medium text-dark"><?= $cur_date ?></span></div>
+                                    <div class="d-flex align-items-center"><i class="fa-solid fa-user-nurse text-muted mr-2"></i><span class="font-weight-medium text-dark"><?= $cur_assessor ?></span></div>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-4 p-4 d-flex flex-column justify-content-center bg-white" style="background-color: #fafbfc;">
                             <div class="w-100">
-                                <h6 class="text-muted font-weight-bold text-uppercase mb-3"
-                                    style="font-size: 0.75rem; letter-spacing: 1px;">
-                                    สิ่งดำเนินการถัดไป (Next Action)
-                                </h6>
+                                <h6 class="text-muted font-weight-bold text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">สิ่งดำเนินการถัดไป (Next Action)</h6>
                                 <?= $next_action_html ?>
                             </div>
                         </div>
@@ -366,9 +329,7 @@ if ($latest_screening) {
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                         </h6>
                         <div class="form-inline mt-2 mt-md-0">
-                            <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="alert('ฟังก์ชันนี้ยังไม่เปิดใช้งาน')">
-                                <i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)
-                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="alert('ฟังก์ชันนี้ยังไม่เปิดใช้งาน')"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)</button>
                             <label class="small mr-2 text-muted">ตัวกรอง:</label>
                             <select class="custom-select custom-select-sm" id="typeFilter" onchange="filterHistory()">
                                 <option value="all">ทั้งหมด (All)</option>
@@ -382,7 +343,7 @@ if ($latest_screening) {
                             <table class="table table-hover table-custom mb-0">
                                 <thead class="bg-light text-secondary">
                                     <tr>
-                                        <th style="width: 200px;">รายการบันทึก</th>
+                                        <th style="width: 250px;">รายการบันทึก</th>
                                         <th style="width: 80px;" class="text-center">ประเภท</th>
                                         <th style="width: 60px;" class="text-center">ครั้งที่</th>
                                         <th style="width: 60px;" class="text-center">คะแนน</th>
@@ -391,17 +352,15 @@ if ($latest_screening) {
                                         <th style="width: 100px">ผู้ประเมิน</th>
                                         <th style="width: 100px">วัน/เวลาที่บันทึก</th>
                                         <th style="width: 120px" class="text-center">สถานะเอกสาร</th>
-                                        <th style="width: 110px;" class="text-center">เอกสาร</th>
+                                        <th style="width: 90px;" class="text-center">ไฟล์ PDF</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historyTableBody">
                                     <?php if (count($history_list) > 0): ?>
                                         <?php foreach ($history_list as $row): ?>
                                             <?php
-                                            // คำนวณคะแนน SPENT
                                             $score = ($row['q1_weight_loss'] + $row['q2_eat_less'] + $row['q3_bmi_abnormal'] + $row['q4_critical']);
 
-                                            // สีผลการคัดกรอง
                                             $spent_res_color = 'text-muted';
                                             if ($row['screening_result'] == 'มีความเสี่ยง') {
                                                 $spent_res_color = 'text-danger font-weight-bold';
@@ -409,7 +368,6 @@ if ($latest_screening) {
                                                 $spent_res_color = 'text-success font-weight-bold';
                                             }
 
-                                            // สถานะเอกสาร
                                             $status_badge = 'badge-secondary';
                                             $status_text = $row['screening_status'] ?? '-';
                                             if (strpos($status_text, 'ปกติ') !== false) $status_badge = 'badge-success';
@@ -417,43 +375,40 @@ if ($latest_screening) {
                                             elseif (strpos($status_text, 'รอทำ') !== false) $status_badge = 'badge-warning';
                                             elseif (strpos($status_text, 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
 
-                                            // ผล NAF
                                             $naf_result = '-';
                                             if (!empty($row['assessment_doc_no'])) {
                                                 $naf_result = '<span class="text-info">ประเมินแล้ว</span>';
                                             }
                                             ?>
-                                            <tr data-type="SPENT">
-                                                <td class="font-weight-bold text-dark"><?= $row['doc_no'] ?></td>
-                                                <td class="text-center"><span class="badge badge-light border text-primary px-2">SPENT</span></td>
-                                                <td class="text-center"><?= $row['screening_seq'] ?></td>
-                                                <td class="text-center font-weight-bold"><?= $score ?></td>
-                                                <td class="text-center <?= $spent_res_color ?>">
-                                                    <?= $row['screening_result'] ?>
+                                            <tr data-type="SPENT" style="cursor: pointer;" onclick="window.location.href='nutrition_screening_detail.php?doc_no=<?= $row['doc_no'] ?>'">
+                                                <td>
+                                                    <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
+                                                        แบบคัดกรองภาวะโภชนาการ (SPENT)
+                                                    </div>
+                                                    <small class="text-muted d-block mt-1">
+                                                        เลขที่เอกสาร: <?= $row['doc_no'] ?>
+                                                    </small>
                                                 </td>
-                                                <td class="text-center text-muted">
-                                                    <?= $naf_result ?>
+                                                <td class="text-center align-middle"><span class="badge badge-light border text-primary px-2">SPENT</span></td>
+                                                <td class="text-center align-middle"><?= $row['screening_seq'] ?></td>
+                                                <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
+                                                <td class="text-center align-middle <?= $spent_res_color ?>"><?= $row['screening_result'] ?></td>
+                                                <td class="text-center align-middle text-muted"><?= $naf_result ?></td>
+                                                <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
+                                                <td class="align-middle"><small><?= thaiDate($row['screening_datetime']) ?></small></td>
+                                                <td class="text-center align-middle">
+                                                    <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
                                                 </td>
-                                                <td><small><?= $row['assessor_name'] ?></small></td>
-                                                <td><small><?= thaiDate($row['screening_datetime']) ?></small></td>
-                                                <td class="text-center">
-                                                    <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1">
-                                                        <?= $status_text ?>
-                                                    </span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-outline-info rounded-circle shadow-sm" title="ดูเอกสาร">
-                                                        <i class="fa-solid fa-file-lines"></i>
-                                                    </button>
+                                                <td class="text-center align-middle" onclick="event.stopPropagation()">
+                                                    <a href="export_pdf_spent.php?doc_no=<?= $row['doc_no'] ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                        <i class="fa-solid fa-file-pdf fa-lg"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="10" class="text-center py-5 text-muted">
-                                                <i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i><br>
-                                                ยังไม่มีประวัติการประเมิน
-                                            </td>
+                                            <td colspan="10" class="text-center py-5 text-muted"><i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i><br>ยังไม่มีประวัติการประเมิน</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>

@@ -162,7 +162,7 @@ try {
         </div>
     </nav>
 
-    <div class="container-fluid mt-3 pt-5 pb-5 px-lg-5">
+    <div class="container-fluid px-lg-5 mt-4">
 
         <form id="mainForm" method="POST" action="nutrition_screening_save.php">
             <input type="hidden" name="hn" value="<?= $hn ?>">
