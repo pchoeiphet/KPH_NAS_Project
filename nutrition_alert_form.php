@@ -2,18 +2,18 @@
 require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
-// 1. รับค่าจาก URL
+// รับค่าจาก URL
 $hn = $_GET['hn'] ?? '';
 $an = $_GET['an'] ?? '';
 $ref_screening = $_GET['ref_screening'] ?? '';
 
-// 2. ตรวจสอบค่าว่าง
+// ตรวจสอบค่าว่าง
 if (empty($hn) || empty($an)) {
     die("Error: ไม่พบข้อมูล HN หรือ AN");
 }
 
 try {
-    // 3. ดึงข้อมูลผู้ป่วย
+    // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
             patients.patients_hn, patients.patients_firstname, patients.patients_lastname, 
@@ -34,7 +34,7 @@ try {
 
     if (!$patient) die("ไม่พบข้อมูลผู้ป่วย");
 
-    // 4. คำนวณอายุ
+    // คำนวณอายุ
     $age = '-';
     if (!empty($patient['patients_dob'])) {
         $dob = new DateTime($patient['patients_dob']);
@@ -43,7 +43,7 @@ try {
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน';
     }
 
-    // 5. แปลงวันที่ Admit (เพิ่มเวลา)
+    // แปลงวันที่ Admit
     $admit_date = '-';
     if (!empty($patient['admit_datetime'])) {
         $dt = new DateTime($patient['admit_datetime']);
@@ -52,7 +52,7 @@ try {
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    // 6. สร้างเลขที่เอกสาร NAF (Running Number)
+    // สร้างเลขที่เอกสาร NAF
     $stmt_seq = $conn->prepare("SELECT COUNT(*) as count FROM nutrition_assessment WHERE patients_hn = :hn");
     $stmt_seq->execute([':hn' => $hn]);
     $count = $stmt_seq->fetch(PDO::FETCH_ASSOC)['count'];
@@ -60,8 +60,7 @@ try {
     $doc_no_show = 'NAF-' . $patient['patients_hn'] . '-' . str_pad($naf_seq, 3, '0', STR_PAD_LEFT);
 
     // ---------------------------------------------------------
-    // 7. ดึง Master Data (สำหรับตัวเลือกต่างๆ)
-    // ---------------------------------------------------------
+    // ดึง Master Data 
     function fetchMasterData($conn, $table, $id_col)
     {
         try {
@@ -78,6 +77,26 @@ try {
     $food_amounts = fetchMasterData($conn, 'food_amount', 'food_amount_id');
     $symptoms = fetchMasterData($conn, 'symptom_problem', 'symptom_problem_id');
     $weight_options = fetchMasterData($conn, 'weight_option', 'weight_option_id');
+
+    $symptom_list = fetchMasterData($conn, 'symptom_problem', 'symptom_problem_id');
+    $symptoms_grouped = [];
+
+    // วนลูปเพื่อจัดกลุ่มตาม Type ที่ระบุในฐานข้อมูล
+    foreach ($symptom_list as $sym) {
+        $type = $sym['symptom_problem_type'];
+        $symptoms_grouped[$type][] = $sym;
+    }
+
+    $food_access_list = fetchMasterData($conn, 'food_access', 'food_access_id');
+
+    $disease_list = fetchMasterData($conn, 'disease', 'disease_id');
+    $diseases_grouped = [];
+
+    // จัดกลุ่มตาม disease_type
+    foreach ($disease_list as $d) {
+        $type = $d['disease_type'];
+        $diseases_grouped[$type][] = $d;
+    }
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -694,101 +713,232 @@ try {
                             <hr class="my-4">
 
                             <div class="form-group mb-4">
-                                <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา </label>
-                                <p class="text-muted small mb-2"><i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ
-                                    (Select all that
-                                    apply)</p>
+                                <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา</label>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
+                                </p>
+
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <div class="symptom-box h-100">
                                             <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check" id="symChoke"
-                                                    value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symChoke">สำลัก <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check" id="symDiff"
-                                                    value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100"
-                                                    for="symDiff">เคี้ยว/กลืนลำบาก/ได้อาหารทางสายยาง <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check"
-                                                    id="symNormalSwallow" value="0" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symNormalSwallow">ปกติ <span
-                                                        class="symptom-score">(0 คะแนน)</span></label>
-                                            </div>
+
+                                            <?php
+                                            $group1 = 'ปัญหาทางการเคี้ยว/กลืนอาหาร';
+                                            if (!empty($symptoms_grouped[$group1])):
+                                                foreach ($symptoms_grouped[$group1] as $item):
+                                            ?>
+                                                    <div class="custom-control custom-checkbox symptom-item">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input score-calc"
+                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                            name="symptoms[]"
+                                                            value="<?= $item['symptom_problem_id'] ?>"
+                                                            data-score="<?= $item['symptom_problem_score'] ?>"
+                                                            onchange="calculateScore()">
+
+                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                        </label>
+                                                    </div>
+                                                <?php
+                                                endforeach;
+                                            else:
+                                                ?>
+                                                <div class="text-muted small p-2">- ไม่มีข้อมูล -</div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
+
                                     <div class="col-md-4 mb-3">
                                         <div class="symptom-box h-100">
                                             <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check"
-                                                    id="symDiarrhea" value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symDiarrhea">ท้องเสีย <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check" id="symPain"
-                                                    value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symPain">ปวดท้อง <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check"
-                                                    id="symNormalGI" value="0" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symNormalGI">ปกติ <span
-                                                        class="symptom-score">(0 คะแนน)</span></label>
-                                            </div>
+
+                                            <?php
+                                            $group2 = 'ปัญหาระบบทางเดินอาหาร';
+                                            if (!empty($symptoms_grouped[$group2])):
+                                                foreach ($symptoms_grouped[$group2] as $item):
+                                            ?>
+                                                    <div class="custom-control custom-checkbox symptom-item">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input score-calc"
+                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                            name="symptoms[]"
+                                                            value="<?= $item['symptom_problem_id'] ?>"
+                                                            data-score="<?= $item['symptom_problem_score'] ?>"
+                                                            onchange="calculateScore()">
+
+                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                        </label>
+                                                    </div>
+                                            <?php
+                                                endforeach;
+                                            endif;
+                                            ?>
                                         </div>
                                     </div>
+
                                     <div class="col-md-4 mb-3">
                                         <div class="symptom-box h-100">
                                             <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check" id="symVomit"
-                                                    value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symVomit">อาเจียน <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check" id="symNausea"
-                                                    value="2" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symNausea">คลื่นไส้ <span
-                                                        class="symptom-score">(2 คะแนน)</span></label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox symptom-item">
-                                                <input type="checkbox" class="custom-control-input symptom-check"
-                                                    id="symNormalEat" value="0" onchange="calculateScore()">
-                                                <label class="custom-control-label w-100" for="symNormalEat">ปกติ <span
-                                                        class="symptom-score">(0 คะแนน)</span></label>
-                                            </div>
+
+                                            <?php
+                                            $group3 = 'ปัญหาระหว่างกินอาหาร';
+                                            if (!empty($symptoms_grouped[$group3])):
+                                                foreach ($symptoms_grouped[$group3] as $item):
+                                            ?>
+                                                    <div class="custom-control custom-checkbox symptom-item">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input score-calc"
+                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                            name="symptoms[]"
+                                                            value="<?= $item['symptom_problem_id'] ?>"
+                                                            data-score="<?= $item['symptom_problem_score'] ?>"
+                                                            onchange="calculateScore()">
+
+                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                        </label>
+                                                    </div>
+                                            <?php
+                                                endforeach;
+                                            endif;
+                                            ?>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
 
                             <hr class="my-4">
 
                             <div class="form-group mb-4">
-                                <label class="section-label text-success">ส่วนที่ 2: ความรุนแรงของโรค (Severity of Disease)</label>
-                                <div class="card bg-white border">
-                                    <div class="card-body">
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="sev0" name="b_severity" value="0" data-score="0" class="custom-control-input score-calc" onchange="calculateScore()">
-                                            <label class="custom-control-label" for="sev0">ปกติ / เล็กน้อย (0 คะแนน)</label>
+                                <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
+                                <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
+
+                                    <?php if (!empty($food_access_list)): ?>
+                                        <?php foreach ($food_access_list as $fa): ?>
+                                            <?php
+                                            $fa_id = $fa['food_access_id'];
+                                            $unique_id = "f_access_" . $fa_id;
+
+                                            $fa_text = $fa['food_access_label'] ?? '-';
+                                            $fa_score = $fa['food_access_score'] ?? 0;
+                                            ?>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input type="radio"
+                                                    id="<?= $unique_id ?>"
+                                                    name="food_access_id"
+                                                    class="custom-control-input score-calc"
+                                                    value="<?= $fa_id ?>"
+                                                    data-score="<?= $fa_score ?>"
+                                                    onchange="calculateScore()">
+
+                                                <label class="custom-control-label" for="<?= $unique_id ?>" style="cursor: pointer;">
+                                                    <?= htmlspecialchars($fa_text) ?>
+                                                    <span class="text-muted small">(<?= $fa_score ?> คะแนน)</span>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <p class="text-danger small">ไม่พบข้อมูล (ตาราง food_access ว่างเปล่า)</p>
+                                    <?php endif; ?>
+
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="form-group mb-4">
+                                <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease)</label>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="symptom-box h-100" style="border-left: 4px solid #ffc107;">
+                                            <div class="symptom-category-title text-warning text-dark font-weight-bold">
+                                                10.1 โรคที่มีความรุนแรงน้อยถึงปานกลาง (3 คะแนน)
+                                            </div>
+
+                                            <?php
+                                            // ** แก้ไขชื่อ Type ให้ตรงกับในฐานข้อมูล disease_type **
+                                            $type_mild = 'โรคที่มีความรุนแรงน้อยถึงปานกลาง';
+
+                                            if (!empty($diseases_grouped[$type_mild])):
+                                                foreach ($diseases_grouped[$type_mild] as $d):
+                                            ?>
+                                                    <div class="custom-control custom-checkbox symptom-item">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input score-calc"
+                                                            id="dis_<?= $d['disease_id'] ?>"
+                                                            name="diseases[]"
+                                                            value="<?= $d['disease_id'] ?>"
+                                                            data-score="<?= $d['disease_score'] ?>"
+                                                            onchange="calculateScore()">
+                                                        <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
+                                                            <?= htmlspecialchars($d['disease_name']) ?>
+                                                        </label>
+                                                    </div>
+                                            <?php endforeach;
+                                            endif; ?>
+
+                                            <div class="custom-control custom-checkbox symptom-item">
+                                                <input type="checkbox"
+                                                    class="custom-control-input score-calc"
+                                                    id="disOtherMod"
+                                                    value="other_mild"
+                                                    data-score="3"
+                                                    onchange="toggleOtherDisease(this, 'disOtherModText'); calculateScore()">
+                                                <label class="custom-control-label w-100" for="disOtherMod">อื่นๆ (Other)</label>
+                                                <input type="text" class="form-control form-control-sm mt-1" id="disOtherModText" placeholder="ระบุ..." disabled>
+                                            </div>
                                         </div>
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="sev1" name="b_severity" value="1" data-score="1" class="custom-control-input score-calc" onchange="calculateScore()">
-                                            <label class="custom-control-label" for="sev1">ปานกลาง (1 คะแนน)</label>
-                                        </div>
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="sev2" name="b_severity" value="2" data-score="2" class="custom-control-input score-calc" onchange="calculateScore()">
-                                            <label class="custom-control-label" for="sev2">รุนแรง (2 คะแนน)</label>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <div class="symptom-box h-100" style="border-left: 4px solid #dc3545;">
+                                            <div class="symptom-category-title text-danger font-weight-bold">
+                                                10.2 โรคที่มีความรุนแรงมาก (6 คะแนน)
+                                            </div>
+
+                                            <?php
+                                            // ** แก้ไขชื่อ Type ให้ตรงกับในฐานข้อมูล disease_type **
+                                            $type_severe = 'โรคที่มีความรุนแรงมาก';
+
+                                            if (!empty($diseases_grouped[$type_severe])):
+                                                foreach ($diseases_grouped[$type_severe] as $d):
+                                            ?>
+                                                    <div class="custom-control custom-checkbox symptom-item">
+                                                        <input type="checkbox"
+                                                            class="custom-control-input score-calc"
+                                                            id="dis_<?= $d['disease_id'] ?>"
+                                                            name="diseases[]"
+                                                            value="<?= $d['disease_id'] ?>"
+                                                            data-score="<?= $d['disease_score'] ?>"
+                                                            onchange="calculateScore()">
+                                                        <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
+                                                            <?= htmlspecialchars($d['disease_name']) ?>
+                                                        </label>
+                                                    </div>
+                                            <?php endforeach;
+                                            endif; ?>
+
+                                            <div class="custom-control custom-checkbox symptom-item">
+                                                <input type="checkbox"
+                                                    class="custom-control-input score-calc"
+                                                    id="disOtherSev"
+                                                    value="other_severe"
+                                                    data-score="6"
+                                                    onchange="toggleOtherDisease(this, 'disOtherSevText'); calculateScore()">
+                                                <label class="custom-control-label w-100" for="disOtherSev">อื่นๆ (Other)</label>
+                                                <input type="text" class="form-control form-control-sm mt-1" id="disOtherSevText" placeholder="ระบุ..." disabled>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -837,19 +987,19 @@ try {
         }
         // ฟังก์ชันคำนวณ BMI
         function calculateBMI() {
-            // 1. ดึงค่าน้ำหนัก
+            // ดึงค่าน้ำหนัก
             const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
 
-            // 2. ดึงค่าส่วนสูงจากทุกช่อง (ถ้าช่องไหนว่าง หรือไม่ใช่ตัวเลข จะได้ค่า 0)
+            // ดึงค่าส่วนสูงจากทุกช่อง (ถ้าช่องไหนว่าง หรือไม่ใช่ตัวเลข จะได้ค่า 0)
             const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
             const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
             const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
             const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
 
-            // 3. หาค่าส่วนสูงที่มากที่สุด (Max Value) เพื่อใช้คำนวณ
+            // หาค่าส่วนสูงที่มากที่สุด (Max Value) เพื่อใช้คำนวณ
             const maxHeight = Math.max(h1, h2, h3, h4);
 
-            // 4. คำนวณ BMI
+            // คำนวณ BMI
             // ต้องมีน้ำหนัก และ ส่วนสูงอย่างน้อย 1 ช่อง (ค่ามากสุด > 0)
             if (weight > 0 && maxHeight > 0) {
                 // แปลง ซม. เป็น เมตร
@@ -871,7 +1021,7 @@ try {
             }
         }
 
-        // 1. ฟังก์ชันสลับโหมด (น้ำหนักปกติ <-> ผลเลือด)
+        // ฟังก์ชันสลับโหมด (น้ำหนักปกติ <-> ผลเลือด)
         function toggleWeightMode() {
             const isUnknown = document.getElementById('unknownWeight').checked;
             const weightSection = document.getElementById('standardWeightSection');
@@ -901,7 +1051,7 @@ try {
             calculateScore(); // คำนวณคะแนนรวมใหม่ทันที
         }
 
-        // 2. ฟังก์ชันเลือกประเภท Lab (Albumin / TLC)
+        // ฟังก์ชันเลือกประเภท Lab (Albumin / TLC)
         function selectLab(type) {
             // อัปเดต UI ของ Card (คลิกแล้วมีกรอบสี/เงา)
             document.querySelectorAll('.lab-choice-card').forEach(card => {
@@ -923,7 +1073,7 @@ try {
             toggleLabInputs(); // เปิดช่องกรอก
         }
 
-        // 3. ฟังก์ชันเปิด/ปิดช่องกรอกตาม Radio ที่เลือก
+        // ฟังก์ชันเปิด/ปิดช่องกรอกตาม Radio ที่เลือก
         function toggleLabInputs() {
             const useAlb = document.getElementById('useAlbumin').checked;
             const useTLC = document.getElementById('useTLC').checked;
@@ -946,7 +1096,7 @@ try {
             calculateLabScore(); // คำนวณคะแนนใหม่
         }
 
-        // 4. ฟังก์ชันคำนวณคะแนนจากผลเลือด
+        // ฟังก์ชันคำนวณคะแนนจากผลเลือด
         function calculateLabScore() {
             let labScore = 0;
             const useAlb = document.getElementById('useAlbumin').checked;
@@ -977,16 +1127,29 @@ try {
             calculateScore();
         }
 
+        // ฟังก์ชันเปิดช่องกรอก "โรคอื่นๆ"
+        function toggleOtherDisease(checkbox, inputId) {
+            const inputField = document.getElementById(inputId);
+            if (inputField) {
+                inputField.disabled = !checkbox.checked;
+                if (checkbox.checked) {
+                    inputField.focus();
+                } else {
+                    inputField.value = ''; // ล้างค่าเมื่อติ๊กออก
+                }
+            }
+        }
+
         function calculateScore() {
             let total = 0;
 
-            // --- ส่วนที่ 1: คะแนนจากตัวเลือกอื่นๆ (คงเดิม) ---
+            // คะแนนจากตัวเลือกอื่นๆ
             const inputs = document.querySelectorAll('.score-calc:checked');
             inputs.forEach(el => {
                 total += parseInt(el.getAttribute('data-score')) || 0;
             });
 
-            // --- ส่วนที่ 2: เลือกคิดคะแนนจาก (BMI) หรือ (Lab) ---
+            // เลือกคิดคะแนนจาก (BMI) หรือ (Lab) 
             // เช็คว่า User เลือกโหมดไหน
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
 
@@ -1013,13 +1176,12 @@ try {
                 total += bmiScore;
             }
 
-            // --- ส่วนที่ 3: แสดงผลรวม (คงเดิม) ---
+            // แสดงผลรวม
             const scoreCircle = document.getElementById('scoreCircle');
             const resultText = document.getElementById('resultText');
 
             if (scoreCircle) {
                 scoreCircle.innerText = total;
-                // ... (Logic เปลี่ยนสี/ข้อความ เหมือนเดิม) ...
                 scoreCircle.className = 'score-circle-big shadow bg-white d-flex align-items-center justify-content-center';
                 resultText.className = 'font-weight-bold';
 

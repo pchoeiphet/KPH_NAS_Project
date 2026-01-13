@@ -49,7 +49,10 @@ try {
 
     $admit_date = '-';
     if (!empty($patient['admit_datetime'])) {
-        $admit_date = (new DateTime($patient['admit_datetime']))->format('d/m/Y');
+        $dt = new DateTime($patient['admit_datetime']);
+        $thai_year = $dt->format('Y') + 543;
+        // แสดงผล: 12/04/2567 10:30 น.
+        $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
     $stmt_seq = $conn->prepare("SELECT MAX(screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
