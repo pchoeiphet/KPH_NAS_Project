@@ -67,13 +67,12 @@ try {
     die("Error: " . $e->getMessage());
 }
 
-// ฟังก์ชันแปลงวันที่ (แก้ไขเพิ่ม "น." ตรงนี้)
+// ฟังก์ชันแปลงวันที่
 function thaiDate($datetime)
 {
     if (!$datetime) return '-';
     $time = strtotime($datetime);
     $thai_year = date('Y', $time) + 543;
-    // เพิ่ม . ' น.' ต่อท้ายเวลา
     return date('d/m/', $time) . $thai_year . ' ' . date('H:i', $time) . ' น.';
 }
 
@@ -125,6 +124,21 @@ if ($latest_screening) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/patient_profile.css">
+    <style>
+        /* CSS สำหรับลิงก์ชื่อเอกสาร */
+        .doc-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            /* ให้ลิงก์คลุมพื้นที่ชื่อ */
+        }
+
+        .doc-link:hover {
+            color: #0d47a1;
+            /* เปลี่ยนสีเมื่อ hover */
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
@@ -380,11 +394,13 @@ if ($latest_screening) {
                                                 $naf_result = '<span class="text-info">ประเมินแล้ว</span>';
                                             }
                                             ?>
-                                            <tr data-type="SPENT" style="cursor: pointer;" onclick="window.location.href='nutrition_screening_detail.php?doc_no=<?= $row['doc_no'] ?>'">
+                                            <tr data-type="SPENT">
                                                 <td>
-                                                    <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
-                                                        แบบคัดกรองภาวะโภชนาการ (SPENT)
-                                                    </div>
+                                                    <a href="nutrition_screening_detail.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
+                                                        <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
+                                                            แบบคัดกรองภาวะโภชนาการ (SPENT)
+                                                        </div>
+                                                    </a>
                                                     <small class="text-muted d-block mt-1">
                                                         เลขที่เอกสาร: <?= $row['doc_no'] ?>
                                                     </small>
@@ -399,7 +415,7 @@ if ($latest_screening) {
                                                 <td class="text-center align-middle">
                                                     <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
                                                 </td>
-                                                <td class="text-center align-middle" onclick="event.stopPropagation()">
+                                                <td class="text-center align-middle">
                                                     <a href="export_pdf_spent.php?doc_no=<?= $row['doc_no'] ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
                                                         <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                     </a>

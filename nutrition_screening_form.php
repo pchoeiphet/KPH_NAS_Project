@@ -47,7 +47,10 @@ try {
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน ' . $diff->d . ' วัน';
     }
 
-    $admit_date = ($patient['admit_datetime']) ? (new DateTime($patient['admit_datetime']))->format('d/m/Y') : '-';
+    $admit_date = '-';
+    if (!empty($patient['admit_datetime'])) {
+        $admit_date = (new DateTime($patient['admit_datetime']))->format('d/m/Y');
+    }
 
     $stmt_seq = $conn->prepare("SELECT MAX(screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
     $stmt_seq->execute([':an' => $an]);
@@ -64,16 +67,17 @@ try {
 
 <head>
     <meta charset="UTF-8">
-    <title>แบบคัดกรองภาวะโภชนาการ (SPENT)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>แบบคัดกรองภาวะโภชนาการ (SPENT) | โรงพยาบาลกำแพงเพชร</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/nutrition_screening_form.css">
+    <link rel="stylesheet" href="css/nutrition_alert_form.css">
 </head>
 
-<body class="bg-light">
-
+<body>
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
@@ -165,8 +169,8 @@ try {
     <div class="container-fluid px-lg-5 mt-4">
 
         <form id="mainForm" method="POST" action="nutrition_screening_save.php">
-            <input type="hidden" name="hn" value="<?= $hn ?>">
-            <input type="hidden" name="an" value="<?= $an ?>">
+            <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
+            <input type="hidden" name="an" value="<?= htmlspecialchars($an) ?>">
             <input type="hidden" name="redirect_to_naf" id="redirect_to_naf" value="false">
 
             <div class="card border-0 shadow-sm mb-4">
@@ -182,43 +186,55 @@ try {
                             <div class="row">
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">HN</small>
-                                    <span class="font-weight-bold" id="p_hn"><?= $patient['patients_hn'] ?></span>
+                                    <span class="font-weight-bold" id="p_hn"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">AN</small>
-                                    <span class="font-weight-bold" id="p_an"><?= $patient['admissions_an'] ?></span>
+                                    <span class="font-weight-bold" id="p_an"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                    <span class="font-weight-bold" id="p_name" style="font-size: 1.1rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span>
+                                    <span class="font-weight-bold" style="font-size: 1.1rem;">
+                                        <?php
+                                        $fname = $patient['patients_firstname'] ?? '';
+                                        $lname = $patient['patients_lastname'] ?? '';
+                                        echo htmlspecialchars($fname . ' ' . $lname);
+                                        ?>
+                                    </span>
                                 </div>
                                 <div class="col-6 col-md-4 col-lg-2 mb-3">
                                     <small class="text-muted d-block">อายุ</small>
-                                    <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= $age ?></span>
+                                    <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span>
                                 </div>
                                 <div class="col-6 col-md-8 col-lg-2 mb-3">
                                     <small class="text-muted d-block">สิทธิการรักษา</small>
-                                    <span class="font-weight-bold" id="p_rights"><?= $patient['health_insurance_name'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" id="p_rights"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
-                                    <span class="font-weight-bold" id="p_doctor"><?= $patient['doctor_name'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" id="p_doctor"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                    <span class="font-weight-bold" id="p_ward"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span>
+                                    <span class="font-weight-bold" id="p_ward">
+                                        <?php
+                                        $ward = $patient['ward_name'] ?? '-';
+                                        $bed = $patient['bed_number'] ?? '-';
+                                        echo htmlspecialchars($ward . ' / ' . $bed);
+                                        ?>
+                                    </span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">วันที่ Admit</small>
-                                    <span class="font-weight-bold" id="p_admit"><?= $admit_date ?></span>
+                                    <span class="font-weight-bold" id="p_admit"><?= htmlspecialchars($admit_date) ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                    <span class="font-weight-bold" id="p_phone"><?= $patient['patients_phone'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" id="p_phone"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold" id="p_underlying"><?= $patient['patients_congenital_disease'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" id="p_underlying"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -227,8 +243,8 @@ try {
             </div>
 
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= $hn ?>'">
-                    <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับหน้าประวัติ
+                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                    <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>
 
@@ -240,14 +256,14 @@ try {
                             <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                         </div>
                         <div class="text-right">
-                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?= $doc_no_show ?></span>
+                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?= htmlspecialchars($doc_no_show) ?></span>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="col-md-2 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div><input type="text" class="form-control text-center font-weight-bold text-primary" value="<?= $next_seq ?>" readonly>
+                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div><input type="text" class="form-control text-center font-weight-bold text-primary" value="<?= htmlspecialchars($next_seq) ?>" readonly>
                             </div>
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
