@@ -205,7 +205,7 @@ try {
         </div>
     </nav>
 
-    <div class="container-fluid mt-3 pt-5 pb-5 px-lg-5">
+    <div class="container-fluid px-lg-5 mt-4">
 
         <form id="nafForm" method="POST" action="nutrition_assessment_save.php">
             <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
@@ -227,15 +227,15 @@ try {
                             <div class="row">
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">HN</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_hn"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">AN</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_an"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                    <small class="text-muted d-block">ชื่อ-สกุล</small>
-                                    <span class="font-weight-bold text-primary" style="font-size: 1.1rem;">
+                                    <small class="text-muted d-block">ชื่อ - นามสกุล</small>
+                                    <span class="font-weight-bold" style="font-size: 1.1rem;">
                                         <?php
                                         $fname = $patient['patients_firstname'] ?? '';
                                         $lname = $patient['patients_lastname'] ?? '';
@@ -245,19 +245,19 @@ try {
                                 </div>
                                 <div class="col-6 col-md-4 col-lg-2 mb-3">
                                     <small class="text-muted d-block">อายุ</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($age) ?></span>
+                                    <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span>
                                 </div>
                                 <div class="col-6 col-md-8 col-lg-2 mb-3">
-                                    <small class="text-muted d-block">สิทธิ</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
+                                    <small class="text-muted d-block">สิทธิการรักษา</small>
+                                    <span class="font-weight-bold" id="p_rights"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                    <small class="text-muted d-block">แพทย์</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
+                                    <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
+                                    <span class="font-weight-bold" id="p_doctor"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                    <span class="font-weight-bold">
+                                    <span class="font-weight-bold" id="p_ward">
                                         <?php
                                         $ward = $patient['ward_name'] ?? '-';
                                         $bed = $patient['bed_number'] ?? '-';
@@ -267,15 +267,15 @@ try {
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">วันที่ Admit</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($admit_date) ?></span>
+                                    <span class="font-weight-bold" id="p_admit"><?= htmlspecialchars($admit_date) ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_phone"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_underlying"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -968,251 +968,250 @@ try {
                         </div>
                     </div>
         </form>
-    </div>
+        </div>
 
-    <script>
-        function toggleOtherSource() {
-            // อ้างอิง Element
-            const otherRadio = document.getElementById('source3');
-            const otherInput = document.getElementById('otherSourceText');
+        <script>
+            function toggleOtherSource() {
+                // อ้างอิง Element
+                const otherRadio = document.getElementById('source3');
+                const otherInput = document.getElementById('otherSourceText');
 
-            // ตรวจสอบว่า Radio "อื่นๆ" ถูกเลือกอยู่หรือไม่
-            if (otherRadio.checked) {
-                otherInput.disabled = false; // เปิดใช้งานช่องกรอก
-                otherInput.focus(); // นำเคอร์เซอร์ไปวางรอพิมพ์ทันที
-            } else {
-                otherInput.disabled = true; // ปิดการใช้งาน
-                otherInput.value = ''; // ล้างค่าที่เคยกรอกไว้ (ถ้าต้องการ)
+                // ตรวจสอบว่า Radio "อื่นๆ" ถูกเลือกอยู่หรือไม่
+                if (otherRadio.checked) {
+                    otherInput.disabled = false; // เปิดใช้งานช่องกรอก
+                    otherInput.focus(); // นำเคอร์เซอร์ไปวางรอพิมพ์ทันที
+                } else {
+                    otherInput.disabled = true; // ปิดการใช้งาน
+                    otherInput.value = ''; // ล้างค่าที่เคยกรอกไว้ (ถ้าต้องการ)
+                }
             }
-        }
-        // ฟังก์ชันคำนวณ BMI
-        function calculateBMI() {
-            // ดึงค่าน้ำหนัก
-            const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
+            // ฟังก์ชันคำนวณ BMI
+            function calculateBMI() {
+                // ดึงค่าน้ำหนัก
+                const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
 
-            // ดึงค่าส่วนสูงจากทุกช่อง (ถ้าช่องไหนว่าง หรือไม่ใช่ตัวเลข จะได้ค่า 0)
-            const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
-            const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
-            const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
-            const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
+                // ดึงค่าส่วนสูงจากทุกช่อง (ถ้าช่องไหนว่าง หรือไม่ใช่ตัวเลข จะได้ค่า 0)
+                const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
+                const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
+                const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
+                const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
 
-            // หาค่าส่วนสูงที่มากที่สุด (Max Value) เพื่อใช้คำนวณ
-            const maxHeight = Math.max(h1, h2, h3, h4);
+                // หาค่าส่วนสูงที่มากที่สุด (Max Value) เพื่อใช้คำนวณ
+                const maxHeight = Math.max(h1, h2, h3, h4);
 
-            // คำนวณ BMI
-            // ต้องมีน้ำหนัก และ ส่วนสูงอย่างน้อย 1 ช่อง (ค่ามากสุด > 0)
-            if (weight > 0 && maxHeight > 0) {
-                // แปลง ซม. เป็น เมตร
-                const heightInMeters = maxHeight / 100;
+                // คำนวณ BMI
+                // ต้องมีน้ำหนัก และ ส่วนสูงอย่างน้อย 1 ช่อง (ค่ามากสุด > 0)
+                if (weight > 0 && maxHeight > 0) {
+                    // แปลง ซม. เป็น เมตร
+                    const heightInMeters = maxHeight / 100;
 
-                // สูตร: น้ำหนัก / (ส่วนสูงเมตร ^ 2)
-                const bmi = weight / (heightInMeters * heightInMeters);
+                    // สูตร: น้ำหนัก / (ส่วนสูงเมตร ^ 2)
+                    const bmi = weight / (heightInMeters * heightInMeters);
 
-                // แสดงผลทศนิยม 2 ตำแหน่ง ที่ช่อง id="bmiValue"
-                document.getElementById('bmiValue').value = bmi.toFixed(2);
+                    // แสดงผลทศนิยม 2 ตำแหน่ง ที่ช่อง id="bmiValue"
+                    document.getElementById('bmiValue').value = bmi.toFixed(2);
 
-                // คำนวณคะแนนต่อทันที
+                    // คำนวณคะแนนต่อทันที
+                    calculateScore();
+                } else {
+                    // ถ้าข้อมูลไม่ครบ ให้เคลียร์ค่า
+                    document.getElementById('bmiValue').value = "-";
+                    document.getElementById('bmiScoreText').innerText = "Score: 0";
+                    calculateScore(); // อัปเดตคะแนนรวมใหม่ (กรณีลบเลขออก)
+                }
+            }
+
+            // ฟังก์ชันสลับโหมด (น้ำหนักปกติ <-> ผลเลือด)
+            function toggleWeightMode() {
+                const isUnknown = document.getElementById('unknownWeight').checked;
+                const weightSection = document.getElementById('standardWeightSection');
+                const labSection = document.getElementById('labSection');
+
+                if (isUnknown) {
+                    // โหมดไม่ทราบน้ำหนัก -> ซ่อนส่วนน้ำหนัก, แสดงส่วน Lab
+                    weightSection.style.display = 'none'; // หรือใช้ class 'd-none'
+                    labSection.classList.remove('hidden-section');
+                    labSection.classList.add('fade-in'); // เพิ่ม effect ถ้ามี class นี้
+
+                    // รีเซ็ตค่าคะแนนจากส่วนน้ำหนักเป็น 0
+                } else {
+                    // โหมดปกติ -> แสดงส่วนน้ำหนัก, ซ่อนส่วน Lab
+                    weightSection.style.display = 'block';
+                    labSection.classList.add('hidden-section');
+                    labSection.classList.remove('fade-in');
+
+                    // รีเซ็ตคะแนน Lab เป็น 0
+                    document.getElementById('labScoreText').innerText = "0";
+                    // เคลียร์ค่า input ของ Lab
+                    document.getElementById('valAlbumin').value = '';
+                    document.getElementById('valTLC').value = '';
+                }
+
+                calculateScore(); // คำนวณคะแนนรวมใหม่ทันที
+            }
+
+            // ฟังก์ชันเลือกประเภท Lab (Albumin / TLC)
+            function selectLab(type) {
+                // อัปเดต UI ของ Card (คลิกแล้วมีกรอบสี/เงา)
+                document.querySelectorAll('.lab-choice-card').forEach(card => {
+                    card.classList.remove('active', 'border-primary');
+                    card.classList.add('inactive');
+                });
+
+                const selectedCard = (type === 'albumin') ? document.getElementById('cardAlbumin') : document.getElementById('cardTLC');
+                selectedCard.classList.remove('inactive');
+                selectedCard.classList.add('active', 'border-primary');
+
+                // สั่ง check radio button ที่ซ่อนอยู่
+                if (type === 'albumin') {
+                    document.getElementById('useAlbumin').checked = true;
+                } else {
+                    document.getElementById('useTLC').checked = true;
+                }
+
+                toggleLabInputs(); // เปิดช่องกรอก
+            }
+
+            // ฟังก์ชันเปิด/ปิดช่องกรอกตาม Radio ที่เลือก
+            function toggleLabInputs() {
+                const useAlb = document.getElementById('useAlbumin').checked;
+                const useTLC = document.getElementById('useTLC').checked;
+
+                const inpAlb = document.getElementById('valAlbumin');
+                const inpTLC = document.getElementById('valTLC');
+
+                if (useAlb) {
+                    inpAlb.disabled = false;
+                    inpAlb.focus();
+                    inpTLC.disabled = true;
+                    inpTLC.value = ''; // เคลียร์ค่าอีกช่อง
+                } else if (useTLC) {
+                    inpTLC.disabled = false;
+                    inpTLC.focus();
+                    inpAlb.disabled = true;
+                    inpAlb.value = '';
+                }
+
+                calculateLabScore(); // คำนวณคะแนนใหม่
+            }
+
+            // ฟังก์ชันคำนวณคะแนนจากผลเลือด
+            function calculateLabScore() {
+                let labScore = 0;
+                const useAlb = document.getElementById('useAlbumin').checked;
+                const useTLC = document.getElementById('useTLC').checked;
+
+                if (useAlb) {
+                    const val = parseFloat(document.getElementById('valAlbumin').value);
+                    if (!isNaN(val)) {
+                        if (val <= 2.5) labScore = 3;
+                        else if (val <= 2.9) labScore = 2;
+                        else if (val <= 3.5) labScore = 1;
+                        else labScore = 0; // > 3.5
+                    }
+                } else if (useTLC) {
+                    const val = parseFloat(document.getElementById('valTLC').value);
+                    if (!isNaN(val)) {
+                        if (val <= 1000) labScore = 3;
+                        else if (val <= 1200) labScore = 2;
+                        else if (val <= 1500) labScore = 1;
+                        else labScore = 0; // > 1500
+                    }
+                }
+
+                // แสดงคะแนน Lab
+                document.getElementById('labScoreText').innerText = labScore;
+
+                // เรียกคำนวณคะแนนรวมใหญ่ (ต้องปรับแก้ calculateScore ด้วย)
                 calculateScore();
-            } else {
-                // ถ้าข้อมูลไม่ครบ ให้เคลียร์ค่า
-                document.getElementById('bmiValue').value = "-";
-                document.getElementById('bmiScoreText').innerText = "Score: 0";
-                calculateScore(); // อัปเดตคะแนนรวมใหม่ (กรณีลบเลขออก)
-            }
-        }
-
-        // ฟังก์ชันสลับโหมด (น้ำหนักปกติ <-> ผลเลือด)
-        function toggleWeightMode() {
-            const isUnknown = document.getElementById('unknownWeight').checked;
-            const weightSection = document.getElementById('standardWeightSection');
-            const labSection = document.getElementById('labSection');
-
-            if (isUnknown) {
-                // โหมดไม่ทราบน้ำหนัก -> ซ่อนส่วนน้ำหนัก, แสดงส่วน Lab
-                weightSection.style.display = 'none'; // หรือใช้ class 'd-none'
-                labSection.classList.remove('hidden-section');
-                labSection.classList.add('fade-in'); // เพิ่ม effect ถ้ามี class นี้
-
-                // รีเซ็ตค่าคะแนนจากส่วนน้ำหนักเป็น 0 (เพื่อไม่ให้คะแนนซ้อนกัน)
-                // (อาจต้องเคลียร์ค่าใน input น้ำหนัก/ส่วนสูง ด้วยถ้าต้องการ)
-            } else {
-                // โหมดปกติ -> แสดงส่วนน้ำหนัก, ซ่อนส่วน Lab
-                weightSection.style.display = 'block';
-                labSection.classList.add('hidden-section');
-                labSection.classList.remove('fade-in');
-
-                // รีเซ็ตคะแนน Lab เป็น 0
-                document.getElementById('labScoreText').innerText = "0";
-                // เคลียร์ค่า input ของ Lab
-                document.getElementById('valAlbumin').value = '';
-                document.getElementById('valTLC').value = '';
             }
 
-            calculateScore(); // คำนวณคะแนนรวมใหม่ทันที
-        }
-
-        // ฟังก์ชันเลือกประเภท Lab (Albumin / TLC)
-        function selectLab(type) {
-            // อัปเดต UI ของ Card (คลิกแล้วมีกรอบสี/เงา)
-            document.querySelectorAll('.lab-choice-card').forEach(card => {
-                card.classList.remove('active', 'border-primary');
-                card.classList.add('inactive');
-            });
-
-            const selectedCard = (type === 'albumin') ? document.getElementById('cardAlbumin') : document.getElementById('cardTLC');
-            selectedCard.classList.remove('inactive');
-            selectedCard.classList.add('active', 'border-primary');
-
-            // สั่ง check radio button ที่ซ่อนอยู่
-            if (type === 'albumin') {
-                document.getElementById('useAlbumin').checked = true;
-            } else {
-                document.getElementById('useTLC').checked = true;
-            }
-
-            toggleLabInputs(); // เปิดช่องกรอก
-        }
-
-        // ฟังก์ชันเปิด/ปิดช่องกรอกตาม Radio ที่เลือก
-        function toggleLabInputs() {
-            const useAlb = document.getElementById('useAlbumin').checked;
-            const useTLC = document.getElementById('useTLC').checked;
-
-            const inpAlb = document.getElementById('valAlbumin');
-            const inpTLC = document.getElementById('valTLC');
-
-            if (useAlb) {
-                inpAlb.disabled = false;
-                inpAlb.focus();
-                inpTLC.disabled = true;
-                inpTLC.value = ''; // เคลียร์ค่าอีกช่อง
-            } else if (useTLC) {
-                inpTLC.disabled = false;
-                inpTLC.focus();
-                inpAlb.disabled = true;
-                inpAlb.value = '';
-            }
-
-            calculateLabScore(); // คำนวณคะแนนใหม่
-        }
-
-        // ฟังก์ชันคำนวณคะแนนจากผลเลือด
-        function calculateLabScore() {
-            let labScore = 0;
-            const useAlb = document.getElementById('useAlbumin').checked;
-            const useTLC = document.getElementById('useTLC').checked;
-
-            if (useAlb) {
-                const val = parseFloat(document.getElementById('valAlbumin').value);
-                if (!isNaN(val)) {
-                    if (val <= 2.5) labScore = 3;
-                    else if (val <= 2.9) labScore = 2;
-                    else if (val <= 3.5) labScore = 1;
-                    else labScore = 0; // > 3.5
-                }
-            } else if (useTLC) {
-                const val = parseFloat(document.getElementById('valTLC').value);
-                if (!isNaN(val)) {
-                    if (val <= 1000) labScore = 3;
-                    else if (val <= 1200) labScore = 2;
-                    else if (val <= 1500) labScore = 1;
-                    else labScore = 0; // > 1500
+            // ฟังก์ชันเปิดช่องกรอก "โรคอื่นๆ"
+            function toggleOtherDisease(checkbox, inputId) {
+                const inputField = document.getElementById(inputId);
+                if (inputField) {
+                    inputField.disabled = !checkbox.checked;
+                    if (checkbox.checked) {
+                        inputField.focus();
+                    } else {
+                        inputField.value = ''; // ล้างค่าเมื่อติ๊กออก
+                    }
                 }
             }
 
-            // แสดงคะแนน Lab
-            document.getElementById('labScoreText').innerText = labScore;
+            function calculateScore() {
+                let total = 0;
 
-            // เรียกคำนวณคะแนนรวมใหญ่ (ต้องปรับแก้ calculateScore ด้วย)
-            calculateScore();
-        }
+                // คะแนนจากตัวเลือกอื่นๆ
+                const inputs = document.querySelectorAll('.score-calc:checked');
+                inputs.forEach(el => {
+                    total += parseInt(el.getAttribute('data-score')) || 0;
+                });
 
-        // ฟังก์ชันเปิดช่องกรอก "โรคอื่นๆ"
-        function toggleOtherDisease(checkbox, inputId) {
-            const inputField = document.getElementById(inputId);
-            if (inputField) {
-                inputField.disabled = !checkbox.checked;
-                if (checkbox.checked) {
-                    inputField.focus();
+                // เลือกคิดคะแนนจาก (BMI) หรือ (Lab) 
+                // เช็คว่า User เลือกโหมดไหน
+                const isUnknownWeight = document.getElementById('unknownWeight').checked;
+
+                if (isUnknownWeight) {
+                    // [กรณีไม่ทราบน้ำหนัก] -> เอาคะแนนจาก Lab
+                    const labScore = parseInt(document.getElementById('labScoreText').innerText) || 0;
+                    total += labScore;
                 } else {
-                    inputField.value = ''; // ล้างค่าเมื่อติ๊กออก
-                }
-            }
-        }
+                    // [กรณีปกติ] -> เอาคะแนนจาก BMI
+                    const bmiField = document.getElementById('bmiValue');
+                    const bmiVal = (bmiField && bmiField.value !== "-") ? parseFloat(bmiField.value) : 0;
+                    let bmiScore = 0;
+                    if (bmiVal > 0) {
+                        if (bmiVal < 17) bmiScore = 2;
+                        else if (bmiVal <= 18) bmiScore = 1; // แก้ range ให้ถูกต้อง
+                        else if (bmiVal < 30) bmiScore = 0;
+                        else bmiScore = 1;
+                    }
 
-        function calculateScore() {
-            let total = 0;
+                    // แสดงคะแนน BMI
+                    const bmiScoreText = document.getElementById('bmiScoreText');
+                    if (bmiScoreText) bmiScoreText.innerText = `Score: ${bmiScore}`;
 
-            // คะแนนจากตัวเลือกอื่นๆ
-            const inputs = document.querySelectorAll('.score-calc:checked');
-            inputs.forEach(el => {
-                total += parseInt(el.getAttribute('data-score')) || 0;
-            });
-
-            // เลือกคิดคะแนนจาก (BMI) หรือ (Lab) 
-            // เช็คว่า User เลือกโหมดไหน
-            const isUnknownWeight = document.getElementById('unknownWeight').checked;
-
-            if (isUnknownWeight) {
-                // [กรณีไม่ทราบน้ำหนัก] -> เอาคะแนนจาก Lab
-                const labScore = parseInt(document.getElementById('labScoreText').innerText) || 0;
-                total += labScore;
-            } else {
-                // [กรณีปกติ] -> เอาคะแนนจาก BMI
-                const bmiField = document.getElementById('bmiValue');
-                const bmiVal = (bmiField && bmiField.value !== "-") ? parseFloat(bmiField.value) : 0;
-                let bmiScore = 0;
-                if (bmiVal > 0) {
-                    if (bmiVal < 17) bmiScore = 2;
-                    else if (bmiVal <= 18) bmiScore = 1; // แก้ range ให้ถูกต้อง
-                    else if (bmiVal < 30) bmiScore = 0;
-                    else bmiScore = 1;
+                    total += bmiScore;
                 }
 
-                // แสดงคะแนน BMI
-                const bmiScoreText = document.getElementById('bmiScoreText');
-                if (bmiScoreText) bmiScoreText.innerText = `Score: ${bmiScore}`;
+                // แสดงผลรวม
+                const scoreCircle = document.getElementById('scoreCircle');
+                const resultText = document.getElementById('resultText');
 
-                total += bmiScore;
-            }
+                if (scoreCircle) {
+                    scoreCircle.innerText = total;
+                    scoreCircle.className = 'score-circle-big shadow bg-white d-flex align-items-center justify-content-center';
+                    resultText.className = 'font-weight-bold';
 
-            // แสดงผลรวม
-            const scoreCircle = document.getElementById('scoreCircle');
-            const resultText = document.getElementById('resultText');
-
-            if (scoreCircle) {
-                scoreCircle.innerText = total;
-                scoreCircle.className = 'score-circle-big shadow bg-white d-flex align-items-center justify-content-center';
-                resultText.className = 'font-weight-bold';
-
-                if (total <= 5) {
-                    scoreCircle.style.color = '#28a745';
-                    scoreCircle.style.border = '4px solid #28a745';
-                    resultText.innerText = 'Low Risk (ความเสี่ยงต่ำ)';
-                    resultText.classList.add('text-success');
-                    resultText.classList.remove('text-warning', 'text-danger');
-                } else if (total <= 11) {
-                    scoreCircle.style.color = '#ffc107';
-                    scoreCircle.style.border = '4px solid #ffc107';
-                    resultText.innerText = 'Moderate Risk (ความเสี่ยงปานกลาง)';
-                    resultText.classList.add('text-warning');
-                    resultText.classList.remove('text-success', 'text-danger');
-                } else {
-                    scoreCircle.style.color = '#dc3545';
-                    scoreCircle.style.border = '4px solid #dc3545';
-                    resultText.innerText = 'High Risk (ความเสี่ยงสูง)';
-                    resultText.classList.add('text-danger');
-                    resultText.classList.remove('text-success', 'text-warning');
+                    if (total <= 5) {
+                        scoreCircle.style.color = '#28a745';
+                        scoreCircle.style.border = '4px solid #28a745';
+                        resultText.innerText = 'Low Risk (ความเสี่ยงต่ำ)';
+                        resultText.classList.add('text-success');
+                        resultText.classList.remove('text-warning', 'text-danger');
+                    } else if (total <= 11) {
+                        scoreCircle.style.color = '#ffc107';
+                        scoreCircle.style.border = '4px solid #ffc107';
+                        resultText.innerText = 'Moderate Risk (ความเสี่ยงปานกลาง)';
+                        resultText.classList.add('text-warning');
+                        resultText.classList.remove('text-success', 'text-danger');
+                    } else {
+                        scoreCircle.style.color = '#dc3545';
+                        scoreCircle.style.border = '4px solid #dc3545';
+                        resultText.innerText = 'High Risk (ความเสี่ยงสูง)';
+                        resultText.classList.add('text-danger');
+                        resultText.classList.remove('text-success', 'text-warning');
+                    }
                 }
             }
-        }
 
-        function confirmLogout() {
-            if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'index.php';
+            function confirmLogout() {
+                if (confirm('ยืนยันการออกจากระบบ?')) {
+                    window.location.href = 'index.php';
+                }
             }
-        }
-    </script>
+        </script>
 </body>
 
 </html>
