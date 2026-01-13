@@ -40,7 +40,7 @@ try {
         $dob = new DateTime($patient['patients_dob']);
         $now = new DateTime();
         $diff = $now->diff($dob);
-        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน';
+        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน' . ' ' . $diff->d . ' วัน';
     }
 
     // แปลงวันที่ Admit
