@@ -1169,7 +1169,7 @@ try {
                     else bmiScore = 1;
                 }
 
-                // แสดงคะแนน BMI เล็กๆ (ถ้ามี)
+                // แสดงคะแนน BMI
                 const bmiScoreText = document.getElementById('bmiScoreText');
                 if (bmiScoreText) bmiScoreText.innerText = `Score: ${bmiScore}`;
 
