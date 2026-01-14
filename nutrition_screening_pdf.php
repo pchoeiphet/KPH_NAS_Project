@@ -141,12 +141,11 @@ $html = '
 
     <!-- Official Header Title -->
     <div style="padding-top: 5px;">
-        <div style="font-size: 10pt; color: #444;">Form No. KPP-DIET-001 (Rev.05)</div>
-        <div style="font-size: 19pt;" class="bold">แบบคัดกรองภาวะโภชนาการ</div>
+        <div style="font-size: 20pt;" class="bold">แบบคัดกรองภาวะโภชนาการ</div>
         <div style="font-size: 16pt;" class="bold">โรงพยาบาลกำแพงเพชร</div>
         <div style="font-size: 12pt; margin-top: 5px; font-style: italic;">(Nutrition Screening Tool : SPENT)</div>
         <div style="margin-top: 15px; font-size: 14pt;">
-            <b>คัดกรองครั้งที่:</b> <span style="font-size: 16pt; border-bottom: 1px solid #000;">&nbsp; ' . ($data['screening_round'] ?? '1') . ' &nbsp;</span>
+            <b>คัดกรองครั้งที่:</b> <span style="font-size: 16pt;">&nbsp; ' . ($data['screening_round'] ?? '1') . ' &nbsp;</span>
         </div>
     </div>
     <div style="clear: both;"></div>
@@ -205,7 +204,7 @@ $html = '
             <td class="text-center">' . (($data['q3_bmi_abnormal'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
         <tr>
-            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะวิกฤต / กึ่งวิกฤต หรือมีโรคประจำตัวรุนแรง</td>
+            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะวิกฤต / กึ่งวิกฤต</td>
             <td class="text-center">' . (($data['q4_critical'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q4_critical'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
@@ -268,7 +267,7 @@ $html = '
     <table width="100%">
         <tr>
             <td width="40%">เลขที่ใบงาน: ' . $data['doc_no'] . '</td>
-            <td width="60%" class="text-right">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
+            <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
         </tr>
     </table>
 </div>
