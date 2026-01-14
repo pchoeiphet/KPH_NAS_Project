@@ -190,3 +190,45 @@ body {
 .text-primary-custom {
   color: #0d47a1;
 }
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: #f8f9fa !important;
+  color: #333 !important;
+  border: 1px solid #ced4da;
+  cursor: default;
+}
+
+/* Radio Button ที่ถูกเลือกตอน Disabled ให้สีชัดขึ้น */
+.custom-control-input:checked:disabled ~ .custom-control-label::before {
+  background-color: #17a2b8;
+  /* สีฟ้า */
+  border-color: #17a2b8;
+  opacity: 1;
+}
+
+.custom-control-input:checked:disabled ~ .custom-control-label {
+  color: #17a2b8;
+  font-weight: bold;
+}
+
+/* ซ่อนปุ่มตอนพิมพ์ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    background-color: white !important;
+  }
+
+  .container-fluid {
+    padding: 0 !important;
+  }
+}

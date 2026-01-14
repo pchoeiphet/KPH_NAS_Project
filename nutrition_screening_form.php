@@ -77,7 +77,7 @@ try {
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/nutrition_alert_form.css">
+    <link rel="stylesheet" href="css/nutrition_screening_form.css">
 </head>
 
 <body>
@@ -189,15 +189,15 @@ try {
                             <div class="row">
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">HN</small>
-                                    <span class="font-weight-bold" id="p_hn"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_hn" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">AN</small>
-                                    <span class="font-weight-bold" id="p_an"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_an" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                    <span class="font-weight-bold" style="font-size: 1.1rem;">
+                                    <span class="font-weight-bold" id="p_name" style="font-size: 0.95rem;">
                                         <?php
                                         $fname = $patient['patients_firstname'] ?? '';
                                         $lname = $patient['patients_lastname'] ?? '';
@@ -205,21 +205,21 @@ try {
                                         ?>
                                     </span>
                                 </div>
-                                <div class="col-6 col-md-4 col-lg-2 mb-3">
+                                <div class=" col-6 col-md-4 col-lg-2 mb-3">
                                     <small class="text-muted d-block">อายุ</small>
                                     <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span>
                                 </div>
                                 <div class="col-6 col-md-8 col-lg-2 mb-3">
                                     <small class="text-muted d-block">สิทธิการรักษา</small>
-                                    <span class="font-weight-bold" id="p_rights"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_rights" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
-                                    <span class="font-weight-bold" id="p_doctor"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_doctor" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
                                 </div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <div class=" col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                    <span class="font-weight-bold" id="p_ward">
+                                    <span class="font-weight-bold" id="p_ward" style="font-size: 0.95rem;">
                                         <?php
                                         $ward = $patient['ward_name'] ?? '-';
                                         $bed = $patient['bed_number'] ?? '-';
@@ -229,15 +229,15 @@ try {
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">วันที่ Admit</small>
-                                    <span class="font-weight-bold" id="p_admit"><?= htmlspecialchars($admit_date) ?></span>
+                                    <span class="font-weight-bold" id="p_admit" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                    <span class="font-weight-bold" id="p_phone"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_phone" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold" id="p_underlying"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_underlying" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -251,7 +251,7 @@ try {
                 </button>
             </div>
 
-            <div class="card form-card mb-5">
+            <div class="card mb-5 border-0 shadow-sm" style="border-top: 5px solid #0d47a1 !important;">
                 <div class="form-header-box">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>

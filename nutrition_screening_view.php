@@ -5,33 +5,66 @@ date_default_timezone_set('Asia/Bangkok');
 $doc_no = $_GET['doc_no'] ?? '';
 
 if (empty($doc_no)) {
-    die("Error: ไม่พบเลขที่เอกสาร");
+    die("<div class='alert alert-danger text-center mt-5'>Error: ไม่พบเลขที่เอกสาร</div>");
 }
 
 try {
-    // ดึงข้อมูลการคัดกรอง + ข้อมูลผู้ป่วย
+    // แก้ไข SQL: ไม่ใช้ตัวย่อ (Alias) ใช้ชื่อตารางเต็ม
     $sql = "
-        SELECT ns.*, 
-            p.patients_firstname, p.patients_lastname, p.patients_hn,
-            a.bed_number, w.ward_name
-        FROM nutrition_screening ns
-        JOIN patients p ON ns.patients_hn = p.patients_hn
-        JOIN admissions a ON ns.admissions_an = a.admissions_an
-        LEFT JOIN wards w ON a.ward_id = w.ward_id
-        WHERE ns.doc_no = :doc_no
+        SELECT 
+            nutrition_screening.*, 
+            patients.patients_firstname, 
+            patients.patients_lastname, 
+            patients.patients_hn, 
+            patients.patients_dob,
+            patients.patients_phone, 
+            patients.patients_congenital_disease,
+            admissions.bed_number, 
+            admissions.admit_datetime,
+            wards.ward_name, 
+            doctor.doctor_name, 
+            health_insurance.health_insurance_name
+        FROM nutrition_screening
+        JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
+        JOIN admissions ON nutrition_screening.admissions_an = admissions.admissions_an
+        LEFT JOIN wards ON admissions.ward_id = wards.ward_id
+        LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
+        LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
+        WHERE nutrition_screening.doc_no = :doc_no
         LIMIT 1
     ";
+
     $stmt = $conn->prepare($sql);
     $stmt->execute([':doc_no' => $doc_no]);
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$data) die("ไม่พบข้อมูลเอกสาร");
+    if (!$data) die("<div class='alert alert-danger text-center mt-5'>ไม่พบข้อมูลเอกสาร</div>");
 
-    // คำนวณคะแนนรวมเพื่อโชว์ผล
-    $score = $data['q1_weight_loss'] + $data['q2_eat_less'] + $data['q3_bmi_abnormal'] + $data['q4_critical'];
+    // คำนวณอายุ
+    $age = '-';
+    if (!empty($data['patients_dob'])) {
+        $dob = new DateTime($data['patients_dob']);
+        $now = new DateTime();
+        $diff = $now->diff($dob);
+        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน' . $diff->d . ' วัน';
+    }
+
+    // ฟังก์ชันแปลงวันที่ไทย
+    $admit_date = '-';
+    if (!empty($data['admit_datetime'])) {
+        $dt = new DateTime($data['admit_datetime']);
+        $thai_year = $dt->format('Y') + 543;
+        // แสดงผล: 12/04/2567 10:30 น.
+        $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
+    }
+
+    // คำนวณคะแนนรวม
+    $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    die("Database Error: " . $e->getMessage());
 }
+
+
 ?>
 
 <!DOCTYPE html>
@@ -39,96 +72,218 @@ try {
 
 <head>
     <meta charset="UTF-8">
-    <title>รายละเอียดการคัดกรอง (View Only)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดการคัดกรอง (View) | โรงพยาบาลกำแพงเพชร</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
     <link rel="stylesheet" href="css/nutrition_screening_form.css">
-    <style>
-        /* สไตล์สำหรับโหมดอ่านอย่างเดียว */
-        input[disabled],
-        textarea[disabled] {
-            background-color: #f8f9fa !important;
-            border: 1px solid #e9ecef;
-            color: #495057;
-        }
-
-        .score-radio:checked+label::before {
-            border-color: #6c757d !important;
-            /* เปลี่ยนสีตอน checked แบบ disabled */
-        }
-
-        .view-only-banner {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #ffeeba;
-            font-weight: bold;
-        }
-
-        .result-box {
-            display: block !important;
-            /* บังคับโชว์ผลลัพธ์ */
-        }
-    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom no-print">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="img/logo_kph.jpg" class="brand-logo mr-2" alt="Logo" style="height: 40px;">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        <div class="user-profile-btn">
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="user-info d-none d-md-block" style="flex-grow: 1;">
+                                <div class="user-name">เพชรลดา เชยเพ็ชร</div>
+                                <div class="user-role">นักโภชนาการ</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 250px;">
+                        <div class="dropdown-header bg-light border-bottom py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div style="line-height: 1.3;">
+                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา เชยเพ็ชร</strong>
+                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
+                                    <br>
+                                    <span class="badge badge-info mt-1" style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-2">
+                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">งานของฉัน</h6>
+                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center" href="#">
+                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary" style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
+                                <span class="badge badge-danger badge-pill">5</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-comment-medical mr-2 text-success" style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
+                            </a>
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary" style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning" style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px; text-align:center;"></i> ออกจากระบบ
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container-fluid mt-5 pt-4 pb-5 px-lg-5">
-
-        <div class="alert alert-warning shadow-sm mt-3">
-            <i class="fa-solid fa-lock mr-2"></i> คุณกำลังอยู่ในโหมด <strong>ดูประวัติย้อนหลัง (Read Only)</strong> ไม่สามารถแก้ไขข้อมูลได้
+    <div class="container-fluid px-lg-5 mt-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-auto">
+                        <div class="patient-icon-box"><i class="fa-solid fa-user-injured"></i></div>
+                    </div>
+                    <div class="col">
+                        <h5 class="text-primary-custom font-weight-bold mb-3 border-bottom pb-2 d-inline-block">
+                            <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                                <small class="text-muted d-block">HN</small>
+                                <span class="font-weight-bold" id="p_hn" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_hn'] ?? '-') ?></span>
+                            </div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                                <small class="text-muted d-block">AN</small>
+                                <span class="font-weight-bold" id="p_an" style="font-size: 0.95rem;"><?= htmlspecialchars($data['admissions_an'] ?? '-') ?></span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">ชื่อ - นามสกุล</small>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;" id="p_name">
+                                    <?php
+                                    $fname = $data['patients_firstname'] ?? '';
+                                    $lname = $data['patients_lastname'] ?? '';
+                                    echo htmlspecialchars($fname . ' ' . $lname);
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3">
+                                <small class="text-muted d-block">อายุ</small>
+                                <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span>
+                            </div>
+                            <div class="col-6 col-md-8 col-lg-2 mb-3">
+                                <small class="text-muted d-block">สิทธิการรักษา</small>
+                                <span class="font-weight-bold" id="p_rights" style="font-size: 0.95rem;"><?= htmlspecialchars($data['health_insurance_name'] ?? '-') ?></span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
+                                <span class="font-weight-bold" id="p_doctor" style="font-size: 0.95rem;"><?= htmlspecialchars($data['doctor_name'] ?? '-') ?></span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
+                                <span class="font-weight-bold" id="p_ward" style="font-size: 0.95rem;">
+                                    <?php
+                                    $ward = $data['ward_name'] ?? '-';
+                                    $bed = $data['bed_number'] ?? '-';
+                                    echo htmlspecialchars($ward . ' / ' . $bed);
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">วันที่ Admit</small>
+                                <span class="font-weight-bold" id="p_admit" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span>
+                            </div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">เบอร์โทรศัพท์</small>
+                                <span class="font-weight-bold" id="p_phone" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_phone'] ?? '-') ?></span>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                                <small class="text-muted d-block">โรคประจำตัว</small>
+                                <span class="font-weight-bold" id="p_underlying" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_congenital_disease'] ?? '-') ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <a href="patient_profile.php?hn=<?= $data['patients_hn'] ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
-                <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
-            </a>
+        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+
+            <div>
+                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>'">
+                    <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
+                </button>
+            </div>
+
+            <div>
+                <div class="alert alert-warning py-1 px-3 d-inline-block mb-0 mr-2 shadow-sm" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-eye mr-1"></i> โหมดดูประวัติ (Read Only)
+                </div>
+                <button onclick="window.print()" class="btn btn-info btn-sm shadow-sm">
+                    <i class="fas fa-print mr-1"></i> พิมพ์เอกสาร
+                </button>
+            </div>
+
         </div>
 
-        <div class="card form-card mb-5">
-            <div class="form-header-box">
+        <div class="card mb-5 border-0 shadow-sm" style="border-top: 5px solid #0d47a1 !important;">
+
+            <div class="card-header bg-white p-4 border-bottom">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
-                        <small class="text-muted">Document No.: <?= $data['doc_no'] ?></small>
+                        <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                     </div>
                     <div class="text-right">
-                        <span class="badge badge-secondary p-2">History View</span>
+                        <span class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?= htmlspecialchars($data['doc_no'] ?? '-') ?></span>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="col-md-3">
-                        <small class="text-muted">ผู้ป่วย:</small><br>
-                        <strong><?= $data['patients_firstname'] . ' ' . $data['patients_lastname'] ?></strong>
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div>
+                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?= htmlspecialchars($data['screening_seq'] ?? '-') ?>" disabled>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <small class="text-muted">วันที่บันทึก:</small><br>
-                        <strong><?= date('d/m/Y H:i', strtotime($data['screening_datetime'])) ?></strong>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
+                            <input type="text" class="form-control text-center" value="<?= isset($data['screening_datetime']) ? date('d/m/Y', strtotime($data['screening_datetime'])) : '-' ?>" disabled>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <small class="text-muted">ผู้คัดกรอง:</small><br>
-                        <strong><?= $data['assessor_name'] ?></strong>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div>
+                            <input type="text" class="form-control text-center" value="<?= isset($data['screening_datetime']) ? date('H:i', strtotime($data['screening_datetime'])) : '-' ?>" disabled>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <small class="text-muted">ครั้งที่:</small><br>
-                        <strong><?= $data['screening_seq'] ?></strong>
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span></div>
+                            <input type="text" class="form-control text-center text-primary" value="<?= htmlspecialchars($data['assessor_name'] ?? '-') ?>" disabled>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,34 +291,68 @@ try {
             <div class="card-body p-4">
                 <form>
                     <div class="form-group mb-4">
-                        <label class="section-label">1. การวินิจฉัยเบื้องต้น</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['initial_diagnosis']) ?>" disabled>
+                        <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis)</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['initial_diagnosis'] ?? '') ?>" disabled>
                     </div>
 
                     <hr class="my-4" style="border-top: 1px dashed #dee2e6;">
 
                     <div class="mb-4">
-                        <label class="section-label">2. ข้อมูลสัดส่วนร่างกาย</label>
+                        <label class="section-label">2. ข้อมูลสัดส่วนร่างกาย (Anthropometry)</label>
                         <div class="row">
                             <div class="col-md-3">
-                                <label class="small text-muted">น้ำหนัก (กก.)</label>
-                                <input type="text" class="form-control" value="<?= $data['present_weight'] ?>" disabled>
+                                <div class="form-group">
+                                    <label class="text-muted small mb-1">น้ำหนักปัจจุบัน</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['present_weight'] ?? '') ?>" disabled>
+                                        <div class="input-group-append"><span class="input-group-text bg-light text-muted">กก.</span></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">ส่วนสูง (ซม.)</label>
-                                <input type="text" class="form-control" value="<?= $data['height'] ?>" disabled>
+                                <div class="form-group">
+                                    <label class="text-muted small mb-1">ส่วนสูง</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['height'] ?? '') ?>" disabled>
+                                        <div class="input-group-append"><span class="input-group-text bg-light text-muted">ซม.</span></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">น้ำหนักปกติ</label>
-                                <input type="text" class="form-control" value="<?= $data['normal_weight'] ?>" disabled>
+                                <div class="form-group">
+                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['normal_weight'] ?? '') ?>" disabled>
+                                        <div class="input-group-append"><span class="input-group-text bg-light text-muted">กก.</span></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">BMI</label>
-                                <input type="text" class="form-control bg-light" value="<?= $data['bmi'] ?>" disabled>
+                                <div class="form-group">
+                                    <label class="text-muted small mb-1">ดัชนีมวลกาย (BMI)</label>
+                                    <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($data['bmi'] ?? '') ?>" disabled>
+                                </div>
                             </div>
                         </div>
-                        <div class="mt-2">
-                            <small class="text-muted">ที่มาของน้ำหนัก: <strong><?= $data['weight_method'] ?></strong></small>
+
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center bg-light p-2 rounded border">
+                                    <span class="mr-3 font-weight-bold text-secondary small">ที่มาของน้ำหนัก:</span>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" <?= (($data['weight_method'] ?? '') == 'ชั่งจริง') ? 'checked' : '' ?> disabled>
+                                        <label class="custom-control-label">ชั่งจริง</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" <?= (($data['weight_method'] ?? '') == 'ซักถาม') ? 'checked' : '' ?> disabled>
+                                        <label class="custom-control-label">ซักถาม</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" class="custom-control-input" <?= (($data['weight_method'] ?? '') == 'กะประมาณ') ? 'checked' : '' ?> disabled>
+                                        <label class="custom-control-label">กะประมาณ</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -171,56 +360,96 @@ try {
 
                     <div class="mb-4">
                         <label class="section-label">3. แบบคัดกรอง (Screening Questions)</label>
-                        <table class="table table-bordered table-screening mb-0">
+                        <table class="table table-bordered mb-0">
                             <thead>
-                                <tr>
-                                    <th>คำถาม</th>
-                                    <th width="15%" class="text-center">ผลการประเมิน</th>
+                                <tr class="bg-light">
+                                    <th style="width: 70%; border-bottom: 2px solid #dee2e6;">ประเด็นคำถาม</th>
+                                    <th class="text-center text-success" style="width: 15%; border-bottom: 2px solid #dee2e6;">ใช่ (1)</th>
+                                    <th class="text-center text-muted" style="width: 15%; border-bottom: 2px solid #dee2e6;">ไม่ใช่ (0)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>1. น้ำหนักลดลงโดยไม่ตั้งใจ (6 เดือน)</td>
-                                    <td class="text-center font-weight-bold"><?= ($data['q1_weight_loss'] == 1) ? '<span class="text-danger">ใช่ (1)</span>' : '<span class="text-success">ไม่ใช่ (0)</span>' ?></td>
+                                    <td class="align-middle">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจ (ในช่วง 6 เดือนที่ผ่านมา)</td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q1_weight_loss'] ?? -1) == 1) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q1_weight_loss'] ?? -1) == 0) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>2. ได้รับอาหารน้อยกว่าปกติ (> 7 วัน)</td>
-                                    <td class="text-center font-weight-bold"><?= ($data['q2_eat_less'] == 1) ? '<span class="text-danger">ใช่ (1)</span>' : '<span class="text-success">ไม่ใช่ (0)</span>' ?></td>
+                                    <td class="align-middle">2. ผู้ป่วยได้รับอาหารน้อยกว่าที่เคยได้ (> 7 วัน)</td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q2_eat_less'] ?? -1) == 1) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q2_eat_less'] ?? -1) == 0) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>3. BMI < 18.5 หรือ ≥ 25.0</td>
-                                    <td class="text-center font-weight-bold"><?= ($data['q3_bmi_abnormal'] == 1) ? '<span class="text-danger">ใช่ (1)</span>' : '<span class="text-success">ไม่ใช่ (0)</span>' ?></td>
+                                    <td class="align-middle">3. BMI < 18.5 หรือ ≥ 25.0 กก./ม.² หรือไม่</td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q3_bmi_abnormal'] ?? -1) == 1) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q3_bmi_abnormal'] ?? -1) == 0) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>4. ภาวะโรควิกฤต/กึ่งวิกฤต</td>
-                                    <td class="text-center font-weight-bold"><?= ($data['q4_critical'] == 1) ? '<span class="text-danger">ใช่ (1)</span>' : '<span class="text-success">ไม่ใช่ (0)</span>' ?></td>
+                                    <td class="align-middle">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต</td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q4_critical'] ?? -1) == 1) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" <?= (($data['q4_critical'] ?? -1) == 0) ? 'checked' : '' ?> disabled><label class="custom-control-label"></label></div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="section-label">4. หมายเหตุ</label>
-                        <textarea class="form-control" rows="2" disabled><?= htmlspecialchars($data['notes']) ?></textarea>
+                        <label class="section-label">4. หมายเหตุ / ข้อสังเกตเพิ่มเติม (Optional)</label>
+                        <textarea class="form-control" rows="3" disabled><?= htmlspecialchars($data['notes'] ?? '') ?></textarea>
                     </div>
 
                     <?php
-                    $box_class = ($score >= 2) ? 'risk-high' : 'risk-normal';
-                    $border_color = ($score >= 2) ? '#dc3545' : '#28a745';
-                    $bg_color = ($score >= 2) ? '#fff5f5' : '#f0fff4';
-                    $icon = ($score >= 2) ? 'fa-triangle-exclamation text-danger' : 'fa-circle-check text-success';
-                    $title_text = ($score >= 2) ? 'มีความเสี่ยง (At Risk)' : 'ภาวะโภชนาการปกติ (Normal)';
-                    $title_class = ($score >= 2) ? 'text-danger' : 'text-success';
+                    $isRisk = ($score >= 2);
+                    $boxClass = $isRisk ? 'alert-danger' : 'alert-success';
+                    $borderStyle = $isRisk ? '2px dashed #dc3545' : '2px dashed #28a745';
+                    $bgColor = $isRisk ? '#fff5f5' : '#f0fff4';
+                    $iconClass = $isRisk ? 'fa-triangle-exclamation text-danger' : 'fa-circle-check text-success';
+                    $titleText = $isRisk ? 'มีความเสี่ยง (At Risk)' : 'ไม่พบความเสี่ยง (Normal)';
+                    $titleColor = $isRisk ? 'text-danger' : 'text-success';
+                    $descText = $isRisk
+                        ? "คะแนนรวม: {$score} คะแนน - ผู้ป่วยมีความเสี่ยงต่อภาวะขาดสารอาหาร"
+                        : "คะแนนรวม: {$score} คะแนน - ควรคัดกรองซ้ำใน 7 วัน";
+
+                    $recommendIcon = $isRisk ? 'fa-bell' : 'fa-calendar-check';
+                    $recommendText = $isRisk
+                        ? 'ทำการประเมินภาวะโภชนาการต่อ หรือปรึกษานักกำหนดอาหาร'
+                        : 'คัดกรองซ้ำในอีก 7 วัน';
                     ?>
-                    <div class="result-box mt-4 p-4 rounded text-center" style="border: 2px dashed <?= $border_color ?>; background-color: <?= $bg_color ?>;">
+
+                    <div class="mt-4 p-4 rounded text-center" style="border: <?= $borderStyle ?>; background-color: <?= $bgColor ?>;">
                         <div class="mb-3">
-                            <i class="fa-solid <?= $icon ?> fa-4x"></i>
+                            <i class="fa-solid <?= $iconClass ?> fa-4x"></i>
                         </div>
-                        <h3 class="font-weight-bold mb-2 <?= $title_class ?>"><?= $title_text ?></h3>
-                        <p class="mb-0" style="font-size: 1.1rem;">
-                            คะแนนรวม: <strong><?= $score ?></strong> คะแนน
-                        </p>
-                        <p class="text-muted mt-2 mb-0">สถานะบันทึก: <?= $data['screening_status'] ?></p>
+
+                        <h3 class="font-weight-bold mb-2 <?= $titleColor ?>"><?= $titleText ?></h3>
+                        <p class="mb-2" style="font-size: 0.95rem;"><?= $descText ?></p>
+
+                        <div class="mt-3 p-2 rounded d-inline-block" style="background-color: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.1);">
+                            <i class="far <?= $recommendIcon ?> mr-2"></i>
+                            <strong>ข้อแนะนำ:</strong> <?= $recommendText ?>
+                        </div>
+
+                        <?php if ($isRisk): ?>
+                            <div class="mt-3">
+                                <span class="badge badge-warning p-2">สถานะ: <?= htmlspecialchars($data['screening_status'] ?? '-') ?></span>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                 </form>
@@ -228,6 +457,15 @@ try {
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmLogout() {
+            if (confirm('ยืนยันการออกจากระบบ?')) {
+                window.location.href = 'index.php';
+            }
+        }
+    </script>
 </body>
 
 </html>

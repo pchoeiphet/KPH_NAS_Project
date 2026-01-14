@@ -9,7 +9,7 @@ if (empty($hn)) {
 }
 
 try {
-    // 1. ดึงข้อมูลผู้ป่วย
+    // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
             patients.patients_hn, 
@@ -50,11 +50,12 @@ try {
 
     $admit_date = '-';
     if (!empty($patient['admit_datetime'])) {
-        $date = new DateTime($patient['admit_datetime']);
-        $admit_date = $date->format('d/m/Y');
+        $dt = new DateTime($patient['admit_datetime']);
+        $thai_year = $dt->format('Y') + 543;
+        $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    // 2. ดึงประวัติ (SPENT)
+    // ดึงประวัติ (SPENT)
     $sql_history = "
         SELECT * FROM nutrition_screening 
         WHERE nutrition_screening.patients_hn = :hn 
@@ -124,21 +125,6 @@ if ($latest_screening) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/patient_profile.css">
-    <style>
-        /* CSS สำหรับลิงก์ชื่อเอกสาร */
-        .doc-link {
-            color: inherit;
-            text-decoration: none;
-            display: block;
-            /* ให้ลิงก์คลุมพื้นที่ชื่อ */
-        }
-
-        .doc-link:hover {
-            color: #0d47a1;
-            /* เปลี่ยนสีเมื่อ hover */
-            text-decoration: underline;
-        }
-    </style>
 </head>
 
 <body>
@@ -396,7 +382,7 @@ if ($latest_screening) {
                                             ?>
                                             <tr data-type="SPENT">
                                                 <td>
-                                                    <a href="nutrition_screening_detail.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
+                                                    <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
                                                         <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
                                                             แบบคัดกรองภาวะโภชนาการ (SPENT)
                                                         </div>
