@@ -240,9 +240,12 @@ try {
                 <div class="alert alert-warning py-1 px-3 d-inline-block mb-0 mr-2 shadow-sm" style="font-size: 0.9rem;">
                     <i class="fa-solid fa-eye mr-1"></i> โหมดดูประวัติ (Read Only)
                 </div>
-                <button onclick="window.print()" class="btn btn-info btn-sm shadow-sm">
-                    <i class="fas fa-print mr-1"></i> พิมพ์เอกสาร
-                </button>
+
+                <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
+                    target="_blank"
+                    class="btn btn-info btn-sm shadow-sm rounded-pill px-3">
+                    <i class="fas fa-file-pdf mr-1"></i> ดาวน์โหลด PDF
+                </a>
             </div>
 
         </div>
