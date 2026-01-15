@@ -93,8 +93,8 @@ $html = '
         border: 1px solid #000; 
         padding: 2px 10px; 
         font-weight: bold; 
-        font-size: 13pt;
-        margin-top: 6px;
+        font-size: 14pt;
+        margin-top: 5px;
     }
 
     .table-content td, .table-content th { 
@@ -153,26 +153,41 @@ $html = '
 <div class="section-header">ส่วนที่ 1: ข้อมูลแรกรับและการวินิจฉัย (Admission & Clinical Data)</div>
 <table class="table-content">
     <tr>
-        <td width="35%"><b>วันที่คัดกรอง:</b> ' . date('d/m/Y', strtotime($data['screening_datetime'])) . '</td>
-        <td width="25%"><b>เวลา:</b> ' . date('H:i', strtotime($data['screening_datetime'])) . ' น.</td>
-        <td width="40%"><b>วันที่รับเข้ารักษา:</b> ' . date('d/m/Y', strtotime($data['admit_datetime'])) . '</td>
+        <td width="33%">
+            <b>วันที่รับเข้ารักษา:</b><br>
+            ' . date('d/m/Y H:i', strtotime($data['admit_datetime'])) . ' น.
+        </td>
+        <td width="33%">
+            <b>วันที่คัดกรอง:</b><br>
+            ' . date('d/m/Y', strtotime($data['screening_datetime'])) . '
+        </td>
+        <td width="34%">
+            <b>เวลาคัดกรอง:</b><br>
+            ' . date('H:i', strtotime($data['screening_datetime'])) . ' น.
+        </td>
     </tr>
     <tr>
-        <td colspan="3"><b>การวินิจฉัยโรค (Diagnosis):</b> ' . ($data['initial_diagnosis'] ?: '-') . '</td>
+        <td colspan="3">
+            <b>การวินิจฉัยโรค (Diagnosis):</b><br>
+            ' . ($data['initial_diagnosis'] ?: '-') . '
+        </td>
     </tr>
 </table>
 
+
 <table class="table-content" style="margin-top: 6px;">
     <tr class="text-center bold bg-light">
-        <td width="20%">น้ำหนัก (kg)</td>
+        <td width="20%">น้ำหนักปัจจุบัน (kg)</td>
+        <td width="20%">น้ำหนักปกติ (kg)</td>
         <td width="20%">ส่วนสูง (cm)</td>
         <td width="20%">BMI (kg/m²)</td>
-        <td width="40%">วิธีการชั่ง/วัด</td>
+        <td width="20%">วิธีการชั่ง/วัด</td>
     </tr>
-    <tr class="text-center" style="font-size: 16pt;">
-        <td class="bold">' . $data['present_weight'] . '</td>
-        <td>' . $data['height'] . '</td>
-        <td class="bold">' . $data['bmi'] . '</td>
+    <tr class="text-center" style="font-size: 15pt;">
+        <td class="bold">' . ($data['present_weight'] ?? '-') . '</td>
+        <td>' . ($data['normal_weight'] ?? '-') . '</td>
+        <td>' . ($data['height'] ?? '-') . '</td>
+        <td class="bold">' . ($data['bmi'] ?? '-') . '</td>
         <td style="font-size: 13pt;">' . ($data['weight_method'] ?? '-') . '</td>
     </tr>
 </table>
@@ -210,17 +225,36 @@ $html = '
     </tbody>
 </table>
 
-<div style="margin-top: 8px;">
-    <div class="score-result">
-        <span style="font-size: 11pt;">คะแนนรวม</span><br>
-        <span style="font-size: 22pt;" class="bold">' . $score . '</span>
-    </div>
-    <div style="padding-top: 5px;">
-        <span class="bold" style="font-size: 16pt;">สรุปผลการคัดกรอง: ' . ($score >= 2 ? 'มีความเสี่ยง (At Risk)' : 'ปกติ (Normal)') . '</span><br>
-        <span style="font-size: 12pt;">* เกณฑ์ตัดสิน: รวมคะแนน &ge; 2 คะแนน ถือว่ามีความเสี่ยงต่อภาวะโภชนาการ</span>
-    </div>
-    <div style="clear: both;"></div>
-</div>
+<div class="section-header">ผลการคัดกรอง</div>
+
+<table class="table-content">
+    <tr>
+        <td width="5%" class="text-center">
+            <span class="checkbox">
+                ' . ($score >= 2 ? '&#9745;' : '&#9744;') . '
+            </span>
+        </td>
+        <td width="95%" style="font-size: 14pt;">
+            ถ้าตอบ <b>ใช่ ≥ 2 ข้อ</b>  
+            ทำการประเมินภาวะโภชนาการต่อ  
+            หรือปรึกษานักกำหนดอาหาร / ทีมโภชนบำบัด
+        </td>
+    </tr>
+    <tr>
+        <td class="text-center">
+            <span class="checkbox">
+                ' . ($score <= 1 ? '&#9745;' : '&#9744;') . '
+            </span>
+        </td>
+        <td style="font-size: 14pt;">
+            ถ้าตอบ <b>ใช่ ≤ 1 ข้อ</b>  
+            ให้คัดกรองซ้ำ <b>สัปดาห์ละ 1 ครั้ง</b>  
+            ในช่วงที่ผู้ป่วยอยู่โรงพยาบาล
+        </td>
+    </tr>
+</table>
+
+
 
 <div class="section-header">ส่วนที่ 3: แผนการจัดการและข้อเสนอแนะ (Intervention Plan)</div>
 <table class="table-content">
