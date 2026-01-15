@@ -193,11 +193,11 @@ $html = '
     <tr>
         <td width="33%">
             <b>วันที่รับเข้ารักษา:</b><br>
-            ' . date('d/m/Y H:i', strtotime($data['admit_datetime'])) . ' น.
+            ' . date('d/m/', strtotime($data['admit_datetime'])) . (date('Y', strtotime($data['admit_datetime'])) + 543) . date(' H:i', strtotime($data['admit_datetime'])) . ' น.
         </td>
         <td width="33%">
             <b>วันที่คัดกรอง:</b><br>
-            ' . date('d/m/Y', strtotime($data['screening_datetime'])) . '
+            ' . date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) . '
         </td>
         <td width="30%">
             <b>เวลาคัดกรอง:</b><br>
@@ -343,11 +343,11 @@ $html = '
             </div>
         </td>
         <td width="50%" class="text-center" style="vertical-align: bottom;">
-            ลงชื่อ................................................................ ผู้คัดกรอง<br>
-            ( ' . $data['assessor_name'] . ' )<br>
-            <span class="bold">ตำแหน่ง นักโภชนาการ</span><br>
-            วันที่พิมพ์: ' . date('d/m/Y H:i') . ' น.
-        </td>
+    ลงชื่อ................................................................ ผู้คัดกรอง<br>
+    ( ' . $data['assessor_name'] . ' )<br>
+    <span class="bold">ตำแหน่ง นักโภชนาการ</span><br>
+    วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
+</td>
     </tr>
 </table>
 
