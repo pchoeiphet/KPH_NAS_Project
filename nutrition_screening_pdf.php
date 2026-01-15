@@ -14,6 +14,7 @@ try {
             patients.patients_lastname, 
             patients.patients_hn, 
             patients.patients_dob,
+            patients.patients_gender,
             admissions.bed_number, 
             admissions.admit_datetime,
             wards.ward_name, 
@@ -38,6 +39,16 @@ try {
         $diff = (new DateTime())->diff(new DateTime($data['patients_dob']));
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน';
     }
+
+    $gender = '-';
+    if (!empty($data['patients_gender'])) {
+        if ($data['patients_gender'] == 'ชาย') {
+            $gender = 'ชาย';
+        } elseif ($data['patients_gender'] == 'หญิง') {
+            $gender = 'หญิง';
+        }
+    }
+
     $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
     $fullname = ($data['patients_firstname'] ?? '') . ' ' . ($data['patients_lastname'] ?? '');
 } catch (PDOException $e) {
@@ -91,7 +102,7 @@ $html = '
     .section-header { 
         background-color: #f0f0f0; 
         border: 1px solid #000; 
-        padding: 2px 10px; 
+        padding: 4px 10px; 
         font-weight: bold; 
         font-size: 14pt;
         margin-top: 5px;
@@ -115,40 +126,67 @@ $html = '
     }
 </style>
 
-<div style="width: 100%;">
-    <!-- Patient ID Sticker / Addressograph Area -->
-    <div class="addressograph">
-        <table style="font-size: 12.5pt; line-height: 1.05;">
-            <tr><td colspan="2" class="bold" style="font-size: 15pt; border-bottom: 1px solid #000; padding-bottom: 2px;">' . $fullname . '</td></tr>
-            <tr>
-                <td width="50%"><b>HN:</b> ' . $data['patients_hn'] . '</td>
-                <td width="50%"><b>AN:</b> ' . $data['admissions_an'] . '</td>
-            </tr>
-            <tr>
-                <td><b>อายุ:</b> ' . $age . '</td>
-                <td><b>หอผู้ป่วย:</b> ' . $data['ward_name'] . '</td>
-            </tr>
-            <tr>
-                <td><b>เตียง:</b> ' . ($data['bed_number'] ?? '-') . '</td>
-                <td><b>สิทธิ:</b> ' . ($data['health_insurance_name'] ?? '-') . '</td>
-            </tr>
-            <tr>
-                <td colspan="2"><b>แพทย์เจ้าของไข้:</b> ' . ($data['doctor_name'] ?? '-') . '</td>
-            </tr>
-        </table>
-    </div>
+<table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <!-- Logo -->
+        <td width="15%" style="text-align:left; vertical-align:middle;">
+            <img src="img/logo_kph.jpg" style="height:75px;">
+        </td>
 
-    <!-- Official Header Title -->
-    <div style="padding-top: 5px;">
-        <div style="font-size: 20pt;" class="bold">แบบคัดกรองภาวะโภชนาการ</div>
-        <div style="font-size: 16pt;" class="bold">โรงพยาบาลกำแพงเพชร</div>
-        <div style="font-size: 12pt; margin-top: 5px; font-style: italic;">(Nutrition Screening Tool : SPENT)</div>
-        <div style="margin-top: 15px; font-size: 14pt;">
-            <b>คัดกรองครั้งที่:</b> <span style="font-size: 16pt;">&nbsp; ' . ($data['screening_round'] ?? '1') . ' &nbsp;</span>
-        </div>
-    </div>
-    <div style="clear: both;"></div>
-</div>
+        <!-- Title -->
+        <td width="55%" style="vertical-align:middle; padding-left:10px;">
+            <div style="font-size:20pt; font-weight:bold; line-height:1.1;">
+                แบบคัดกรองภาวะโภชนาการ
+            </div>
+            <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
+                โรงพยาบาลกำแพงเพชร
+            </div>
+            <div style="font-size:12pt; font-style:italic; margin-top:2px;">
+                (Nutrition Screening Tool : SPENT)
+            </div>
+            <div style="margin-top:6px; font-size:14pt;">
+                <b>คัดกรองครั้งที่:</b>
+                <span style="font-size:16pt;">
+                    ' . ($data['screening_round'] ?? '1') . '
+                </span>
+            </div>
+        </td>
+
+        <!-- Addressograph -->
+<td width="50%" style="vertical-align:top;">
+    <table width="100%" style="border:2px solid #000; font-size:12.5pt; line-height:1.3;">
+        <tr>
+            <td colspan="2" class="bold"
+                style="font-size:15pt; border-bottom:1px solid #000; padding:4px;">
+                ' . $fullname . '
+            </td>
+        </tr>
+        <tr>
+            <td width="50%"><b>HN:</b> ' . $data['patients_hn'] . '</td>
+            <td width="50%"><b>AN:</b> ' . $data['admissions_an'] . '</td>
+        </tr>
+        <tr>
+            <td><b>อายุ:</b> ' . $age . '</td>
+            <td><b>เพศ:</b> ' . $gender . '</td>
+        </tr>
+        <tr>
+            <td><b>หอผู้ป่วย:</b> ' . $data['ward_name'] . '</td>
+            <td><b>เตียง:</b> ' . ($data['bed_number'] ?? '-') . '</td>
+        </tr>
+        <tr>
+            <td colspan="2"><b>สิทธิการรักษา:</b> ' . ($data['health_insurance_name'] ?? '-') . '</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <b>แพทย์เจ้าของไข้:</b> ' . ($data['doctor_name'] ?? '-') . '
+            </td>
+        </tr>
+    </table>
+</td>
+
+    </tr>
+</table>
+
 
 <div class="section-header">ส่วนที่ 1: ข้อมูลแรกรับและการวินิจฉัย (Admission & Clinical Data)</div>
 <table class="table-content">
@@ -161,7 +199,7 @@ $html = '
             <b>วันที่คัดกรอง:</b><br>
             ' . date('d/m/Y', strtotime($data['screening_datetime'])) . '
         </td>
-        <td width="34%">
+        <td width="30%">
             <b>เวลาคัดกรอง:</b><br>
             ' . date('H:i', strtotime($data['screening_datetime'])) . ' น.
         </td>
@@ -192,40 +230,43 @@ $html = '
     </tr>
 </table>
 
-<div class="section-header">ส่วนที่ 2: แบบคัดกรองภาวะโภชนาการ (SPENT Tool)</div>
+<div class="section-header">ส่วนที่ 2: แบบคัดกรองภาวะโภชนาการ (SPENT Nutrition Screening Tool)</div>
 <table class="table-content">
     <thead>
         <tr class="text-center bold bg-light">
-            <th width="74%">หัวข้อการพิจารณา</th>
+            <th width="74%">ประเด็นคำถาม</th>
             <th width="13%">ใช่ (1)</th>
             <th width="13%">ไม่ใช่ (0)</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="padding: 6px;">1. น้ำหนักตัวลดลงโดยไม่ได้ตั้งใจในช่วง 6 เดือนที่ผ่านมา</td>
+            <td style="padding: 6px;">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจ (ในช่วง 6 เดือนที่ผ่านมา)</td>
             <td class="text-center">' . (($data['q1_weight_loss'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q1_weight_loss'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
         <tr>
-            <td style="padding: 6px;">2. ความสามารถในการรับประทานอาหารลดลงมากกว่า 1 สัปดาห์</td>
+            <td style="padding: 6px;">2. ผู้ป่วยได้รับอาหารน้อยกว่าที่เคยได้ (> 7 วัน)</td>
             <td class="text-center">' . (($data['q2_eat_less'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q2_eat_less'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
         <tr>
-            <td style="padding: 6px;">3. มีค่าดัชนีมวลกาย (BMI) < 18.5 หรือ &ge; 25.0 kg/m²</td>
+            <td style="padding: 6px;">3. BMI < 18.5 หรือ ≥ 25.0 กก./ม.² หรือไม่</td>
             <td class="text-center">' . (($data['q3_bmi_abnormal'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q3_bmi_abnormal'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
         <tr>
-            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะวิกฤต / กึ่งวิกฤต</td>
+            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต</td>
             <td class="text-center">' . (($data['q4_critical'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q4_critical'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
     </tbody>
 </table>
 
-<div class="section-header">ผลการคัดกรอง</div>
+<div class="section-header">
+    สรุปผลการคัดกรองภาวะโภชนาการ (SPENT)
+</div>
+
 
 <table class="table-content">
     <tr>
@@ -252,31 +293,43 @@ $html = '
             ในช่วงที่ผู้ป่วยอยู่โรงพยาบาล
         </td>
     </tr>
-</table>
 
-
-
-<div class="section-header">ส่วนที่ 3: แผนการจัดการและข้อเสนอแนะ (Intervention Plan)</div>
+</table><div class="section-header">ส่วนที่ 3: แผนการจัดการและข้อเสนอแนะ (Intervention Plan)</div>
 <table class="table-content">
-    <tr class="bold bg-light">
+    <tr class="bold" style="border-bottom:2px solid #000;">
         <td width="50%">แนวทางดำเนินการ</td>
         <td width="50%">การปฏิบัติจริง</td>
     </tr>
     <tr>
-        <td style="font-size: 13pt;">
-            ' . ($score >= 2
-    ? '• <b>พบความเสี่ยง:</b> ต้องส่งประเมิน NAF ต่อเชิงลึก<br>• ปรึกษานักกำหนดอาหาร / Nutrition Team'
-    : '• <b>ไม่พบความเสี่ยง:</b> ให้การดูแลตามมาตรฐานโรงพยาบาล<br>• ติดตามและคัดกรองซ้ำในอีก 7 วัน') . '
-        </td>
-        <td style="font-size: 13pt;">
-            <span class="checkbox">' . ($score >= 2 ? '&#9745;' : '&#9744;') . '</span> ประสานงานนักกำหนดอาหาร (Consult Dietitian)<br>
-            <span class="checkbox">' . ($score < 2 ? '&#9745;' : '&#9744;') . '</span> เฝ้าระวังและติดตามอาการตามเกณฑ์ (Monitoring)<br>
-            <span class="checkbox">&#9744;</span> อื่นๆ ................................................................
-        </td>
+        <td style="font-size:13pt; line-height:1.4;">
+    ' . ($score >= 2
+    ? '• <b>พบความเสี่ยงทางโภชนาการ</b><br>
+           • ส่งประเมินภาวะโภชนาการเชิงลึก (NAF)<br>
+           • ปรึกษานักกำหนดอาหาร / ทีมโภชนบำบัด'
+    : '• <b>ไม่พบความเสี่ยงทางโภชนาการ</b><br>
+           • ให้การดูแลตามแนวทางมาตรฐานโรงพยาบาล<br>
+           • คัดกรองซ้ำทุก 7 วันระหว่างการนอนรักษา'
+) . '
+</td>
+        <td style="font-size:13pt; line-height:1.6;">
+    <span class="checkbox">' . ($score >= 2 ? '&#9745;' : '&#9744;') . '</span>
+    ปรึกษานักกำหนดอาหาร (Consult Dietitian)<br>
+
+    <span class="checkbox">' . ($score < 2 ? '&#9745;' : '&#9744;') . '</span>
+    เฝ้าระวังและติดตามอาการ (Monitoring)<br>
+
+    <span class="checkbox">&#9744;</span>
+    อื่น ๆ ................................................................
+</td>
+
     </tr>
-    <tr>
-        <td colspan="2" style="height: 40px;"><b>หมายเหตุ (Notes):</b> ' . ($data['notes'] ?: '-') . '</td>
-    </tr>
+   <tr>
+    <td colspan="2" style="height:50px; font-size:13pt;">
+        <b>หมายเหตุ / ข้อสังเกตเพิ่มเติม:</b><br>
+        ' . ($data['notes'] ?: '') . '
+    </td>
+</tr>
+
 </table>
 
 <br>
