@@ -273,7 +273,9 @@ try {
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
-                            <input type="text" class="form-control text-center" value="<?= isset($data['screening_datetime']) ? date('d/m/Y', strtotime($data['screening_datetime'])) : '-' ?>" disabled>
+                            <input type="text" class="form-control text-center"
+                                value="<?= isset($data['screening_datetime']) ? date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) : '-' ?>"
+                                disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
