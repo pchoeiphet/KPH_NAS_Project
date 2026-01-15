@@ -98,10 +98,21 @@ if ($latest_screening) {
         $cur_title = 'มีความเสี่ยง (At Risk)';
         $cur_desc = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
         $cur_color_class = 'text-danger';
+
         if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_screening['assessment_doc_no'])) {
+            // กรณีประเมินไปแล้ว
             $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
         } else {
-            $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;"><h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6><p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p><button class="btn btn-sm btn-danger px-3 disabled" style="opacity: 0.7; cursor: not-allowed;"><i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF</button></div>';
+            // [แก้ไขจุดนี้] กรณีต้องประเมินต่อ -> เปลี่ยนปุ่ม disabled เป็นลิงก์ <a> ที่ส่งค่า HN, AN และเลขที่ SPENT อ้างอิง
+            $link_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $latest_screening['doc_no'];
+
+            $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
+                <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
+                <p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p>
+                <a href="' . $link_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
+                    <i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF
+                </a>
+            </div>';
         }
     } else {
         $cur_title = 'ภาวะโภชนาการปกติ (Normal)';
@@ -268,9 +279,11 @@ if ($latest_screening) {
                             </div>
                         </div>
                     </a>
-                    <a href="#" class="dropdown-item py-3 px-3 menu-action-link disabled" onclick="return false;">
+                    <a href="nutrition_alert_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>&ref_screening=<?= $latest_screening['doc_no'] ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
-                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;"><i class="fa-solid fa-clipboard-user fa-lg"></i></div>
+                            <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
+                                <i class="fa-solid fa-clipboard-user fa-lg"></i>
+                            </div>
                             <div class="w-100">
                                 <span class="font-weight-bold text-dark title-text" style="font-size: 1rem;">แบบประเมินภาวะโภชนาการ</span>
                                 <small class="text-muted sub-text d-block mb-1">Nutrition Alert Form (NAF)</small>
