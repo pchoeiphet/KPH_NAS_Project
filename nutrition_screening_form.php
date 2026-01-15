@@ -290,7 +290,7 @@ try {
                 <div class="card-body p-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis)</label>
+                        <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
                         <input type="text" class="form-control" id="diagnosis" name="initial_diagnosis" placeholder="ระบุการวินิจฉัยโรค..." required>
                     </div>
 

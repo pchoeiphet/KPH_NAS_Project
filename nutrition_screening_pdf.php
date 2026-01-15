@@ -215,10 +215,10 @@ $html = '
 
 <table class="table-content" style="margin-top: 6px;">
     <tr class="text-center bold bg-light">
-        <td width="20%">น้ำหนักปัจจุบัน (kg)</td>
-        <td width="20%">น้ำหนักปกติ (kg)</td>
-        <td width="20%">ส่วนสูง (cm)</td>
-        <td width="20%">BMI (kg/m²)</td>
+        <td width="20%">น้ำหนักปัจจุบัน (กก.)</td>
+        <td width="20%">น้ำหนักปกติ (กก.)</td>
+        <td width="20%">ส่วนสูง (ซม.)</td>
+        <td width="20%">BMI (กก./ม²)</td>
         <td width="20%">ประเมินน้ำหนักโดย</td>
     </tr>
     <tr class="text-center" style="font-size: 15pt;">
