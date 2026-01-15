@@ -37,7 +37,7 @@ try {
     $age = '-';
     if (!empty($data['patients_dob'])) {
         $diff = (new DateTime())->diff(new DateTime($data['patients_dob']));
-        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน';
+        $age = $diff->y . ' ปี ' . $diff->m . ' เดือน' . ' ' . $diff->d . ' วัน';
     }
 
     $gender = '-';
@@ -219,7 +219,7 @@ $html = '
         <td width="20%">น้ำหนักปกติ (kg)</td>
         <td width="20%">ส่วนสูง (cm)</td>
         <td width="20%">BMI (kg/m²)</td>
-        <td width="20%">วิธีการชั่ง/วัด</td>
+        <td width="20%">ประเมินน้ำหนักโดย</td>
     </tr>
     <tr class="text-center" style="font-size: 15pt;">
         <td class="bold">' . ($data['present_weight'] ?? '-') . '</td>
@@ -313,7 +313,7 @@ $html = '
 </td>
         <td style="font-size:13pt; line-height:1.6;">
     <span class="checkbox">' . ($score >= 2 ? '&#9745;' : '&#9744;') . '</span>
-    ปรึกษานักกำหนดอาหาร (Consult Dietitian)<br>
+    ปรึกษานักกำหนดอาหาร / ทีมโภชนบำบัด (Consult Dietitian)<br>
 
     <span class="checkbox">' . ($score < 2 ? '&#9745;' : '&#9744;') . '</span>
     เฝ้าระวังและติดตามอาการ (Monitoring)<br>
