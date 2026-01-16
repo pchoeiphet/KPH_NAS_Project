@@ -415,7 +415,7 @@ if ($latest_screening) {
                                                     <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
                                                 </td>
                                                 <td class="text-center align-middle">
-                                                    <a href="export_pdf_spent.php?doc_no=<?= $row['doc_no'] ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                    <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no'] ?? '') ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
                                                         <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                     </a>
                                                 </td>
