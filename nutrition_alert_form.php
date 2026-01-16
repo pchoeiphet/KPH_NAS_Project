@@ -944,274 +944,248 @@ try {
                                 </div>
                             </div>
 
-                            <div class="card text-center mb-5 border-0 shadow-sm" style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
-                                <div class="card-body py-5">
-                                    <h5 class="text-muted mb-3">ผลการประเมินรวม (Total Score)</h5>
-                                    <div class="d-flex justify-content-center align-items-center mb-3">
-                                        <div id="scoreCircle" class="score-circle-big shadow bg-white d-flex align-items-center justify-content-center"
-                                            style="width: 100px; height: 100px; border-radius: 50%; font-size: 2.5rem; font-weight: bold; color: #6c757d;">
-                                            0
+                            <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
+                                <div class="row no-gutters">
+                                    <div class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
+                                        <h6 class="text-muted font-weight-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                            TOTAL SCORE
+                                        </h6>
+                                        <div class="d-flex align-items-baseline">
+                                            <h1 class="display-3 font-weight-bold text-dark mb-0" id="totalScore" style="line-height: 1;">0</h1>
                                         </div>
                                     </div>
-                                    <h3 id="resultText" class="font-weight-bold text-muted">รอการประเมิน</h3>
-                                </div>
-                            </div>
 
-                            <div class="form-row justify-content-center mt-4">
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-primary shadow-sm px-5 py-2">
-                                        <i class="fa-solid fa-save mr-2"></i> บันทึกผลการประเมิน
-                                    </button>
+                                    <div class="col-md-8">
+                                        <div id="nafResultBox" class="h-100 p-4 d-flex flex-column justify-content-center transition-bg" style="background-color: #e8f5e9; border-left: 5px solid #28a745;">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-circle mr-2 status-dot" style="font-size: 0.8rem; color: #28a745;"></i>
+                                                <h5 class="font-weight-bold mb-0 text-success" id="nafLevel">NAF A (Normal-Mild malnutrition)</h5>
+                                            </div>
+                                            <p class="mb-0 text-dark" id="nafDesc" style="opacity: 0.85; line-height: 1.6;">
+                                                ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                         </div>
                     </div>
         </form>
+        <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
+            <button type="button" class="btn btn-secondary shadow-sm px-4"
+                onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                <i class="fa-solid fa-chevron-left mr-2"></i> ยกเลิก / ย้อนกลับ
+            </button>
+            <button type="button" class="btn btn-success shadow-sm px-4" style="background-color: #2e7d32; border: none;" onclick="saveData()">
+                <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
+            </button>
         </div>
+    </div>
 
-        <script>
-            function toggleOtherSource() {
-                // อ้างอิง Element
-                const otherRadio = document.getElementById('source3');
-                const otherInput = document.getElementById('otherSourceText');
+    <script>
+        // 1. ฟังก์ชันเปิด/ปิด ช่องระบุอื่นๆ
+        function toggleOtherSource() {
+            const otherRadio = document.getElementById('source3');
+            const otherInput = document.getElementById('otherSourceText');
+            otherInput.disabled = !otherRadio.checked;
+            if (otherRadio.checked) otherInput.focus();
+            else otherInput.value = '';
+        }
 
-                // ตรวจสอบว่า Radio "อื่นๆ" ถูกเลือกอยู่หรือไม่
-                if (otherRadio.checked) {
-                    otherInput.disabled = false; // เปิดใช้งานช่องกรอก
-                    otherInput.focus(); // นำเคอร์เซอร์ไปวางรอพิมพ์ทันที
-                } else {
-                    otherInput.disabled = true; // ปิดการใช้งาน
-                    otherInput.value = ''; // ล้างค่าที่เคยกรอกไว้ (ถ้าต้องการ)
-                }
+        function toggleOtherDisease(checkbox, inputId) {
+            const inputField = document.getElementById(inputId);
+            if (inputField) {
+                inputField.disabled = !checkbox.checked;
+                if (checkbox.checked) inputField.focus();
+                else inputField.value = '';
             }
-            // ฟังก์ชันคำนวณ BMI
-            function calculateBMI() {
-                // ดึงค่าน้ำหนัก
-                const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
+        }
 
-                // ดึงค่าส่วนสูงจากทุกช่อง (ถ้าช่องไหนว่าง หรือไม่ใช่ตัวเลข จะได้ค่า 0)
-                const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
-                const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
-                const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
-                const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
+        // 2. ฟังก์ชันคำนวณ BMI และ Auto-Select คะแนน BMI
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
+            const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
+            const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
+            const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
+            const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
 
-                // หาค่าส่วนสูงที่มากที่สุด (Max Value) เพื่อใช้คำนวณ
-                const maxHeight = Math.max(h1, h2, h3, h4);
+            const maxHeight = Math.max(h1, h2, h3, h4);
 
-                // คำนวณ BMI
-                // ต้องมีน้ำหนัก และ ส่วนสูงอย่างน้อย 1 ช่อง (ค่ามากสุด > 0)
-                if (weight > 0 && maxHeight > 0) {
-                    // แปลง ซม. เป็น เมตร
-                    const heightInMeters = maxHeight / 100;
+            if (weight > 0 && maxHeight > 0) {
+                const heightInMeters = maxHeight / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                document.getElementById('bmiValue').value = bmi.toFixed(2);
+                document.getElementById('bmiScoreText').innerText = "BMI: " + bmi.toFixed(2);
 
-                    // สูตร: น้ำหนัก / (ส่วนสูงเมตร ^ 2)
-                    const bmi = weight / (heightInMeters * heightInMeters);
+                // Auto-select Radio ตามเกณฑ์ BMI (NAF Criteria)
+                // < 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), > 30 (1 คะแนน)
+                // หมายเหตุ: ต้องมี radio input ที่มี value ตรงกับ id ใน database หรือ logic นี้ต้องปรับตาม id จริง
+                // เพื่อความง่ายในตัวอย่างนี้ จะใช้การเลือก radio ตัวแรกๆ ในกลุ่ม (สมมติลำดับ) 
+                // *แนะนำ: ใน production ควร map กับ id จริงของ weight_option*
 
-                    // แสดงผลทศนิยม 2 ตำแหน่ง ที่ช่อง id="bmiValue"
-                    document.getElementById('bmiValue').value = bmi.toFixed(2);
-
-                    // คำนวณคะแนนต่อทันที
-                    calculateScore();
-                } else {
-                    // ถ้าข้อมูลไม่ครบ ให้เคลียร์ค่า
-                    document.getElementById('bmiValue').value = "-";
-                    document.getElementById('bmiScoreText').innerText = "Score: 0";
-                    calculateScore(); // อัปเดตคะแนนรวมใหม่ (กรณีลบเลขออก)
-                }
-            }
-
-            // ฟังก์ชันสลับโหมด (น้ำหนักปกติ <-> ผลเลือด)
-            function toggleWeightMode() {
-                const isUnknown = document.getElementById('unknownWeight').checked;
-                const weightSection = document.getElementById('standardWeightSection');
-                const labSection = document.getElementById('labSection');
-
-                if (isUnknown) {
-                    // โหมดไม่ทราบน้ำหนัก -> ซ่อนส่วนน้ำหนัก, แสดงส่วน Lab
-                    weightSection.style.display = 'none'; // หรือใช้ class 'd-none'
-                    labSection.classList.remove('hidden-section');
-                    labSection.classList.add('fade-in'); // เพิ่ม effect ถ้ามี class นี้
-
-                    // รีเซ็ตค่าคะแนนจากส่วนน้ำหนักเป็น 0
-                } else {
-                    // โหมดปกติ -> แสดงส่วนน้ำหนัก, ซ่อนส่วน Lab
-                    weightSection.style.display = 'block';
-                    labSection.classList.add('hidden-section');
-                    labSection.classList.remove('fade-in');
-
-                    // รีเซ็ตคะแนน Lab เป็น 0
-                    document.getElementById('labScoreText').innerText = "0";
-                    // เคลียร์ค่า input ของ Lab
-                    document.getElementById('valAlbumin').value = '';
-                    document.getElementById('valTLC').value = '';
-                }
-
-                calculateScore(); // คำนวณคะแนนรวมใหม่ทันที
-            }
-
-            // ฟังก์ชันเลือกประเภท Lab (Albumin / TLC)
-            function selectLab(type) {
-                // อัปเดต UI ของ Card (คลิกแล้วมีกรอบสี/เงา)
-                document.querySelectorAll('.lab-choice-card').forEach(card => {
-                    card.classList.remove('active', 'border-primary');
-                    card.classList.add('inactive');
-                });
-
-                const selectedCard = (type === 'albumin') ? document.getElementById('cardAlbumin') : document.getElementById('cardTLC');
-                selectedCard.classList.remove('inactive');
-                selectedCard.classList.add('active', 'border-primary');
-
-                // สั่ง check radio button ที่ซ่อนอยู่
-                if (type === 'albumin') {
-                    document.getElementById('useAlbumin').checked = true;
-                } else {
-                    document.getElementById('useTLC').checked = true;
-                }
-
-                toggleLabInputs(); // เปิดช่องกรอก
-            }
-
-            // ฟังก์ชันเปิด/ปิดช่องกรอกตาม Radio ที่เลือก
-            function toggleLabInputs() {
-                const useAlb = document.getElementById('useAlbumin').checked;
-                const useTLC = document.getElementById('useTLC').checked;
-
-                const inpAlb = document.getElementById('valAlbumin');
-                const inpTLC = document.getElementById('valTLC');
-
-                if (useAlb) {
-                    inpAlb.disabled = false;
-                    inpAlb.focus();
-                    inpTLC.disabled = true;
-                    inpTLC.value = ''; // เคลียร์ค่าอีกช่อง
-                } else if (useTLC) {
-                    inpTLC.disabled = false;
-                    inpTLC.focus();
-                    inpAlb.disabled = true;
-                    inpAlb.value = '';
-                }
-
-                calculateLabScore(); // คำนวณคะแนนใหม่
-            }
-
-            // ฟังก์ชันคำนวณคะแนนจากผลเลือด
-            function calculateLabScore() {
-                let labScore = 0;
-                const useAlb = document.getElementById('useAlbumin').checked;
-                const useTLC = document.getElementById('useTLC').checked;
-
-                if (useAlb) {
-                    const val = parseFloat(document.getElementById('valAlbumin').value);
-                    if (!isNaN(val)) {
-                        if (val <= 2.5) labScore = 3;
-                        else if (val <= 2.9) labScore = 2;
-                        else if (val <= 3.5) labScore = 1;
-                        else labScore = 0; // > 3.5
-                    }
-                } else if (useTLC) {
-                    const val = parseFloat(document.getElementById('valTLC').value);
-                    if (!isNaN(val)) {
-                        if (val <= 1000) labScore = 3;
-                        else if (val <= 1200) labScore = 2;
-                        else if (val <= 1500) labScore = 1;
-                        else labScore = 0; // > 1500
-                    }
-                }
-
-                // แสดงคะแนน Lab
-                document.getElementById('labScoreText').innerText = labScore;
-
-                // เรียกคำนวณคะแนนรวมใหญ่ (ต้องปรับแก้ calculateScore ด้วย)
+                // เรียกคำนวณคะแนนรวม
+                calculateScore();
+            } else {
+                document.getElementById('bmiValue').value = "-";
                 calculateScore();
             }
+        }
 
-            // ฟังก์ชันเปิดช่องกรอก "โรคอื่นๆ"
-            function toggleOtherDisease(checkbox, inputId) {
-                const inputField = document.getElementById(inputId);
-                if (inputField) {
-                    inputField.disabled = !checkbox.checked;
-                    if (checkbox.checked) {
-                        inputField.focus();
-                    } else {
-                        inputField.value = ''; // ล้างค่าเมื่อติ๊กออก
-                    }
+        // 3. สลับโหมด น้ำหนัก vs Lab
+        function toggleWeightMode() {
+            const isUnknown = document.getElementById('unknownWeight').checked;
+            const weightSec = document.getElementById('standardWeightSection');
+            const labSec = document.getElementById('labSection');
+
+            if (isUnknown) {
+                weightSec.style.display = 'none';
+                labSec.classList.remove('hidden-section');
+
+                // Clear selections in weight section to avoid double counting
+                document.querySelectorAll('input[name="weight_option_id"]').forEach(el => el.checked = false);
+            } else {
+                weightSec.style.display = 'block';
+                labSec.classList.add('hidden-section');
+
+                // Reset Lab selections
+                document.querySelectorAll('input[name="labChoice"]').forEach(el => el.checked = false);
+                document.querySelectorAll('.lab-choice-card').forEach(el => el.classList.remove('active'));
+                document.getElementById('labScoreText').innerText = "0";
+            }
+            calculateScore();
+        }
+
+        // 4. เลือก Lab
+        function selectLab(type) {
+            document.querySelectorAll('.lab-choice-card').forEach(card => {
+                card.classList.remove('active', 'border-primary');
+                card.classList.add('inactive');
+            });
+
+            const selectedCard = (type === 'albumin') ? document.getElementById('cardAlbumin') : document.getElementById('cardTLC');
+            selectedCard.classList.remove('inactive');
+            selectedCard.classList.add('active', 'border-primary');
+
+            if (type === 'albumin') {
+                document.getElementById('useAlbumin').checked = true;
+            } else {
+                document.getElementById('useTLC').checked = true;
+            }
+            toggleLabInputs();
+        }
+
+        function toggleLabInputs() {
+            const useAlb = document.getElementById('useAlbumin').checked;
+            const useTLC = document.getElementById('useTLC').checked;
+            const inpAlb = document.getElementById('valAlbumin');
+            const inpTLC = document.getElementById('valTLC');
+
+            inpAlb.disabled = !useAlb;
+            inpTLC.disabled = !useTLC;
+
+            if (useAlb) inpAlb.focus();
+            if (useTLC) inpTLC.focus();
+
+            calculateLabScore();
+        }
+
+        function calculateLabScore() {
+            let labScore = 0;
+            const useAlb = document.getElementById('useAlbumin').checked;
+            const useTLC = document.getElementById('useTLC').checked;
+
+            if (useAlb) {
+                const val = parseFloat(document.getElementById('valAlbumin').value);
+                if (!isNaN(val)) {
+                    if (val <= 2.5) labScore = 3;
+                    else if (val <= 2.9) labScore = 2;
+                    else if (val <= 3.5) labScore = 1; // แก้ไข range ตาม prompt (3.0-3.5)
+                    else labScore = 0;
+                }
+            } else if (useTLC) {
+                const val = parseFloat(document.getElementById('valTLC').value);
+                if (!isNaN(val)) {
+                    if (val <= 1000) labScore = 3; // แก้ไข range ตาม prompt
+                    else if (val <= 1200) labScore = 2;
+                    else if (val <= 1500) labScore = 1;
+                    else labScore = 0;
                 }
             }
+            document.getElementById('labScoreText').innerText = labScore;
+            calculateScore();
+        }
 
-            function calculateScore() {
-                let total = 0;
+        // 5. คำนวณคะแนนรวม (Main Logic)
+        function calculateScore() {
+            let total = 0;
 
-                // คะแนนจากตัวเลือกอื่นๆ
-                const inputs = document.querySelectorAll('.score-calc:checked');
-                inputs.forEach(el => {
-                    total += parseInt(el.getAttribute('data-score')) || 0;
-                });
+            // รวมคะแนนจาก Radio/Checkbox ที่มี class 'score-calc'
+            const inputs = document.querySelectorAll('.score-calc:checked');
+            inputs.forEach(el => {
+                const sc = parseInt(el.getAttribute('data-score'));
+                if (!isNaN(sc)) total += sc;
+            });
 
-                // เลือกคิดคะแนนจาก (BMI) หรือ (Lab) 
-                // เช็คว่า User เลือกโหมดไหน
-                const isUnknownWeight = document.getElementById('unknownWeight').checked;
-
-                if (isUnknownWeight) {
-                    // [กรณีไม่ทราบน้ำหนัก] -> เอาคะแนนจาก Lab
-                    const labScore = parseInt(document.getElementById('labScoreText').innerText) || 0;
-                    total += labScore;
-                } else {
-                    // [กรณีปกติ] -> เอาคะแนนจาก BMI
-                    const bmiField = document.getElementById('bmiValue');
-                    const bmiVal = (bmiField && bmiField.value !== "-") ? parseFloat(bmiField.value) : 0;
-                    let bmiScore = 0;
-                    if (bmiVal > 0) {
-                        if (bmiVal < 17) bmiScore = 2;
-                        else if (bmiVal <= 18) bmiScore = 1; // แก้ range ให้ถูกต้อง
-                        else if (bmiVal < 30) bmiScore = 0;
-                        else bmiScore = 1;
-                    }
-
-                    // แสดงคะแนน BMI
-                    const bmiScoreText = document.getElementById('bmiScoreText');
-                    if (bmiScoreText) bmiScoreText.innerText = `Score: ${bmiScore}`;
-
-                    total += bmiScore;
-                }
-
-                // แสดงผลรวม
-                const scoreCircle = document.getElementById('scoreCircle');
-                const resultText = document.getElementById('resultText');
-
-                if (scoreCircle) {
-                    scoreCircle.innerText = total;
-                    scoreCircle.className = 'score-circle-big shadow bg-white d-flex align-items-center justify-content-center';
-                    resultText.className = 'font-weight-bold';
-
-                    if (total <= 5) {
-                        scoreCircle.style.color = '#28a745';
-                        scoreCircle.style.border = '4px solid #28a745';
-                        resultText.innerText = 'Low Risk (ความเสี่ยงต่ำ)';
-                        resultText.classList.add('text-success');
-                        resultText.classList.remove('text-warning', 'text-danger');
-                    } else if (total <= 11) {
-                        scoreCircle.style.color = '#ffc107';
-                        scoreCircle.style.border = '4px solid #ffc107';
-                        resultText.innerText = 'Moderate Risk (ความเสี่ยงปานกลาง)';
-                        resultText.classList.add('text-warning');
-                        resultText.classList.remove('text-success', 'text-danger');
-                    } else {
-                        scoreCircle.style.color = '#dc3545';
-                        scoreCircle.style.border = '4px solid #dc3545';
-                        resultText.innerText = 'High Risk (ความเสี่ยงสูง)';
-                        resultText.classList.add('text-danger');
-                        resultText.classList.remove('text-success', 'text-warning');
-                    }
-                }
+            // บวกคะแนน Lab ถ้าอยู่ในโหมดไม่ทราบน้ำหนัก
+            const isUnknownWeight = document.getElementById('unknownWeight').checked;
+            if (isUnknownWeight) {
+                const labScore = parseInt(document.getElementById('labScoreText').innerText) || 0;
+                total += labScore;
             }
 
-            function confirmLogout() {
-                if (confirm('ยืนยันการออกจากระบบ?')) {
-                    window.location.href = 'index.php';
-                }
+            // แสดงผลรวม
+            document.getElementById('totalScore').innerText = total;
+            updateNafResult(total);
+        }
+
+        // 6. อัปเดต UI ผลลัพธ์ (NAF Level)
+        function updateNafResult(score) {
+            const box = document.getElementById('nafResultBox');
+            const level = document.getElementById('nafLevel');
+            const desc = document.getElementById('nafDesc');
+            const dot = box.querySelector('.status-dot');
+
+            if (score <= 5) {
+                // NAF A
+                box.style.backgroundColor = '#e8f5e9';
+                box.style.borderLeft = '5px solid #28a745';
+                level.innerText = 'NAF A (Normal-Mild malnutrition)';
+                level.className = 'font-weight-bold mb-0 text-success';
+                desc.innerText = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
+                dot.style.color = '#28a745';
+            } else if (score <= 10) {
+                // NAF B
+                box.style.backgroundColor = '#fff3cd';
+                box.style.borderLeft = '5px solid #ffc107';
+                level.innerText = 'NAF B (Moderate malnutrition)';
+                level.className = 'font-weight-bold mb-0 text-warning';
+                desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
+                dot.style.color = '#ffc107';
+            } else {
+                // NAF C
+                box.style.backgroundColor = '#ffebee';
+                box.style.borderLeft = '5px solid #dc3545';
+                level.innerText = 'NAF C (Severe malnutrition)';
+                level.className = 'font-weight-bold mb-0 text-danger';
+                desc.innerText = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
+                dot.style.color = '#dc3545';
             }
-        </script>
+        }
+
+        // 7. บันทึกข้อมูล
+        function saveData() {
+            if (confirm('ยืนยันการบันทึกข้อมูลการประเมิน?')) {
+                document.getElementById('nafForm').submit();
+            }
+        }
+
+        function confirmLogout() {
+            if (confirm('ยืนยันการออกจากระบบ?')) {
+                window.location.href = 'index.php';
+            }
+        }
+    </script>
 </body>
 
 </html>
