@@ -106,6 +106,12 @@ body {
   vertical-align: middle;
 }
 
+.table td,
+.table th {
+  font-size: 15px; /* ปรับขนาดตรงนี้ได้เลย */
+  vertical-align: middle !important; /* จัดกึ่งกลางแนวตั้ง */
+}
+
 /* Filter Row Styling */
 .filter-row th {
   background-color: #f8f9fa !important;
