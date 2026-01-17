@@ -97,9 +97,7 @@ function thaiDate($datetime)
     return date('d/m/', $time) . $thai_year . ' ' . date('H:i', $time) . ' น.';
 }
 
-// ---------------------------------------------------------
-// Logic Current Status & Reference Finding
-// ---------------------------------------------------------
+// หากมีประวัติ ให้ดึงข้อมูลล่าสุด
 $latest_activity = $history_list[0] ?? null; // กิจกรรมล่าสุด (รวม SPENT/NAF)
 $latest_screening = $spent_list[0] ?? null; // SPENT ล่าสุด (สำหรับดูสถานะปัจจุบัน)
 
@@ -118,7 +116,7 @@ if (!empty($spent_list)) {
     }
 }
 
-// 2. กำหนดเลขเอกสารที่จะส่งไป (Priority: ใบเสี่ยงล่าสุด -> ใบล่าสุดธรรมดา -> ว่าง)
+// กำหนดเลขเอกสารที่จะส่งไป
 if ($latest_risky_screening) {
     $target_ref_doc = $latest_risky_screening['doc_no'];
 } elseif ($latest_screening) {
@@ -274,6 +272,15 @@ if ($latest_activity) {
                             <a class="dropdown-item py-2 rounded" href="#">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
                                         style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider m-0"></div>
+
+                        <div class="p-2">
+                            <a class="dropdown-item py-2 rounded" href="#">
+                                <i class="fa-solid fa-file-signature mr-2 text-warning"
+                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
                             </a>
                         </div>
 
@@ -451,7 +458,7 @@ if ($latest_activity) {
                                                 $status_text = $row['screening_status'] ?? '-';
                                                 if (strpos($status_text, 'ปกติ') !== false) $status_badge = 'badge-success';
                                                 elseif (strpos($status_text, 'เสี่ยง') !== false) $status_badge = 'badge-danger';
-                                                elseif (strpos($status_text, 'รอทำ') !== false) $status_badge = 'badge-warning';
+                                                elseif (strpos($status_text, 'รอทำแบบคัดกรอง') !== false) $status_badge = 'badge-warning';
                                                 elseif (strpos($status_text, 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
 
                                                 $naf_result = '-';
@@ -494,7 +501,7 @@ if ($latest_activity) {
                                                 ?>
                                                 <tr data-type="NAF" style="background-color: #f9fbfd;">
                                                     <td>
-                                                        <a href="#" class="doc-link">
+                                                        <a href="print_naf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="doc-link">
                                                             <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
                                                                 แบบประเมินภาวะโภชนาการ (NAF)
                                                             </div>
@@ -512,8 +519,8 @@ if ($latest_activity) {
                                                         <span class="badge badge-success font-weight-normal px-2 py-1">บันทึกสมบูรณ์</span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="#" class="btn btn-sm btn-outline-secondary shadow-sm border-0 disabled" title="ดูรายละเอียด">
-                                                            <i class="fa-solid fa-file-lines fa-lg"></i>
+                                                        <a href="print_naf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                            <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -522,7 +529,9 @@ if ($latest_activity) {
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="10" class="text-center py-5 text-muted"><i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i><br>ยังไม่มีประวัติการประเมิน</td>
+                                            <td colspan="10" class="text-center py-5 text-muted">
+                                                <i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i><br>ยังไม่มีประวัติการประเมิน
+                                            </td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>

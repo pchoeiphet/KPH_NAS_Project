@@ -128,12 +128,10 @@ $html = '
 
 <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-        <!-- Logo -->
         <td width="15%" style="text-align:left; vertical-align:middle;">
             <img src="img/logo_kph.jpg" style="height:75px;">
         </td>
 
-        <!-- Title -->
         <td width="55%" style="vertical-align:middle; padding-left:10px;">
             <div style="font-size:20pt; font-weight:bold; line-height:1.1;">
                 แบบคัดกรองภาวะโภชนาการ
@@ -147,13 +145,12 @@ $html = '
             <div style="margin-top:6px; font-size:14pt;">
                 <b>คัดกรองครั้งที่:</b>
                 <span style="font-size:16pt;">
-                    ' . ($data['screening_round'] ?? '1') . '
+                    ' . ($data['screening_seq'] ?? '1') . '
                 </span>
             </div>
         </td>
 
-        <!-- Addressograph -->
-<td width="50%" style="vertical-align:top;">
+        <td width="50%" style="vertical-align:top;">
     <table width="100%" style="border:2px solid #000; font-size:12.5pt; line-height:1.3;">
         <tr>
             <td colspan="2" class="bold"
@@ -334,7 +331,6 @@ $html = '
 
 <br>
 
-<!-- ส่วนลงชื่อผู้คัดกรอง -->
 <table width="100%" style="margin-top: 30px;">
     <tr>
         <td width="50%">
@@ -363,3 +359,4 @@ $html = '
 
 $mpdf->WriteHTML($html);
 $mpdf->Output('Nutrition_Screening_Form.pdf', 'I');
+?>
