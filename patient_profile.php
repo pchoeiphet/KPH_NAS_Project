@@ -443,83 +443,95 @@ if ($latest_activity) {
                                     <?php if (count($history_list) > 0): ?>
                                         <?php foreach ($history_list as $row): ?>
 
-                                            <?php if ($row['form_type'] == 'SPENT'): ?>
-                                                <?php
+                                            <?php
+                                            // --- กรณี SPENT (สีน้ำเงิน) ---
+                                            if ($row['form_type'] == 'SPENT'):
                                                 $score = ($row['q1_weight_loss'] + $row['q2_eat_less'] + $row['q3_bmi_abnormal'] + $row['q4_critical']);
 
-                                                $spent_res_color = 'text-muted';
-                                                if ($row['screening_result'] == 'มีความเสี่ยง') {
-                                                    $spent_res_color = 'text-danger font-weight-bold';
-                                                } elseif ($row['screening_result'] == 'ปกติ') {
-                                                    $spent_res_color = 'text-success font-weight-bold';
-                                                }
+                                                // สีผลลัพธ์
+                                                $res_class = 'text-muted';
+                                                if ($row['screening_result'] == 'มีความเสี่ยง') $res_class = 'text-danger font-weight-bold';
+                                                elseif ($row['screening_result'] == 'ปกติ') $res_class = 'text-success font-weight-bold';
 
+                                                // สถานะ Badge
                                                 $status_badge = 'badge-secondary';
-                                                $status_text = $row['screening_status'] ?? '-';
-                                                if (strpos($status_text, 'ปกติ') !== false) $status_badge = 'badge-success';
-                                                elseif (strpos($status_text, 'เสี่ยง') !== false) $status_badge = 'badge-danger';
-                                                elseif (strpos($status_text, 'รอทำแบบคัดกรอง') !== false) $status_badge = 'badge-warning';
-                                                elseif (strpos($status_text, 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
-
-                                                $naf_result = '-';
-                                                if (!empty($row['assessment_doc_no'])) {
-                                                    $naf_result = '<span class="text-info"><small>ประเมินแล้ว</small></span>';
-                                                }
-                                                ?>
+                                                if (strpos($row['screening_status'] ?? '', 'ปกติ') !== false) $status_badge = 'badge-success';
+                                                elseif (strpos($row['screening_status'] ?? '', 'เสี่ยง') !== false) $status_badge = 'badge-danger';
+                                                elseif (strpos($row['screening_status'] ?? '', 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
+                                            ?>
                                                 <tr data-type="SPENT">
                                                     <td>
-                                                        <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
-                                                            <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
-                                                                แบบคัดกรองภาวะโภชนาการ (SPENT)
+                                                        <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fa-solid fa-file-medical fa-lg mr-2 icon-spent"></i>
+                                                                <div>
+                                                                    <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">แบบคัดกรองภาวะโภชนาการ (SPENT)</span>
+                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                                </div>
                                                             </div>
                                                         </a>
-                                                        <small class="text-muted d-block mt-1">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
                                                     </td>
-                                                    <td class="text-center align-middle"><span class="badge badge-light border text-primary px-2">SPENT</span></td>
-                                                    <td class="text-center align-middle"><?= $row['screening_seq'] ?></td>
+                                                    <td class="text-center align-middle">
+                                                        <span class="badge badge-pill badge-spent px-3 py-1">SPENT</span>
+                                                    </td>
+                                                    <td class="text-center align-middle text-muted"><?= $row['screening_seq'] ?></td>
                                                     <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
-                                                    <td class="text-center align-middle <?= $spent_res_color ?>"><?= $row['screening_result'] ?></td>
-                                                    <td class="text-center align-middle text-muted"><?= $naf_result ?></td>
+                                                    <td class="text-center align-middle <?= $res_class ?>"><?= $row['screening_result'] ?></td>
+                                                    <td class="text-center align-middle text-muted">-</td>
                                                     <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
                                                     <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
                                                     <td class="text-center align-middle">
-                                                        <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
+                                                        <span class="badge <?= $status_badge ?> font-weight-normal px-2"><?= $row['screening_status'] ?></span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                        <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
                                                 </tr>
 
-                                            <?php else: ?>
-                                                <?php
-                                                $naf_color = 'text-dark';
-                                                if ($row['naf_level'] == 'NAF C') $naf_color = 'text-danger font-weight-bold';
-                                                elseif ($row['naf_level'] == 'NAF B') $naf_color = 'text-warning font-weight-bold';
-                                                elseif ($row['naf_level'] == 'NAF A') $naf_color = 'text-success font-weight-bold';
-                                                ?>
-                                                <tr data-type="NAF" style="background-color: #f9fbfd;">
+                                            <?php
+                                            // --- กรณี NAF (สีเขียว) ---
+                                            elseif ($row['form_type'] == 'NAF'):
+                                                $score = $row['total_score'];
+                                                $naf_level = $row['naf_level']; // e.g., "NAF A", "NAF B"
+
+                                                // สีผลลัพธ์ NAF (Severity Colors)
+                                                $naf_res_html = '<span class="text-muted">-</span>';
+                                                if ($naf_level == 'NAF A') {
+                                                    $naf_res_html = '<span class="text-success font-weight-bold"><i class="fa-solid fa-circle-check mr-1"></i>NAF A</span>';
+                                                } elseif ($naf_level == 'NAF B') {
+                                                    $naf_res_html = '<span class="text-warning font-weight-bold" style="color: #f57f17 !important;"><i class="fa-solid fa-triangle-exclamation mr-1"></i>NAF B</span>';
+                                                } elseif ($naf_level == 'NAF C') {
+                                                    $naf_res_html = '<span class="text-danger font-weight-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>NAF C</span>';
+                                                }
+                                            ?>
+                                                <tr data-type="NAF" style="background-color: #f9fff9;">
                                                     <td>
-                                                        <a href="print_naf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="doc-link">
-                                                            <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
-                                                                แบบประเมินภาวะโภชนาการ (NAF)
+                                                        <a href="nutrition_alert_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="fa-solid fa-clipboard-user fa-lg mr-2 icon-naf"></i>
+                                                                <div>
+                                                                    <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">แบบประเมินภาวะโภชนาการ (NAF)</span>
+                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                                </div>
                                                             </div>
                                                         </a>
-                                                        <small class="text-muted d-block mt-1">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
                                                     </td>
-                                                    <td class="text-center align-middle"><span class="badge badge-warning text-dark border px-2">NAF</span></td>
-                                                    <td class="text-center align-middle"><?= $row['naf_seq'] ?></td>
-                                                    <td class="text-center align-middle font-weight-bold"><?= $row['total_score'] ?></td>
-                                                    <td class="text-center align-middle text-muted">-</td>
-                                                    <td class="text-center align-middle <?= $naf_color ?>"><?= $row['naf_level'] ?></td>
+                                                    <td class="text-center align-middle">
+                                                        <span class="badge badge-pill badge-naf px-3 py-1">NAF</span>
+                                                    </td>
+                                                    <td class="text-center align-middle text-muted"><?= $row['naf_seq'] ?></td>
+                                                    <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
+                                                    <td class="text-center align-middle text-muted"><small>-</small></td>
+                                                    <td class="text-center align-middle"><?= $naf_res_html ?></td>
                                                     <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
                                                     <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
                                                     <td class="text-center align-middle">
-                                                        <span class="badge badge-success font-weight-normal px-2 py-1">บันทึกสมบูรณ์</span>
+                                                        <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="print_naf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                        <a href="nutrition_alert_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
@@ -529,8 +541,9 @@ if ($latest_activity) {
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="10" class="text-center py-5 text-muted">
-                                                <i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i><br>ยังไม่มีประวัติการประเมิน
+                                            <td colspan="10" class="text-center py-4 text-muted">
+                                                <i class="fa-solid fa-folder-open mb-2" style="font-size: 2rem; opacity: 0.5;"></i><br>
+                                                ยังไม่มีประวัติการบันทึกข้อมูล
                                             </td>
                                         </tr>
                                     <?php endif; ?>

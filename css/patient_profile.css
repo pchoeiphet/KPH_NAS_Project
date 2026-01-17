@@ -343,3 +343,25 @@ body {
   /* เปลี่ยนสีเมื่อ hover */
   text-decoration: underline;
 }
+
+/* ป้าย SPENT สีน้ำเงิน (Primary) - สำหรับการคัดกรอง */
+.badge-spent {
+  background-color: #e3f2fd; /* ฟ้าอ่อนมาก */
+  color: #0d47a1; /* น้ำเงินเข้ม */
+  border: 1px solid #bbdefb;
+}
+
+/* ป้าย NAF สีเขียว (Success) - สำหรับการประเมิน */
+.badge-naf {
+  background-color: #e8f5e9; /* เขียวอ่อนมาก */
+  color: #1b5e20; /* เขียวเข้ม */
+  border: 1px solid #c8e6c9;
+}
+
+/* ไอคอนหน้าชื่อฟอร์ม */
+.icon-spent {
+  color: #1976d2;
+}
+.icon-naf {
+  color: #2e7d32;
+}
