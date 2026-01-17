@@ -96,7 +96,7 @@ try {
     // 4. การ Redirect
     if ($redirect_to_naf === 'true' && $total_score >= 2) {
         // ส่งไปหน้าประเมิน NAF (ส่ง doc_no ของ screening ไปอ้างอิงด้วย)
-        header("Location: nutrition_assessment_form.php?hn=$hn&an=$an&ref_screening=$doc_no");
+        header("Location: nutrition_alert_form.php?hn=$hn&an=$an&ref_screening=$doc_no");
     } else {
         // กลับหน้าเดิม หรือหน้า Profile ผู้ป่วย
         header("Location: patient_profile.php?hn=$hn");

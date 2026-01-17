@@ -9,7 +9,7 @@ if (empty($hn)) {
 }
 
 try {
-    // ดึงข้อมูลผู้ป่วย
+    // 1. ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
             patients.patients_hn, 
@@ -55,15 +55,35 @@ try {
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    // ดึงประวัติ (SPENT)
-    $sql_history = "
-        SELECT * FROM nutrition_screening 
-        WHERE nutrition_screening.patients_hn = :hn 
-        ORDER BY nutrition_screening.screening_datetime DESC
+    // 2. ดึงประวัติ (SPENT)
+    $sql_spent = "
+        SELECT *, 'SPENT' as form_type, screening_datetime as action_datetime 
+        FROM nutrition_screening 
+        WHERE patients_hn = :hn 
+        ORDER BY screening_datetime DESC
     ";
-    $stmt_hist = $conn->prepare($sql_history);
-    $stmt_hist->execute([':hn' => $hn]);
-    $history_list = $stmt_hist->fetchAll(PDO::FETCH_ASSOC);
+    $stmt_spent = $conn->prepare($sql_spent);
+    $stmt_spent->execute([':hn' => $hn]);
+    $spent_list = $stmt_spent->fetchAll(PDO::FETCH_ASSOC);
+
+    // 3. ดึงประวัติ (NAF) - เพิ่มส่วนนี้
+    $sql_naf = "
+        SELECT *, 'NAF' as form_type, assessment_datetime as action_datetime 
+        FROM nutrition_assessment 
+        WHERE patients_hn = :hn 
+        ORDER BY assessment_datetime DESC
+    ";
+    $stmt_naf = $conn->prepare($sql_naf);
+    $stmt_naf->execute([':hn' => $hn]);
+    $naf_list = $stmt_naf->fetchAll(PDO::FETCH_ASSOC);
+
+    // 4. รวมข้อมูลและเรียงลำดับตามเวลาล่าสุด
+    $history_list = array_merge($spent_list, $naf_list);
+
+    // เรียงลำดับ array ตาม action_datetime จากมากไปน้อย (ล่าสุดขึ้นก่อน)
+    usort($history_list, function ($a, $b) {
+        return strtotime($b['action_datetime']) - strtotime($a['action_datetime']);
+    });
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -77,8 +97,37 @@ function thaiDate($datetime)
     return date('d/m/', $time) . $thai_year . ' ' . date('H:i', $time) . ' น.';
 }
 
-// Logic Current Status
-$latest_screening = $history_list[0] ?? null;
+// ---------------------------------------------------------
+// Logic Current Status & Reference Finding
+// ---------------------------------------------------------
+$latest_activity = $history_list[0] ?? null; // กิจกรรมล่าสุด (รวม SPENT/NAF)
+$latest_screening = $spent_list[0] ?? null; // SPENT ล่าสุด (สำหรับดูสถานะปัจจุบัน)
+
+// --- [ส่วนที่เพิ่มใหม่] ค้นหาใบ SPENT ที่ "เสี่ยง" (Score >= 2) ล่าสุด ---
+$target_ref_doc = ''; // ตัวแปรสำหรับเก็บเลขที่เอกสารที่จะส่งไปหน้า NAF
+
+// 1. ลองหาใบที่เสี่ยงล่าสุดก่อน
+$latest_risky_screening = null;
+if (!empty($spent_list)) {
+    foreach ($spent_list as $scr) {
+        $sc = ($scr['q1_weight_loss'] + $scr['q2_eat_less'] + $scr['q3_bmi_abnormal'] + $scr['q4_critical']);
+        if ($sc >= 2) {
+            $latest_risky_screening = $scr;
+            break; // เจอใบเสี่ยงที่ใหม่ที่สุดแล้ว หยุดหา
+        }
+    }
+}
+
+// 2. กำหนดเลขเอกสารที่จะส่งไป (Priority: ใบเสี่ยงล่าสุด -> ใบล่าสุดธรรมดา -> ว่าง)
+if ($latest_risky_screening) {
+    $target_ref_doc = $latest_risky_screening['doc_no'];
+} elseif ($latest_screening) {
+    $target_ref_doc = $latest_screening['doc_no'];
+}
+// ---------------------------------------------------------
+
+
+// ส่วนแสดงผล Status Card (เหมือนเดิม แต่ปรับปรุงนิดหน่อย)
 $cur_title = 'ยังไม่มีข้อมูลการคัดกรอง';
 $cur_desc = 'กรุณาทำแบบคัดกรอง SPENT เป็นครั้งแรก';
 $cur_score = '-';
@@ -87,40 +136,64 @@ $cur_assessor = '-';
 $cur_color_class = 'text-muted';
 $next_action_html = '<div class="alert alert-secondary mb-0 p-2 text-center" style="font-size: 0.9rem;"><i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบคัดกรอง SPENT</div>';
 
-if ($latest_screening) {
-    $cur_score_val = ($latest_screening['q1_weight_loss'] + $latest_screening['q2_eat_less'] + $latest_screening['q3_bmi_abnormal'] + $latest_screening['q4_critical']);
-    $cur_score = $cur_score_val;
-    $cur_date = thaiDate($latest_screening['screening_datetime']);
-    $cur_assessor = $latest_screening['assessor_name'];
-    $cur_status_db = $latest_screening['screening_status'] ?? '';
+if ($latest_activity) {
+    $cur_date = thaiDate($latest_activity['action_datetime']);
+    $cur_assessor = $latest_activity['assessor_name'];
 
-    if ($cur_score_val >= 2) {
-        $cur_title = 'มีความเสี่ยง (At Risk)';
-        $cur_desc = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
-        $cur_color_class = 'text-danger';
+    // กรณีล่าสุดเป็น SPENT
+    if ($latest_activity['form_type'] == 'SPENT') {
+        $cur_score_val = ($latest_activity['q1_weight_loss'] + $latest_activity['q2_eat_less'] + $latest_activity['q3_bmi_abnormal'] + $latest_activity['q4_critical']);
+        $cur_score = $cur_score_val;
+        $cur_status_db = $latest_activity['screening_status'] ?? '';
 
-        if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_screening['assessment_doc_no'])) {
-            // กรณีประเมินไปแล้ว
-            $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
+        if ($cur_score_val >= 2) {
+            $cur_title = 'มีความเสี่ยง (At Risk)';
+            $cur_desc = 'ผู้ป่วยมีคะแนน SPENT ≥ 2 ควรได้รับการประเมิน NAF';
+            $cur_color_class = 'text-danger';
+
+            if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_activity['assessment_doc_no'])) {
+                $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
+            } else {
+                // ใช้ $target_ref_doc ที่เราหามา
+                $link_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $target_ref_doc;
+
+                $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
+                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
+                    <p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p>
+                    <a href="' . $link_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
+                        <i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF
+                    </a>
+                </div>';
+            }
         } else {
-            // [แก้ไขจุดนี้] กรณีต้องประเมินต่อ -> เปลี่ยนปุ่ม disabled เป็นลิงก์ <a> ที่ส่งค่า HN, AN และเลขที่ SPENT อ้างอิง
-            $link_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $latest_screening['doc_no'];
-
-            $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
-                <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
-                <p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p>
-                <a href="' . $link_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
-                    <i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF
-                </a>
-            </div>';
+            $cur_title = 'ภาวะโภชนาการปกติ (Normal)';
+            $cur_desc = 'ไม่พบความเสี่ยงในขณะนี้';
+            $cur_color_class = 'text-success';
+            $next_rescreen_ts = strtotime($latest_activity['action_datetime']) + (7 * 24 * 60 * 60);
+            $next_rescreen_date = date('d/m/', $next_rescreen_ts) . (date('Y', $next_rescreen_ts) + 543);
+            $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6><small class="text-dark">ควรทำการคัดกรองซ้ำในอีก 7 วัน</small><br><strong class="text-success" style="font-size: 0.9rem;">(วันที่ ' . $next_rescreen_date . ')</strong></div>';
         }
-    } else {
-        $cur_title = 'ภาวะโภชนาการปกติ (Normal)';
-        $cur_desc = 'ไม่พบความเสี่ยงในขณะนี้';
-        $cur_color_class = 'text-success';
-        $next_rescreen_ts = strtotime($latest_screening['screening_datetime']) + (7 * 24 * 60 * 60);
-        $next_rescreen_date = date('d/m/', $next_rescreen_ts) . (date('Y', $next_rescreen_ts) + 543);
-        $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6><small class="text-dark">ควรทำการคัดกรองซ้ำในอีก 7 วัน</small><br><strong class="text-success" style="font-size: 0.9rem;">(วันที่ ' . $next_rescreen_date . ')</strong></div>';
+    }
+    // กรณีล่าสุดเป็น NAF
+    elseif ($latest_activity['form_type'] == 'NAF') {
+        $cur_score = $latest_activity['total_score'];
+        $naf_level = $latest_activity['naf_level'];
+        if ($naf_level == 'NAF C') {
+            $cur_title = 'NAF C: Severe Malnutrition';
+            $cur_desc = 'ภาวะทุพโภชนาการระดับรุนแรง (Severe Malnutrition)';
+            $cur_color_class = 'text-danger';
+            $next_action_html = '<div class="alert alert-danger mb-0 p-3" style="border-left: 4px solid #dc3545; background-color: #ffebee;"><h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-user-doctor mr-2"></i>การจัดการเร่งด่วน</h6><small class="text-dark">แจ้งแพทย์/นักโภชนาการเพื่อดูแลภายใน 24 ชม.</small></div>';
+        } elseif ($naf_level == 'NAF B') {
+            $cur_title = 'NAF B: Moderate Malnutrition';
+            $cur_desc = 'ภาวะทุพโภชนาการระดับปานกลาง (Moderate Malnutrition)';
+            $cur_color_class = 'text-warning';
+            $next_action_html = '<div class="alert alert-warning mb-0 p-3" style="border-left: 4px solid #ffc107; background-color: #fff3cd;"><h6 class="font-weight-bold mb-1 text-dark"><i class="fa-solid fa-user-nurse mr-2"></i>การจัดการ</h6><small class="text-dark">แจ้งแพทย์/นักโภชนาการเพื่อดูแลภายใน 3 วัน</small></div>';
+        } else {
+            $cur_title = 'NAF A: Normal-Mild Malnutrition';
+            $cur_desc = 'ภาวะโภชนาการปกติ หรือเสี่ยงต่ำ (Normal/Mild)';
+            $cur_color_class = 'text-success';
+            $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำ</h6><small class="text-dark">ประเมินซ้ำตามระยะเวลาที่กำหนด (7 วัน)</small></div>';
+        }
     }
 }
 ?>
@@ -207,15 +280,6 @@ if ($latest_screening) {
                         <div class="dropdown-divider m-0"></div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <i class="fa-solid fa-file-signature mr-2 text-warning"
-                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
-                            </a>
-                        </div>
-
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
                             <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
                                 <i class="fa-solid fa-right-from-bracket mr-2"
                                     style="width:20px; text-align:center;"></i>
@@ -279,7 +343,7 @@ if ($latest_screening) {
                             </div>
                         </div>
                     </a>
-                    <a href="nutrition_alert_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>&ref_screening=<?= $latest_screening['doc_no'] ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_alert_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>&ref_screening=<?= $latest_screening['doc_no'] ?? '' ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
                                 <i class="fa-solid fa-clipboard-user fa-lg"></i>
@@ -371,55 +435,90 @@ if ($latest_screening) {
                                 <tbody id="historyTableBody">
                                     <?php if (count($history_list) > 0): ?>
                                         <?php foreach ($history_list as $row): ?>
-                                            <?php
-                                            $score = ($row['q1_weight_loss'] + $row['q2_eat_less'] + $row['q3_bmi_abnormal'] + $row['q4_critical']);
 
-                                            $spent_res_color = 'text-muted';
-                                            if ($row['screening_result'] == 'มีความเสี่ยง') {
-                                                $spent_res_color = 'text-danger font-weight-bold';
-                                            } elseif ($row['screening_result'] == 'ปกติ') {
-                                                $spent_res_color = 'text-success font-weight-bold';
-                                            }
+                                            <?php if ($row['form_type'] == 'SPENT'): ?>
+                                                <?php
+                                                $score = ($row['q1_weight_loss'] + $row['q2_eat_less'] + $row['q3_bmi_abnormal'] + $row['q4_critical']);
 
-                                            $status_badge = 'badge-secondary';
-                                            $status_text = $row['screening_status'] ?? '-';
-                                            if (strpos($status_text, 'ปกติ') !== false) $status_badge = 'badge-success';
-                                            elseif (strpos($status_text, 'เสี่ยง') !== false) $status_badge = 'badge-danger';
-                                            elseif (strpos($status_text, 'รอทำ') !== false) $status_badge = 'badge-warning';
-                                            elseif (strpos($status_text, 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
+                                                $spent_res_color = 'text-muted';
+                                                if ($row['screening_result'] == 'มีความเสี่ยง') {
+                                                    $spent_res_color = 'text-danger font-weight-bold';
+                                                } elseif ($row['screening_result'] == 'ปกติ') {
+                                                    $spent_res_color = 'text-success font-weight-bold';
+                                                }
 
-                                            $naf_result = '-';
-                                            if (!empty($row['assessment_doc_no'])) {
-                                                $naf_result = '<span class="text-info">ประเมินแล้ว</span>';
-                                            }
-                                            ?>
-                                            <tr data-type="SPENT">
-                                                <td>
-                                                    <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
-                                                        <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
-                                                            แบบคัดกรองภาวะโภชนาการ (SPENT)
-                                                        </div>
-                                                    </a>
-                                                    <small class="text-muted d-block mt-1">
-                                                        เลขที่เอกสาร: <?= $row['doc_no'] ?>
-                                                    </small>
-                                                </td>
-                                                <td class="text-center align-middle"><span class="badge badge-light border text-primary px-2">SPENT</span></td>
-                                                <td class="text-center align-middle"><?= $row['screening_seq'] ?></td>
-                                                <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
-                                                <td class="text-center align-middle <?= $spent_res_color ?>"><?= $row['screening_result'] ?></td>
-                                                <td class="text-center align-middle text-muted"><?= $naf_result ?></td>
-                                                <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
-                                                <td class="align-middle"><small><?= thaiDate($row['screening_datetime']) ?></small></td>
-                                                <td class="text-center align-middle">
-                                                    <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
-                                                </td>
-                                                <td class="text-center align-middle">
-                                                    <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no'] ?? '') ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
-                                                        <i class="fa-solid fa-file-pdf fa-lg"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                                $status_badge = 'badge-secondary';
+                                                $status_text = $row['screening_status'] ?? '-';
+                                                if (strpos($status_text, 'ปกติ') !== false) $status_badge = 'badge-success';
+                                                elseif (strpos($status_text, 'เสี่ยง') !== false) $status_badge = 'badge-danger';
+                                                elseif (strpos($status_text, 'รอทำ') !== false) $status_badge = 'badge-warning';
+                                                elseif (strpos($status_text, 'ประเมินต่อ') !== false) $status_badge = 'badge-info';
+
+                                                $naf_result = '-';
+                                                if (!empty($row['assessment_doc_no'])) {
+                                                    $naf_result = '<span class="text-info"><small>ประเมินแล้ว</small></span>';
+                                                }
+                                                ?>
+                                                <tr data-type="SPENT">
+                                                    <td>
+                                                        <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link">
+                                                            <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
+                                                                แบบคัดกรองภาวะโภชนาการ (SPENT)
+                                                            </div>
+                                                        </a>
+                                                        <small class="text-muted d-block mt-1">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                    </td>
+                                                    <td class="text-center align-middle"><span class="badge badge-light border text-primary px-2">SPENT</span></td>
+                                                    <td class="text-center align-middle"><?= $row['screening_seq'] ?></td>
+                                                    <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
+                                                    <td class="text-center align-middle <?= $spent_res_color ?>"><?= $row['screening_result'] ?></td>
+                                                    <td class="text-center align-middle text-muted"><?= $naf_result ?></td>
+                                                    <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
+                                                    <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
+                                                    <td class="text-center align-middle">
+                                                        <span class="badge <?= $status_badge ?> font-weight-normal px-2 py-1"><?= $status_text ?></span>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-danger shadow-sm border-0" title="ดาวน์โหลด PDF">
+                                                            <i class="fa-solid fa-file-pdf fa-lg"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+
+                                            <?php else: ?>
+                                                <?php
+                                                $naf_color = 'text-dark';
+                                                if ($row['naf_level'] == 'NAF C') $naf_color = 'text-danger font-weight-bold';
+                                                elseif ($row['naf_level'] == 'NAF B') $naf_color = 'text-warning font-weight-bold';
+                                                elseif ($row['naf_level'] == 'NAF A') $naf_color = 'text-success font-weight-bold';
+                                                ?>
+                                                <tr data-type="NAF" style="background-color: #f9fbfd;">
+                                                    <td>
+                                                        <a href="#" class="doc-link">
+                                                            <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">
+                                                                แบบประเมินภาวะโภชนาการ (NAF)
+                                                            </div>
+                                                        </a>
+                                                        <small class="text-muted d-block mt-1">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                    </td>
+                                                    <td class="text-center align-middle"><span class="badge badge-warning text-dark border px-2">NAF</span></td>
+                                                    <td class="text-center align-middle"><?= $row['naf_seq'] ?></td>
+                                                    <td class="text-center align-middle font-weight-bold"><?= $row['total_score'] ?></td>
+                                                    <td class="text-center align-middle text-muted">-</td>
+                                                    <td class="text-center align-middle <?= $naf_color ?>"><?= $row['naf_level'] ?></td>
+                                                    <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
+                                                    <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
+                                                    <td class="text-center align-middle">
+                                                        <span class="badge badge-success font-weight-normal px-2 py-1">บันทึกสมบูรณ์</span>
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        <a href="#" class="btn btn-sm btn-outline-secondary shadow-sm border-0 disabled" title="ดูรายละเอียด">
+                                                            <i class="fa-solid fa-file-lines fa-lg"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
+
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>

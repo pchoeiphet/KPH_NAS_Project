@@ -5,11 +5,44 @@ date_default_timezone_set('Asia/Bangkok');
 // รับค่าจาก URL
 $hn = $_GET['hn'] ?? '';
 $an = $_GET['an'] ?? '';
-$ref_screening = $_GET['ref_screening'] ?? '';
+$ref_screening_doc = $_GET['ref_screening'] ?? '';
+
+// 2. เตรียมตัวแปรเก็บข้อมูล
+$screening_data = [];
+
+// 3. ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
+if (!empty($ref_screening_doc)) {
+    try {
+        // Query ค้นหาข้อมูลจากตาราง nutrition_screening ด้วยเลขที่เอกสาร
+        $stmt_find = $conn->prepare("SELECT * FROM nutrition_screening WHERE doc_no = :ref_doc LIMIT 1");
+        $stmt_find->execute([':ref_doc' => $ref_screening_doc]);
+        $result = $stmt_find->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $screening_data = $result; // เก็บข้อมูลทั้งหมด (รวมถึง ID) ลงตัวแปรนี้
+        }
+    } catch (Exception $e) {
+        // กรณี Error ข้ามไป
+    }
+}
 
 // ตรวจสอบค่าว่าง
 if (empty($hn) || empty($an)) {
     die("Error: ไม่พบข้อมูล HN หรือ AN");
+}
+
+// ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
+if (!empty($ref_screening_doc)) {
+    try {
+        $stmt_find = $conn->prepare("SELECT nutrition_screening_id FROM nutrition_screening WHERE doc_no = :ref_doc LIMIT 1");
+        $stmt_find->execute([':ref_doc' => $ref_screening_doc]);
+        $row_find = $stmt_find->fetch(PDO::FETCH_ASSOC);
+
+        if ($row_find) {
+            $screening_id_val = $row_find['nutrition_screening_id'];
+        }
+    } catch (Exception $e) {
+    }
 }
 
 try {
@@ -207,12 +240,13 @@ try {
 
     <div class="container-fluid px-lg-5 mt-4">
 
-        <form id="nafForm" method="POST" action="nutrition_assessment_save.php">
+        <form id="nafForm" method="POST" action="nutrition_alert_form_save.php">
             <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
             <input type="hidden" name="an" value="<?= htmlspecialchars($an) ?>">
             <input type="hidden" name="doc_no" value="<?= htmlspecialchars($doc_no_show) ?>">
             <input type="hidden" name="naf_seq" value="<?= htmlspecialchars($naf_seq) ?>">
-            <input type="hidden" name="ref_screening_doc" value="<?= htmlspecialchars($ref_screening) ?>">
+            <input type="hidden" name="ref_screening_doc" value="<?= htmlspecialchars($ref_screening ?? $screening_data['doc_no'] ?? '') ?>">
+            <input type="hidden" name="screening_id" value="<?= $screening_data['nutrition_screening_id'] ?? '' ?>">
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -376,7 +410,9 @@ try {
                             <div class="col-md-6 col-lg-3 mb-3">
                                 <label class="small text-muted font-weight-bold">ส่วนสูง (Height)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control anthro-input" id="anthroHeight"
+                                    <input type="number" step="0.1" class="form-control anthro-input"
+                                        id="anthroHeight"
+                                        name="height_measure"
                                         placeholder="0.0" oninput="calculateBMI()">
                                     <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                                 </div>
@@ -385,7 +421,9 @@ try {
                             <div class="col-md-6 col-lg-3 mb-3">
                                 <label class="small text-muted font-weight-bold">วัดความยาวตัว (Length)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control anthro-input" id="anthroLength"
+                                    <input type="number" step="0.1" class="form-control anthro-input"
+                                        id="anthroLength"
+                                        name="body_length"
                                         placeholder="0.0" oninput="calculateBMI()">
                                     <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                                 </div>
@@ -394,7 +432,9 @@ try {
                             <div class="col-md-6 col-lg-3 mb-3">
                                 <label class="small text-muted font-weight-bold">Arm Span</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control anthro-input" id="anthroArmSpan"
+                                    <input type="number" step="0.1" class="form-control anthro-input"
+                                        id="anthroArmSpan"
+                                        name="arm_span"
                                         placeholder="0.0" oninput="calculateBMI()">
                                     <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                                 </div>
@@ -403,574 +443,570 @@ try {
                             <div class="col-md-6 col-lg-3 mb-3">
                                 <label class="small text-muted font-weight-bold">ญาติบอก (Reported)</label>
                                 <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control anthro-input" id="anthroReported"
+                                    <input type="number" step="0.1" class="form-control anthro-input"
+                                        id="anthroReported"
+                                        name="height_relative"
                                         placeholder="0.0" oninput="calculateBMI()">
                                     <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                                 </div>
                             </div>
+
                             <div id="anthroAlert" class="alert alert-danger py-2 d-none" role="alert">
                                 <i class="fas fa-exclamation-triangle mr-2"></i> กรุณาระบุข้อมูลส่วนสูง/ความยาวตัว อย่างน้อย
                                 1 ช่อง
                             </div>
                         </div>
+                    </div>
 
-                        <hr class="my-4">
+                    <hr class="my-4">
 
-                        <div class="form-group mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="section-label mb-0">4. น้ำหนักและค่าดัชนีมวลกาย (Weight & BMI)</label>
+                    <div class="form-group mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="section-label mb-0">4. น้ำหนักและค่าดัชนีมวลกาย (Weight & BMI)</label>
 
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="unknownWeight"
-                                        onchange="toggleWeightMode()">
-                                    <label class="custom-control-label text-danger font-weight-bold" for="unknownWeight">
-                                        ไม่ทราบน้ำหนัก (ประเมินด้วยผลเลือด)
-                                    </label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="unknownWeight"
+                                    name="is_no_weight" value="1"
+                                    onchange="toggleWeightMode()">
+                                <label class="custom-control-label text-danger font-weight-bold" for="unknownWeight">
+                                    ไม่ทราบน้ำหนัก (ประเมินด้วยผลเลือด)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="standardWeightSection" class="fade-in">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control" id="currentWeight"
+                                            name="weight"
+                                            placeholder="0.0" oninput="calculateBMI()">
+                                        <div class="input-group-append"><span class="input-group-text">กก.</span></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bmi-display-box" id="bmiValue" value="-" readonly>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text small" id="bmiScoreText"
+                                                style="background-color: #e9ecef; font-weight: 500;">Score: 0</span>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="bmi" id="hidden_bmi">
+                                    <input type="hidden" name="bmi_score" id="hidden_bmi_score" value="0">
                                 </div>
                             </div>
-
-                            <div id="standardWeightSection" class="fade-in">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-4 mb-3">
-                                        <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
-                                        <div class="input-group">
-                                            <input type="number" step="0.1" class="form-control" id="currentWeight"
-                                                placeholder="0.0" oninput="calculateBMI()">
-                                            <div class="input-group-append"><span class="input-group-text">กก.</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-4 mb-3">
-                                        <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control bmi-display-box" id="bmiValue" value="-"
-                                                readonly>
-                                            <div class="input-group-append">
-                                                <span class="input-group-text small" id="bmiScoreText"
-                                                    style="background-color: #e9ecef; font-weight: 500;">Score: 0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Method)</label>
-                                    <div class="radio-group-container">
-                                        <?php if (!empty($weight_options)): ?>
-                                            <?php foreach ($weight_options as $wo): ?>
-                                                <div class="custom-control custom-radio custom-control-inline mr-4">
-                                                    <input type="radio"
-                                                        id="wo_<?= $wo['weight_option_id'] ?>"
-                                                        name="weight_option_id"
-                                                        class="custom-control-input score-calc"
-                                                        value="<?= $wo['weight_option_id'] ?>"
-                                                        data-score="<?= $wo['weight_option_score'] ?? 0 ?>"
-                                                        onchange="calculateScore()">
-                                                    <label class="custom-control-label" for="wo_<?= $wo['weight_option_id'] ?>">
-                                                        <?= htmlspecialchars($wo['weight_option_label'] ?? $wo['weight_option_name']) ?>
-                                                        <span class="text-muted small">(<?= $wo['weight_option_score'] ?? 0 ?> คะแนน)</span>
-                                                    </label>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <p class="text-danger small">ไม่พบข้อมูลตัวเลือก (weight_option)</p>
-                                        <?php endif; ?>
-                                    </div>
-                                    <small class="text-muted mt-1 d-block">
-                                        <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
-                                    </small>
-                                </div>
-                            </div>
-
-                            <div id="labSection" class="hidden-section fade-in">
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <div class="lab-choice-card inactive" id="cardAlbumin"
-                                            onclick="selectLab('albumin')">
-
-                                            <input type="radio" id="useAlbumin" name="labChoice" value="albumin"
-                                                class="d-none" onchange="toggleLabInputs()">
-
-                                            <div class="lab-header">
-                                                <i class="fas fa-vial text-primary mr-2"></i> 1. Albumin
-                                                <span class="lab-unit">(g/dl)</span>
-                                            </div>
-
-                                            <div class="form-group mb-3">
-                                                <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
-                                                <div class="input-group">
-                                                    <input type="number" step="0.1" class="form-control" id="valAlbumin"
-                                                        placeholder="เช่น 3.2" disabled oninput="calculateLabScore()"
-                                                        onclick="event.stopPropagation()">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text bg-white text-muted">g/dl</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mt-3">
-                                                <table class="ref-table-clean">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>เกณฑ์ (Criteria)</th>
-                                                            <th class="text-right">คะแนน</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>&le; 2.5</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-danger">3</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>2.6 - 2.9</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-warning">2</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>3.0 - 3.5</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-primary">1</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>&gt; 3.5</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-muted">0</span></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="lab-choice-card inactive" id="cardTLC" onclick="selectLab('tlc')">
-
-                                            <input type="radio" id="useTLC" name="labChoice" value="tlc" class="d-none"
-                                                onchange="toggleLabInputs()">
-
-                                            <div class="lab-header">
-                                                <i class="fas fa-microscope text-primary mr-2"></i> 2. TLC
-                                                <span class="lab-unit">(cells/mm³)</span>
-                                            </div>
-
-                                            <div class="form-group mb-3">
-                                                <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
-                                                <div class="input-group">
-                                                    <input type="number" class="form-control" id="valTLC"
-                                                        placeholder="เช่น 1200" disabled oninput="calculateLabScore()"
-                                                        onclick="event.stopPropagation()">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text bg-white text-muted">cells</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mt-3">
-                                                <table class="ref-table-clean">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>เกณฑ์ (Criteria)</th>
-                                                            <th class="text-right">คะแนน</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>&le; 1,000</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-danger">3</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>1,001 - 1,200</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-warning">2</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>1,201 - 1,500</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-primary">1</span></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>&gt; 1,500</td>
-                                                            <td class="text-right"><span
-                                                                    class="score-badge text-muted">0</span></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-3">
-                                    <div class="col-12 text-right">
-                                        <div class="d-inline-block px-3 py-2 bg-white border rounded shadow-sm">
-                                            <small class="text-muted mr-2">คะแนนจากผลเลือด (Lab Score):</small>
-                                            <span class="font-weight-bold text-primary h5 m-0" id="labScoreText">0</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group mb-4">
-                                <label class="section-label">5. รูปร่างของผู้ป่วย (Body Shape)</label>
+                            <div class="mb-3">
+                                <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Method)</label>
                                 <div class="radio-group-container">
-                                    <?php if (!empty($patient_shapes)): ?>
-                                        <?php foreach ($patient_shapes as $row): ?>
-                                            <div class="custom-control custom-radio custom-control-inline mr-4 mb-2">
+                                    <?php if (!empty($weight_options)): ?>
+                                        <?php foreach ($weight_options as $wo): ?>
+                                            <div class="custom-control custom-radio custom-control-inline mr-4">
                                                 <input type="radio"
-                                                    id="shape_<?= $row['patient_shape_id'] ?>"
-                                                    name="patient_shape_id"
-                                                    value="<?= $row['patient_shape_id'] ?>"
-                                                    data-score="<?= $row['patient_shape_score'] ?>"
-                                                    class="custom-control-input score-calc" onchange="calculateScore()">
-                                                <label class="custom-control-label" for="shape_<?= $row['patient_shape_id'] ?>">
-                                                    <?= htmlspecialchars($row['patient_shape_label']) ?>
-                                                    <span class="text-muted small">(<?= $row['patient_shape_score'] ?> คะแนน)</span>
-                                                </label>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <p class="text-danger small">ไม่พบข้อมูลตัวเลือกในตาราง patient_shape</p>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="form-group mb-4">
-                                <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change)</label>
-                                <div class="radio-group-container">
-                                    <?php if (!empty($weight_changes)): ?>
-                                        <?php foreach ($weight_changes as $row): ?>
-                                            <div class="custom-control custom-radio custom-control-inline mr-4 mb-2">
-                                                <input type="radio"
-                                                    id="wc_<?= $row['weight_change_4_weeks_id'] ?>"
-                                                    name="weight_change_4_week_id"
-                                                    value="<?= $row['weight_change_4_weeks_id'] ?>"
-                                                    data-score="<?= $row['weight_change_4_weeks_score'] ?>"
-                                                    class="custom-control-input score-calc" onchange="calculateScore()">
-                                                <label class="custom-control-label" for="wc_<?= $row['weight_change_4_weeks_id'] ?>">
-                                                    <?= htmlspecialchars($row['weight_change_4_weeks_label']) ?>
-                                                    <span class="text-muted small">(<?= $row['weight_change_4_weeks_score'] ?> คะแนน)</span>
-                                                </label>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="form-group mb-4">
-                                <label class="section-label">7. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา</label>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <h6 class="text-secondary font-weight-bold mb-2">7.1 ลักษณะของอาหาร (Type)</h6>
-                                        <div class="radio-group-container">
-                                            <?php if (!empty($food_types)): ?>
-                                                <?php foreach ($food_types as $row): ?>
-                                                    <div class="custom-control custom-radio mb-2">
-                                                        <input type="radio"
-                                                            id="ft_<?= $row['food_type_id'] ?>"
-                                                            name="food_type_id"
-                                                            value="<?= $row['food_type_id'] ?>"
-                                                            data-score="<?= $row['food_type_score'] ?>"
-                                                            class="custom-control-input score-calc" onchange="calculateScore()">
-                                                        <label class="custom-control-label radio-label" for="ft_<?= $row['food_type_id'] ?>">
-                                                            <?= htmlspecialchars($row['food_type_label']) ?>
-                                                            <span class="radio-score">(<?= $row['food_type_score'] ?> คะแนน)</span>
-                                                        </label>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <h6 class="text-secondary font-weight-bold mb-2">7.2 ปริมาณอาหารที่กิน (Amount)</h6>
-                                        <div class="radio-group-container">
-                                            <?php if (!empty($food_amounts)): ?>
-                                                <?php foreach ($food_amounts as $row): ?>
-                                                    <div class="custom-control custom-radio mb-2">
-                                                        <input type="radio"
-                                                            id="fa_<?= $row['food_amount_id'] ?>"
-                                                            name="food_amount_id"
-                                                            value="<?= $row['food_amount_id'] ?>"
-                                                            data-score="<?= $row['food_amount_score'] ?>"
-                                                            class="custom-control-input score-calc" onchange="calculateScore()">
-                                                        <label class="custom-control-label radio-label" for="fa_<?= $row['food_amount_id'] ?>">
-                                                            <?= htmlspecialchars($row['food_amount_label']) ?>
-                                                            <span class="radio-score">(<?= $row['food_amount_score'] ?> คะแนน)</span>
-                                                        </label>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="form-group mb-4">
-                                <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา</label>
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
-                                </p>
-
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <div class="symptom-box h-100">
-                                            <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
-
-                                            <?php
-                                            $group1 = 'ปัญหาทางการเคี้ยว/กลืนอาหาร';
-                                            if (!empty($symptoms_grouped[$group1])):
-                                                foreach ($symptoms_grouped[$group1] as $item):
-                                            ?>
-                                                    <div class="custom-control custom-checkbox symptom-item">
-                                                        <input type="checkbox"
-                                                            class="custom-control-input score-calc"
-                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
-                                                            name="symptoms[]"
-                                                            value="<?= $item['symptom_problem_id'] ?>"
-                                                            data-score="<?= $item['symptom_problem_score'] ?>"
-                                                            onchange="calculateScore()">
-
-                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
-                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
-                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
-                                                        </label>
-                                                    </div>
-                                                <?php
-                                                endforeach;
-                                            else:
-                                                ?>
-                                                <div class="text-muted small p-2">- ไม่มีข้อมูล -</div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="symptom-box h-100">
-                                            <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
-
-                                            <?php
-                                            $group2 = 'ปัญหาระบบทางเดินอาหาร';
-                                            if (!empty($symptoms_grouped[$group2])):
-                                                foreach ($symptoms_grouped[$group2] as $item):
-                                            ?>
-                                                    <div class="custom-control custom-checkbox symptom-item">
-                                                        <input type="checkbox"
-                                                            class="custom-control-input score-calc"
-                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
-                                                            name="symptoms[]"
-                                                            value="<?= $item['symptom_problem_id'] ?>"
-                                                            data-score="<?= $item['symptom_problem_score'] ?>"
-                                                            onchange="calculateScore()">
-
-                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
-                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
-                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
-                                                        </label>
-                                                    </div>
-                                            <?php
-                                                endforeach;
-                                            endif;
-                                            ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="symptom-box h-100">
-                                            <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
-
-                                            <?php
-                                            $group3 = 'ปัญหาระหว่างกินอาหาร';
-                                            if (!empty($symptoms_grouped[$group3])):
-                                                foreach ($symptoms_grouped[$group3] as $item):
-                                            ?>
-                                                    <div class="custom-control custom-checkbox symptom-item">
-                                                        <input type="checkbox"
-                                                            class="custom-control-input score-calc"
-                                                            id="sym_<?= $item['symptom_problem_id'] ?>"
-                                                            name="symptoms[]"
-                                                            value="<?= $item['symptom_problem_id'] ?>"
-                                                            data-score="<?= $item['symptom_problem_score'] ?>"
-                                                            onchange="calculateScore()">
-
-                                                        <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
-                                                            <?= htmlspecialchars($item['symptom_problem_name']) ?>
-                                                            <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
-                                                        </label>
-                                                    </div>
-                                            <?php
-                                                endforeach;
-                                            endif;
-                                            ?>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <div class="form-group mb-4">
-                                <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
-                                <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
-
-                                    <?php if (!empty($food_access_list)): ?>
-                                        <?php foreach ($food_access_list as $fa): ?>
-                                            <?php
-                                            $fa_id = $fa['food_access_id'];
-                                            $unique_id = "f_access_" . $fa_id;
-
-                                            $fa_text = $fa['food_access_label'] ?? '-';
-                                            $fa_score = $fa['food_access_score'] ?? 0;
-                                            ?>
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio"
-                                                    id="<?= $unique_id ?>"
-                                                    name="food_access_id"
+                                                    id="wo_<?= $wo['weight_option_id'] ?>"
+                                                    name="weight_option_id"
                                                     class="custom-control-input score-calc"
-                                                    value="<?= $fa_id ?>"
-                                                    data-score="<?= $fa_score ?>"
+                                                    value="<?= $wo['weight_option_id'] ?>"
+                                                    data-score="<?= $wo['weight_option_score'] ?? 0 ?>"
                                                     onchange="calculateScore()">
-
-                                                <label class="custom-control-label" for="<?= $unique_id ?>" style="cursor: pointer;">
-                                                    <?= htmlspecialchars($fa_text) ?>
-                                                    <span class="text-muted small">(<?= $fa_score ?> คะแนน)</span>
+                                                <label class="custom-control-label" for="wo_<?= $wo['weight_option_id'] ?>">
+                                                    <?= htmlspecialchars($wo['weight_option_label'] ?? $wo['weight_option_name']) ?>
+                                                    <span class="text-muted small">(<?= $wo['weight_option_score'] ?? 0 ?> คะแนน)</span>
                                                 </label>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <p class="text-danger small">ไม่พบข้อมูล (ตาราง food_access ว่างเปล่า)</p>
+                                        <p class="text-danger small">ไม่พบข้อมูลตัวเลือก (weight_option)</p>
                                     <?php endif; ?>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
+                                </small>
+                            </div>
+                        </div>
 
+                        <div id="labSection" class="hidden-section fade-in">
+                            <input type="hidden" name="lab_score" id="hidden_lab_score" value="0">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="lab-choice-card inactive" id="cardAlbumin" onclick="selectLab('albumin')">
+
+                                        <input type="radio" id="useAlbumin" name="lab_method" value="Albumin"
+                                            class="d-none" onchange="toggleLabInputs()">
+
+                                        <div class="lab-header">
+                                            <i class="fas fa-vial text-primary mr-2"></i> 1. Albumin
+                                            <span class="lab-unit">(g/dl)</span>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                            <div class="input-group">
+                                                <input type="number" step="0.1" class="form-control" id="valAlbumin"
+                                                    name="albumin_val"
+                                                    placeholder="เช่น 3.2" disabled oninput="calculateLabScore()"
+                                                    onclick="event.stopPropagation()">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white text-muted">g/dl</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <table class="ref-table-clean">
+                                                <thead>
+                                                    <tr>
+                                                        <th>เกณฑ์ (Criteria)</th>
+                                                        <th class="text-right">คะแนน</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>&le; 2.5</td>
+                                                        <td class="text-right"><span class="score-badge text-danger">3</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2.6 - 2.9</td>
+                                                        <td class="text-right"><span class="score-badge text-warning">2</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>3.0 - 3.5</td>
+                                                        <td class="text-right"><span class="score-badge text-primary">1</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>&gt; 3.5</td>
+                                                        <td class="text-right"><span class="score-badge text-muted">0</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="lab-choice-card inactive" id="cardTLC" onclick="selectLab('tlc')">
+
+                                        <input type="radio" id="useTLC" name="lab_method" value="TLC" class="d-none"
+                                            onchange="toggleLabInputs()">
+
+                                        <div class="lab-header">
+                                            <i class="fas fa-microscope text-primary mr-2"></i> 2. TLC
+                                            <span class="lab-unit">(cells/mm³)</span>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="valTLC"
+                                                    name="tlc_val"
+                                                    placeholder="เช่น 1200" disabled oninput="calculateLabScore()"
+                                                    onclick="event.stopPropagation()">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white text-muted">cells</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <table class="ref-table-clean">
+                                                <thead>
+                                                    <tr>
+                                                        <th>เกณฑ์ (Criteria)</th>
+                                                        <th class="text-right">คะแนน</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>&le; 1,000</td>
+                                                        <td class="text-right"><span class="score-badge text-danger">3</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1,001 - 1,200</td>
+                                                        <td class="text-right"><span class="score-badge text-warning">2</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1,201 - 1,500</td>
+                                                        <td class="text-right"><span class="score-badge text-primary">1</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>&gt; 1,500</td>
+                                                        <td class="text-right"><span class="score-badge text-muted">0</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <hr class="my-4">
+                            <div class="row mt-3">
+                                <div class="col-12 text-right">
+                                    <div class="d-inline-block px-3 py-2 bg-white border rounded shadow-sm">
+                                        <small class="text-muted mr-2">คะแนนจากผลเลือด (Lab Score):</small>
+                                        <span class="font-weight-bold text-primary h5 m-0" id="labScoreText">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <div class="form-group mb-4">
-                                <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease)</label>
-                                <p class="text-muted small mb-2">
-                                    <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
-                                </p>
+                    <div class="form-group mb-4">
+                        <label class="section-label">5. รูปร่างของผู้ป่วย (Body Shape)</label>
+                        <div class="radio-group-container">
+                            <?php if (!empty($patient_shapes)): ?>
+                                <?php foreach ($patient_shapes as $row): ?>
+                                    <div class="custom-control custom-radio custom-control-inline mr-4 mb-2">
+                                        <input type="radio"
+                                            id="shape_<?= $row['patient_shape_id'] ?>"
+                                            name="patient_shape_id"
+                                            value="<?= $row['patient_shape_id'] ?>"
+                                            data-score="<?= $row['patient_shape_score'] ?>"
+                                            class="custom-control-input score-calc" onchange="calculateScore()">
+                                        <label class="custom-control-label" for="shape_<?= $row['patient_shape_id'] ?>">
+                                            <?= htmlspecialchars($row['patient_shape_label']) ?>
+                                            <span class="text-muted small">(<?= $row['patient_shape_score'] ?> คะแนน)</span>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="text-danger small">ไม่พบข้อมูลตัวเลือกในตาราง patient_shape</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="symptom-box h-100" style="border-left: 4px solid #ffc107;">
-                                            <div class="symptom-category-title text-warning text-dark font-weight-bold">
-                                                10.1 โรคที่มีความรุนแรงน้อยถึงปานกลาง (3 คะแนน)
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change)</label>
+                        <div class="radio-group-container">
+                            <?php if (!empty($weight_changes)): ?>
+                                <?php foreach ($weight_changes as $row): ?>
+                                    <div class="custom-control custom-radio custom-control-inline mr-4 mb-2">
+                                        <input type="radio"
+                                            id="wc_<?= $row['weight_change_4_weeks_id'] ?>"
+                                            name="weight_change_4_week_id"
+                                            value="<?= $row['weight_change_4_weeks_id'] ?>"
+                                            data-score="<?= $row['weight_change_4_weeks_score'] ?>"
+                                            class="custom-control-input score-calc" onchange="calculateScore()">
+                                        <label class="custom-control-label" for="wc_<?= $row['weight_change_4_weeks_id'] ?>">
+                                            <?= htmlspecialchars($row['weight_change_4_weeks_label']) ?>
+                                            <span class="text-muted small">(<?= $row['weight_change_4_weeks_score'] ?> คะแนน)</span>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">7. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-secondary font-weight-bold mb-2">7.1 ลักษณะของอาหาร (Type)</h6>
+                                <div class="radio-group-container">
+                                    <?php if (!empty($food_types)): ?>
+                                        <?php foreach ($food_types as $row): ?>
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio"
+                                                    id="ft_<?= $row['food_type_id'] ?>"
+                                                    name="food_type_id"
+                                                    value="<?= $row['food_type_id'] ?>"
+                                                    data-score="<?= $row['food_type_score'] ?>"
+                                                    class="custom-control-input score-calc" onchange="calculateScore()">
+                                                <label class="custom-control-label radio-label" for="ft_<?= $row['food_type_id'] ?>">
+                                                    <?= htmlspecialchars($row['food_type_label']) ?>
+                                                    <span class="radio-score">(<?= $row['food_type_score'] ?> คะแนน)</span>
+                                                </label>
                                             </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                                            <?php
-                                            // ** แก้ไขชื่อ Type ให้ตรงกับในฐานข้อมูล disease_type **
-                                            $type_mild = 'โรคที่มีความรุนแรงน้อยถึงปานกลาง';
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-secondary font-weight-bold mb-2">7.2 ปริมาณอาหารที่กิน (Amount)</h6>
+                                <div class="radio-group-container">
+                                    <?php if (!empty($food_amounts)): ?>
+                                        <?php foreach ($food_amounts as $row): ?>
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio"
+                                                    id="fa_<?= $row['food_amount_id'] ?>"
+                                                    name="food_amount_id"
+                                                    value="<?= $row['food_amount_id'] ?>"
+                                                    data-score="<?= $row['food_amount_score'] ?>"
+                                                    class="custom-control-input score-calc" onchange="calculateScore()">
+                                                <label class="custom-control-label radio-label" for="fa_<?= $row['food_amount_id'] ?>">
+                                                    <?= htmlspecialchars($row['food_amount_label']) ?>
+                                                    <span class="radio-score">(<?= $row['food_amount_score'] ?> คะแนน)</span>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                            if (!empty($diseases_grouped[$type_mild])):
-                                                foreach ($diseases_grouped[$type_mild] as $d):
-                                            ?>
-                                                    <div class="custom-control custom-checkbox symptom-item">
-                                                        <input type="checkbox"
-                                                            class="custom-control-input score-calc"
-                                                            id="dis_<?= $d['disease_id'] ?>"
-                                                            name="diseases[]"
-                                                            value="<?= $d['disease_id'] ?>"
-                                                            data-score="<?= $d['disease_score'] ?>"
-                                                            onchange="calculateScore()">
-                                                        <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
-                                                            <?= htmlspecialchars($d['disease_name']) ?>
-                                                        </label>
-                                                    </div>
-                                            <?php endforeach;
-                                            endif; ?>
+                    <hr class="my-4">
 
+                    <div class="form-group mb-4">
+                        <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา</label>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
+                                    <?php
+                                    $group1 = 'ปัญหาทางการเคี้ยว/กลืนอาหาร';
+                                    if (!empty($symptoms_grouped[$group1])):
+                                        foreach ($symptoms_grouped[$group1] as $item):
+                                    ?>
                                             <div class="custom-control custom-checkbox symptom-item">
                                                 <input type="checkbox"
                                                     class="custom-control-input score-calc"
-                                                    id="disOtherMod"
-                                                    value="other_mild"
-                                                    data-score="3"
-                                                    onchange="toggleOtherDisease(this, 'disOtherModText'); calculateScore()">
-                                                <label class="custom-control-label w-100" for="disOtherMod">อื่นๆ (Other)</label>
-                                                <input type="text" class="form-control form-control-sm mt-1" id="disOtherModText" placeholder="ระบุ..." disabled>
+                                                    id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                    name="symptom_ids[]"
+                                                    value="<?= $item['symptom_problem_id'] ?>"
+                                                    data-score="<?= $item['symptom_problem_score'] ?>"
+                                                    onchange="calculateScore()">
+                                                <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                    <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                    <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                </label>
                                             </div>
-                                        </div>
-                                    </div>
+                                        <?php endforeach;
+                                    else: ?>
+                                        <div class="text-muted small p-2">- ไม่มีข้อมูล -</div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <div class="symptom-box h-100" style="border-left: 4px solid #dc3545;">
-                                            <div class="symptom-category-title text-danger font-weight-bold">
-                                                10.2 โรคที่มีความรุนแรงมาก (6 คะแนน)
-                                            </div>
-
-                                            <?php
-                                            // ** แก้ไขชื่อ Type ให้ตรงกับในฐานข้อมูล disease_type **
-                                            $type_severe = 'โรคที่มีความรุนแรงมาก';
-
-                                            if (!empty($diseases_grouped[$type_severe])):
-                                                foreach ($diseases_grouped[$type_severe] as $d):
-                                            ?>
-                                                    <div class="custom-control custom-checkbox symptom-item">
-                                                        <input type="checkbox"
-                                                            class="custom-control-input score-calc"
-                                                            id="dis_<?= $d['disease_id'] ?>"
-                                                            name="diseases[]"
-                                                            value="<?= $d['disease_id'] ?>"
-                                                            data-score="<?= $d['disease_score'] ?>"
-                                                            onchange="calculateScore()">
-                                                        <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
-                                                            <?= htmlspecialchars($d['disease_name']) ?>
-                                                        </label>
-                                                    </div>
-                                            <?php endforeach;
-                                            endif; ?>
-
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
+                                    <?php
+                                    $group2 = 'ปัญหาระบบทางเดินอาหาร';
+                                    if (!empty($symptoms_grouped[$group2])):
+                                        foreach ($symptoms_grouped[$group2] as $item):
+                                    ?>
                                             <div class="custom-control custom-checkbox symptom-item">
                                                 <input type="checkbox"
                                                     class="custom-control-input score-calc"
-                                                    id="disOtherSev"
-                                                    value="other_severe"
-                                                    data-score="6"
-                                                    onchange="toggleOtherDisease(this, 'disOtherSevText'); calculateScore()">
-                                                <label class="custom-control-label w-100" for="disOtherSev">อื่นๆ (Other)</label>
-                                                <input type="text" class="form-control form-control-sm mt-1" id="disOtherSevText" placeholder="ระบุ..." disabled>
+                                                    id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                    name="symptom_ids[]"
+                                                    value="<?= $item['symptom_problem_id'] ?>"
+                                                    data-score="<?= $item['symptom_problem_score'] ?>"
+                                                    onchange="calculateScore()">
+                                                <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                    <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                    <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                </label>
                                             </div>
-                                        </div>
-                                    </div>
+                                    <?php endforeach;
+                                    endif; ?>
                                 </div>
                             </div>
 
-                            <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
-                                <div class="row no-gutters">
-                                    <div class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
-                                        <h6 class="text-muted font-weight-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
-                                            TOTAL SCORE
-                                        </h6>
-                                        <div class="d-flex align-items-baseline">
-                                            <h1 class="display-3 font-weight-bold text-dark mb-0" id="totalScore" style="line-height: 1;">0</h1>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-8">
-                                        <div id="nafResultBox" class="h-100 p-4 d-flex flex-column justify-content-center transition-bg" style="background-color: #e8f5e9; border-left: 5px solid #28a745;">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <i class="fas fa-circle mr-2 status-dot" style="font-size: 0.8rem; color: #28a745;"></i>
-                                                <h5 class="font-weight-bold mb-0 text-success" id="nafLevel">NAF A (Normal-Mild malnutrition)</h5>
+                            <div class="col-md-4 mb-3">
+                                <div class="symptom-box h-100">
+                                    <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
+                                    <?php
+                                    $group3 = 'ปัญหาระหว่างกินอาหาร';
+                                    if (!empty($symptoms_grouped[$group3])):
+                                        foreach ($symptoms_grouped[$group3] as $item):
+                                    ?>
+                                            <div class="custom-control custom-checkbox symptom-item">
+                                                <input type="checkbox"
+                                                    class="custom-control-input score-calc"
+                                                    id="sym_<?= $item['symptom_problem_id'] ?>"
+                                                    name="symptom_ids[]"
+                                                    value="<?= $item['symptom_problem_id'] ?>"
+                                                    data-score="<?= $item['symptom_problem_score'] ?>"
+                                                    onchange="calculateScore()">
+                                                <label class="custom-control-label w-100" for="sym_<?= $item['symptom_problem_id'] ?>">
+                                                    <?= htmlspecialchars($item['symptom_problem_name']) ?>
+                                                    <span class="symptom-score">(<?= $item['symptom_problem_score'] ?> คะแนน)</span>
+                                                </label>
                                             </div>
-                                            <p class="mb-0 text-dark" id="nafDesc" style="opacity: 0.85; line-height: 1.6;">
-                                                ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <?php endforeach;
+                                    endif; ?>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
+                        <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
+
+                            <?php if (!empty($food_access_list)): ?>
+                                <?php foreach ($food_access_list as $fa): ?>
+                                    <?php
+                                    $fa_id = $fa['food_access_id'];
+                                    $unique_id = "f_access_" . $fa_id;
+
+                                    $fa_text = $fa['food_access_label'] ?? '-';
+                                    $fa_score = $fa['food_access_score'] ?? 0;
+                                    ?>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio"
+                                            id="<?= $unique_id ?>"
+                                            name="food_access_id"
+                                            class="custom-control-input score-calc"
+                                            value="<?= $fa_id ?>"
+                                            data-score="<?= $fa_score ?>"
+                                            onchange="calculateScore()">
+
+                                        <label class="custom-control-label" for="<?= $unique_id ?>" style="cursor: pointer;">
+                                            <?= htmlspecialchars($fa_text) ?>
+                                            <span class="text-muted small">(<?= $fa_score ?> คะแนน)</span>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="text-danger small">ไม่พบข้อมูล (ตาราง food_access ว่างเปล่า)</p>
+                            <?php endif; ?>
 
                         </div>
                     </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group mb-4">
+                        <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease)</label>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="symptom-box h-100" style="border-left: 4px solid #ffc107;">
+                                    <div class="symptom-category-title text-warning text-dark font-weight-bold">
+                                        10.1 โรคที่มีความรุนแรงน้อยถึงปานกลาง (3 คะแนน)
+                                    </div>
+
+                                    <?php
+                                    $type_mild = 'โรคที่มีความรุนแรงน้อยถึงปานกลาง';
+                                    if (!empty($diseases_grouped[$type_mild])):
+                                        foreach ($diseases_grouped[$type_mild] as $d):
+                                    ?>
+                                            <div class="custom-control custom-checkbox symptom-item">
+                                                <input type="checkbox"
+                                                    class="custom-control-input score-calc"
+                                                    id="dis_<?= $d['disease_id'] ?>"
+                                                    name="disease_ids[]"
+                                                    value="<?= $d['disease_id'] ?>"
+                                                    data-score="<?= $d['disease_score'] ?>"
+                                                    onchange="calculateScore()">
+                                                <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
+                                                    <?= htmlspecialchars($d['disease_name']) ?>
+                                                </label>
+                                            </div>
+                                    <?php endforeach;
+                                    endif; ?>
+
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox"
+                                            class="custom-control-input score-calc"
+                                            id="disOtherMod"
+                                            name="check_other_mild"
+                                            value="other_mild"
+                                            data-score="3"
+                                            onchange="toggleOtherDisease(this, 'disOtherModText'); calculateScore()">
+                                        <label class="custom-control-label w-100" for="disOtherMod">อื่นๆ (Other)</label>
+
+                                        <input type="text" class="form-control form-control-sm mt-1"
+                                            id="disOtherModText"
+                                            name="disease_other_mild"
+                                            placeholder="ระบุ..." disabled>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="symptom-box h-100" style="border-left: 4px solid #dc3545;">
+                                    <div class="symptom-category-title text-danger font-weight-bold">
+                                        10.2 โรคที่มีความรุนแรงมาก (6 คะแนน)
+                                    </div>
+
+                                    <?php
+                                    $type_severe = 'โรคที่มีความรุนแรงมาก';
+                                    if (!empty($diseases_grouped[$type_severe])):
+                                        foreach ($diseases_grouped[$type_severe] as $d):
+                                    ?>
+                                            <div class="custom-control custom-checkbox symptom-item">
+                                                <input type="checkbox"
+                                                    class="custom-control-input score-calc"
+                                                    id="dis_<?= $d['disease_id'] ?>"
+                                                    name="disease_ids[]"
+                                                    value="<?= $d['disease_id'] ?>"
+                                                    data-score="<?= $d['disease_score'] ?>"
+                                                    onchange="calculateScore()">
+                                                <label class="custom-control-label w-100" for="dis_<?= $d['disease_id'] ?>">
+                                                    <?= htmlspecialchars($d['disease_name']) ?>
+                                                </label>
+                                            </div>
+                                    <?php endforeach;
+                                    endif; ?>
+
+                                    <div class="custom-control custom-checkbox symptom-item">
+                                        <input type="checkbox"
+                                            class="custom-control-input score-calc"
+                                            id="disOtherSev"
+                                            name="check_other_severe"
+                                            value="other_severe"
+                                            data-score="6"
+                                            onchange="toggleOtherDisease(this, 'disOtherSevText'); calculateScore()">
+                                        <label class="custom-control-label w-100" for="disOtherSev">อื่นๆ (Other)</label>
+
+                                        <input type="text" class="form-control form-control-sm mt-1"
+                                            id="disOtherSevText"
+                                            name="disease_other_severe"
+                                            placeholder="ระบุ..." disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
+                        <div class="row no-gutters">
+                            <div class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
+                                <h6 class="text-muted font-weight-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                    TOTAL SCORE
+                                </h6>
+                                <div class="d-flex align-items-baseline">
+                                    <h1 class="display-3 font-weight-bold text-dark mb-0" id="totalScore" style="line-height: 1;">0</h1>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div id="nafResultBox" class="h-100 p-4 d-flex flex-column justify-content-center transition-bg" style="background-color: #e8f5e9; border-left: 5px solid #28a745;">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-circle mr-2 status-dot" style="font-size: 0.8rem; color: #28a745;"></i>
+                                        <h5 class="font-weight-bold mb-0 text-success" id="nafLevel">NAF A (Normal-Mild malnutrition)</h5>
+                                    </div>
+                                    <p class="mb-0 text-dark" id="nafDesc" style="opacity: 0.85; line-height: 1.6;">
+                                        ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </form>
         <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
             <button type="button" class="btn btn-secondary shadow-sm px-4"
@@ -988,9 +1024,11 @@ try {
         function toggleOtherSource() {
             const otherRadio = document.getElementById('source3');
             const otherInput = document.getElementById('otherSourceText');
-            otherInput.disabled = !otherRadio.checked;
-            if (otherRadio.checked) otherInput.focus();
-            else otherInput.value = '';
+            if (otherRadio && otherInput) {
+                otherInput.disabled = !otherRadio.checked;
+                if (otherRadio.checked) otherInput.focus();
+                else otherInput.value = '';
+            }
         }
 
         function toggleOtherDisease(checkbox, inputId) {
@@ -1002,34 +1040,55 @@ try {
             }
         }
 
-        // 2. ฟังก์ชันคำนวณ BMI และ Auto-Select คะแนน BMI
+        // 2. ฟังก์ชันคำนวณ BMI และให้คะแนนอัตโนมัติ
         function calculateBMI() {
+            // ดึงค่า
             const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
             const h1 = parseFloat(document.getElementById('anthroHeight').value) || 0;
             const h2 = parseFloat(document.getElementById('anthroLength').value) || 0;
             const h3 = parseFloat(document.getElementById('anthroArmSpan').value) || 0;
             const h4 = parseFloat(document.getElementById('anthroReported').value) || 0;
 
+            // ใช้ค่าส่วนสูงที่มากที่สุดที่มีการกรอก
             const maxHeight = Math.max(h1, h2, h3, h4);
 
             if (weight > 0 && maxHeight > 0) {
                 const heightInMeters = maxHeight / 100;
                 const bmi = weight / (heightInMeters * heightInMeters);
+
+                // แสดงผล BMI
                 document.getElementById('bmiValue').value = bmi.toFixed(2);
-                document.getElementById('bmiScoreText').innerText = "BMI: " + bmi.toFixed(2);
 
-                // Auto-select Radio ตามเกณฑ์ BMI (NAF Criteria)
+                // [สำคัญ] อัปเดตลง Hidden Input สำหรับส่งเข้า Database
+                document.getElementById('hidden_bmi').value = bmi.toFixed(2);
+
+                // คำนวณคะแนน BMI ตามเกณฑ์
                 // < 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), > 30 (1 คะแนน)
-                // หมายเหตุ: ต้องมี radio input ที่มี value ตรงกับ id ใน database หรือ logic นี้ต้องปรับตาม id จริง
-                // เพื่อความง่ายในตัวอย่างนี้ จะใช้การเลือก radio ตัวแรกๆ ในกลุ่ม (สมมติลำดับ) 
-                // *แนะนำ: ใน production ควร map กับ id จริงของ weight_option*
+                let bmiScore = 0;
+                if (bmi < 17) {
+                    bmiScore = 2;
+                } else if (bmi <= 18) {
+                    bmiScore = 1;
+                } else if (bmi > 30) {
+                    bmiScore = 1;
+                } else {
+                    bmiScore = 0; // 18.1 - 29.9 (รวมถึง 30 เป๊ะๆ ถ้าอิงตามตรรกะ >30)
+                }
 
-                // เรียกคำนวณคะแนนรวม
-                calculateScore();
+                // แสดงคะแนนและอัปเดต Hidden Input
+                document.getElementById('bmiScoreText').innerText = "Score: " + bmiScore;
+                document.getElementById('hidden_bmi_score').value = bmiScore;
+
             } else {
+                // กรณีข้อมูลไม่ครบ
                 document.getElementById('bmiValue').value = "-";
-                calculateScore();
+                document.getElementById('hidden_bmi').value = "";
+                document.getElementById('bmiScoreText').innerText = "Score: 0";
+                document.getElementById('hidden_bmi_score').value = 0;
             }
+
+            // เรียกคำนวณคะแนนรวมใหม่
+            calculateScore();
         }
 
         // 3. สลับโหมด น้ำหนัก vs Lab
@@ -1039,25 +1098,33 @@ try {
             const labSec = document.getElementById('labSection');
 
             if (isUnknown) {
+                // โหมดไม่รู้น้ำหนัก -> ใช้ Lab
                 weightSec.style.display = 'none';
                 labSec.classList.remove('hidden-section');
 
-                // Clear selections in weight section to avoid double counting
+                // Reset คะแนน BMI เป็น 0 เพื่อไม่ให้คำนวณซ้ำซ้อน
+                document.getElementById('hidden_bmi_score').value = 0;
+
+                // (Optional) ล้างค่าการเลือกวิธีการชั่งน้ำหนัก
                 document.querySelectorAll('input[name="weight_option_id"]').forEach(el => el.checked = false);
+
             } else {
+                // โหมดรู้น้ำหนัก -> ใช้ BMI
                 weightSec.style.display = 'block';
                 labSec.classList.add('hidden-section');
 
-                // Reset Lab selections
-                document.querySelectorAll('input[name="labChoice"]').forEach(el => el.checked = false);
-                document.querySelectorAll('.lab-choice-card').forEach(el => el.classList.remove('active'));
-                document.getElementById('labScoreText').innerText = "0";
+                // Reset คะแนน Lab เป็น 0
+                document.getElementById('hidden_lab_score').value = 0;
+
+                // คำนวณ BMI ใหม่อีกรอบ (เผื่อมีค่าค้างอยู่)
+                calculateBMI();
             }
             calculateScore();
         }
 
-        // 4. เลือก Lab
+        // 4. เลือก Lab (Albumin / TLC)
         function selectLab(type) {
+            // Reset Card Styles
             document.querySelectorAll('.lab-choice-card').forEach(card => {
                 card.classList.remove('active', 'border-primary');
                 card.classList.add('inactive');
@@ -1067,6 +1134,7 @@ try {
             selectedCard.classList.remove('inactive');
             selectedCard.classList.add('active', 'border-primary');
 
+            // Check Radio Button
             if (type === 'albumin') {
                 document.getElementById('useAlbumin').checked = true;
             } else {
@@ -1084,8 +1152,14 @@ try {
             inpAlb.disabled = !useAlb;
             inpTLC.disabled = !useTLC;
 
-            if (useAlb) inpAlb.focus();
-            if (useTLC) inpTLC.focus();
+            if (useAlb) {
+                inpAlb.focus();
+                inpTLC.value = ''; // ล้างค่าอีกช่อง
+            }
+            if (useTLC) {
+                inpTLC.focus();
+                inpAlb.value = ''; // ล้างค่าอีกช่อง
+            }
 
             calculateLabScore();
         }
@@ -1100,19 +1174,25 @@ try {
                 if (!isNaN(val)) {
                     if (val <= 2.5) labScore = 3;
                     else if (val <= 2.9) labScore = 2;
-                    else if (val <= 3.5) labScore = 1; // แก้ไข range ตาม prompt (3.0-3.5)
+                    else if (val <= 3.5) labScore = 1;
                     else labScore = 0;
                 }
             } else if (useTLC) {
                 const val = parseFloat(document.getElementById('valTLC').value);
                 if (!isNaN(val)) {
-                    if (val <= 1000) labScore = 3; // แก้ไข range ตาม prompt
+                    if (val <= 1000) labScore = 3;
                     else if (val <= 1200) labScore = 2;
                     else if (val <= 1500) labScore = 1;
                     else labScore = 0;
                 }
             }
+
+            // แสดงผลคะแนน Lab
             document.getElementById('labScoreText').innerText = labScore;
+
+            // [สำคัญ] อัปเดตลง Hidden Input
+            document.getElementById('hidden_lab_score').value = labScore;
+
             calculateScore();
         }
 
@@ -1120,18 +1200,24 @@ try {
         function calculateScore() {
             let total = 0;
 
-            // รวมคะแนนจาก Radio/Checkbox ที่มี class 'score-calc'
+            // 5.1 รวมคะแนนจาก Radio/Checkbox ทั่วไปที่มี class 'score-calc' (เช่น โรค, การกินอาหาร)
             const inputs = document.querySelectorAll('.score-calc:checked');
             inputs.forEach(el => {
                 const sc = parseInt(el.getAttribute('data-score'));
                 if (!isNaN(sc)) total += sc;
             });
 
-            // บวกคะแนน Lab ถ้าอยู่ในโหมดไม่ทราบน้ำหนัก
+            // 5.2 ตรวจสอบโหมด (น้ำหนัก หรือ Lab)
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
+
             if (isUnknownWeight) {
-                const labScore = parseInt(document.getElementById('labScoreText').innerText) || 0;
+                // กรณีใช้ Lab: บวกคะแนน Lab
+                const labScore = parseInt(document.getElementById('hidden_lab_score').value) || 0;
                 total += labScore;
+            } else {
+                // กรณีใช้น้ำหนัก: บวกคะแนน BMI
+                const bmiScore = parseInt(document.getElementById('hidden_bmi_score').value) || 0;
+                total += bmiScore;
             }
 
             // แสดงผลรวม
@@ -1175,6 +1261,27 @@ try {
 
         // 7. บันทึกข้อมูล
         function saveData() {
+            // ตรวจสอบขั้นพื้นฐาน (Validation)
+            const isUnknownWeight = document.getElementById('unknownWeight').checked;
+            if (!isUnknownWeight) {
+                // ถ้ารู้น้ำหนัก แต่ยังไม่กรอกน้ำหนักหรือส่วนสูง (ทำให้ BMI หาไม่ได้)
+                const weight = document.getElementById('currentWeight').value;
+                const hiddenBmi = document.getElementById('hidden_bmi').value;
+                if (!weight || !hiddenBmi) {
+                    alert('กรุณาระบุน้ำหนักและส่วนสูงให้ครบถ้วน');
+                    document.getElementById('currentWeight').focus();
+                    return;
+                }
+            } else {
+                // ถ้าไม่รู้น้ำหนัก ต้องเลือก Lab อย่างใดอย่างหนึ่ง
+                const useAlb = document.getElementById('useAlbumin').checked;
+                const useTLC = document.getElementById('useTLC').checked;
+                if (!useAlb && !useTLC) {
+                    alert('กรุณาเลือกและระบุค่าผลเลือด (Albumin หรือ TLC)');
+                    return;
+                }
+            }
+
             if (confirm('ยืนยันการบันทึกข้อมูลการประเมิน?')) {
                 document.getElementById('nafForm').submit();
             }
