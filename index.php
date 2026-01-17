@@ -322,18 +322,16 @@ try {
                                 </th>
                                 <th class="text-center" onclick="handleSort('age')">อายุ <i
                                         class="fas fa-sort sort-icon" id="sort-age"></i></th>
-                                <th class="no-sort" style="width: 12%;">
-                                    โรคประจำตัว
-                                </th>
+
                                 <th style="width: 12%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i
                                         class="fas fa-sort sort-icon" id="sort-doctor"></i></th>
                                 <th style="width: 12%;" onclick="handleSort('admitDate')">วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon"
                                         id="sort-admitDate"></i></th>
 
-                                <th class="no-sort" style="min-width: 200px;">
+                                <th class="text-center" style="width: 13%;">
                                     สถานะทางโภชนาการ
                                 </th>
-                                <th class="no-sort" style="min-width: 140px;">
+                                <th class="text-center" style="width: 12%;">
                                     การดำเนินการ
                                 </th>
 
@@ -498,7 +496,7 @@ try {
                 let dateDisplay = '';
 
                 // ปรับ style ของวันที่ใต้สถานะ ให้ตัวเท่ากัน (ไม่ใช้ small)
-                const dateStyle = 'class="text-muted mt-1"';
+                const dateStyle = 'class="text-muted mt-1" style="font-size: 0.8rem;"';
 
                 if (p.status === 'wait_screen') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-wait">รอคัดกรอง</span>`;
@@ -568,23 +566,23 @@ try {
                 const row = `
                         <tr>
                             <td class="text-center text-muted">${index + 1}</td>
-                            
-                            <td class="text-center font-weight-bold text-dark">${p.bed}</td>
-                            
-                            <td><span class="text-muted">${p.an}</span></td>
-                            
-                            <td class="font-weight-bold text-dark">${p.hn}</td>
-                            <td><a href="patient_profile.php?hn=${p.hn}" class="patient-link">${p.name}</a></td>
-                            <td class="text-center">${p.age} ปี</td>
-                            
-                            <td><span class="text-muted">${p.underlying}</span></td>
-                            
-                            <td><span class="text-secondary">${p.doctor}</span></td>
-                            
-                            <td>
-                                <span class="font-weight-bold text-dark">${admitDateShow}</span>
-                                <span class="text-muted pl-1">${admitTimeShow}</span>
-                            </td>
+        
+        <td class="text-center font-weight-bold text-dark">${p.bed}</td>
+        
+        <td><span class="text-muted">${p.an}</span></td>
+        
+        <td class="font-weight-bold text-dark">${p.hn}</td>
+        
+        <td><a href="patient_profile.php?hn=${p.hn}" class="patient-link">${p.name}</a></td>
+        
+        <td class="text-center">${p.age} ปี</td>
+        
+        <td><span class="text-secondary">${p.doctor}</span></td>
+        
+        <td>
+            <span class="font-weight-bold text-dark">${admitDateShow}</span>
+            <span class="text-muted pl-1">${admitTimeShow}</span>
+        </td>
                             
                             <td>
                                 ${statusDisplay}
