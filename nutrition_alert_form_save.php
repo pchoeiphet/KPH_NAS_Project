@@ -144,7 +144,7 @@ try {
             weight_option_id, patient_shape_id, weight_change_4_weeks_id, 
             food_type_id, food_amount_id, food_access_id,
             total_score, naf_level, assessor_name, 
-            ref_screening_doc_no, screening_id
+            ref_screening_doc_no, nutrition_screening_id
         ) VALUES (
             :doc_no, :naf_seq, :an, :hn, NOW(),
             :diagnosis, :src, :oth_src,
