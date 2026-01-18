@@ -277,19 +277,19 @@ $html = '
 <div class="info-box">
     <table width="100%" style="border-collapse: collapse;">
         <tr style="border-bottom: 1px dotted #ccc;">
-            <td width="20%" style="padding-bottom: 5px;">
+            <td width="24%" style="padding-bottom: 5px;">
                 <b>ชื่อ-สกุล:</b> ' . $patient_full_name . '
             </td>
             <td width="20%" style="padding-bottom: 5px;">
                 <b>อายุ:</b> ' . $age . '
             </td>
-            <td width="15%" style="padding-bottom: 5px;">
+            <td width="10%" style="padding-bottom: 5px;">
                 <b>เพศ:</b> ' . $gender_th . '
             </td>
-            <td width="15%" style="padding-bottom: 5px;">
+            <td width="10%" style="padding-bottom: 5px;">
                 <b>HN:</b> ' . $assessment['patients_hn'] . '
             </td>
-            <td width="20%" style="padding-bottom: 5px;">
+            <td width="15%" style="padding-bottom: 5px;">
                 <b>AN:</b> ' . ($assessment['admissions_an'] ?? '-') . '
             </td>
         </tr>
