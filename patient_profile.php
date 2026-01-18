@@ -429,7 +429,7 @@ if ($latest_activity) {
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                         </h6>
                         <div class="form-inline mt-2 mt-md-0">
-                            <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="alert('ฟังก์ชันนี้ยังไม่เปิดใช้งาน')"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)</button>
+                            <!-- <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="alert('ฟังก์ชันนี้ยังไม่เปิดใช้งาน')"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)</button> -->
                             <label class="small mr-2 text-muted">ตัวกรอง:</label>
                             <select class="custom-select custom-select-sm" id="typeFilter" onchange="filterHistory()">
                                 <option value="all">ทั้งหมด (All)</option>
