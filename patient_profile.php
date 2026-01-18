@@ -9,7 +9,7 @@ if (empty($hn)) {
 }
 
 try {
-    // 1. ดึงข้อมูลผู้ป่วย
+    // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
             patients.patients_hn, 
@@ -55,7 +55,7 @@ try {
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    // 2. ดึงประวัติ (SPENT)
+    // ดึงประวัติ (SPENT)
     $sql_spent = "
         SELECT *, 'SPENT' as form_type, screening_datetime as action_datetime 
         FROM nutrition_screening 
@@ -66,7 +66,7 @@ try {
     $stmt_spent->execute([':hn' => $hn]);
     $spent_list = $stmt_spent->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3. ดึงประวัติ (NAF) - เพิ่มส่วนนี้
+    // ดึงประวัติ (NAF)
     $sql_naf = "
         SELECT *, 'NAF' as form_type, assessment_datetime as action_datetime 
         FROM nutrition_assessment 
@@ -77,7 +77,7 @@ try {
     $stmt_naf->execute([':hn' => $hn]);
     $naf_list = $stmt_naf->fetchAll(PDO::FETCH_ASSOC);
 
-    // 4. รวมข้อมูลและเรียงลำดับตามเวลาล่าสุด
+    // รวมข้อมูลและเรียงลำดับตามเวลาล่าสุด
     $history_list = array_merge($spent_list, $naf_list);
 
     // เรียงลำดับ array ตาม action_datetime จากมากไปน้อย (ล่าสุดขึ้นก่อน)
@@ -100,11 +100,9 @@ function thaiDate($datetime)
 // หากมีประวัติ ให้ดึงข้อมูลล่าสุด
 $latest_activity = $history_list[0] ?? null; // กิจกรรมล่าสุด (รวม SPENT/NAF)
 $latest_screening = $spent_list[0] ?? null; // SPENT ล่าสุด (สำหรับดูสถานะปัจจุบัน)
-
-// --- [ส่วนที่เพิ่มใหม่] ค้นหาใบ SPENT ที่ "เสี่ยง" (Score >= 2) ล่าสุด ---
 $target_ref_doc = ''; // ตัวแปรสำหรับเก็บเลขที่เอกสารที่จะส่งไปหน้า NAF
 
-// 1. ลองหาใบที่เสี่ยงล่าสุดก่อน
+// ลองหาใบที่เสี่ยงล่าสุดก่อน
 $latest_risky_screening = null;
 if (!empty($spent_list)) {
     foreach ($spent_list as $scr) {
@@ -122,17 +120,28 @@ if ($latest_risky_screening) {
 } elseif ($latest_screening) {
     $target_ref_doc = $latest_screening['doc_no'];
 }
-// ---------------------------------------------------------
 
+$link_start_spent = "nutrition_screening_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'];
 
-// ส่วนแสดงผล Status Card (เหมือนเดิม แต่ปรับปรุงนิดหน่อย)
+// กำหนดค่า Default
+$latest_activity = $history_list[0] ?? null;
 $cur_title = 'ยังไม่มีข้อมูลการคัดกรอง';
-$cur_desc = 'กรุณาทำแบบคัดกรอง SPENT เป็นครั้งแรก';
+$cur_desc = 'ผู้ป่วยรายนี้ยังไม่เคยได้รับการคัดกรอง';
 $cur_score = '-';
 $cur_date = '-';
 $cur_assessor = '-';
 $cur_color_class = 'text-muted';
-$next_action_html = '<div class="alert alert-secondary mb-0 p-2 text-center" style="font-size: 0.9rem;"><i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบคัดกรอง SPENT</div>';
+
+$status_label = 'ผลการคัดกรอง (SPENT)';
+
+
+// ใส่ปุ่ม Link ให้กดไปหน้าฟอร์มได้
+$next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
+    <h6 class="font-weight-bold mb-2 text-secondary"><i class="fa-solid fa-circle-info mr-2"></i>ยังไม่มีข้อมูล</h6>
+    <a href="' . $link_start_spent . '" class="btn btn-sm btn-primary px-4 shadow-sm">
+        <i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบคัดกรอง SPENT
+    </a>
+</div>';
 
 if ($latest_activity) {
     $cur_date = thaiDate($latest_activity['action_datetime']);
@@ -140,6 +149,9 @@ if ($latest_activity) {
 
     // กรณีล่าสุดเป็น SPENT
     if ($latest_activity['form_type'] == 'SPENT') {
+
+        $status_label = 'ผลการคัดกรอง (SPENT)';
+
         $cur_score_val = ($latest_activity['q1_weight_loss'] + $latest_activity['q2_eat_less'] + $latest_activity['q3_bmi_abnormal'] + $latest_activity['q4_critical']);
         $cur_score = $cur_score_val;
         $cur_status_db = $latest_activity['screening_status'] ?? '';
@@ -152,7 +164,6 @@ if ($latest_activity) {
             if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_activity['assessment_doc_no'])) {
                 $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
             } else {
-                // ใช้ $target_ref_doc ที่เราหามา
                 $link_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $target_ref_doc;
 
                 $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
@@ -174,8 +185,11 @@ if ($latest_activity) {
     }
     // กรณีล่าสุดเป็น NAF
     elseif ($latest_activity['form_type'] == 'NAF') {
+
+        $status_label = 'ผลการประเมิน (NAF)';
         $cur_score = $latest_activity['total_score'];
         $naf_level = $latest_activity['naf_level'];
+
         if ($naf_level == 'NAF C') {
             $cur_title = 'NAF C: Severe Malnutrition';
             $cur_desc = 'ภาวะทุพโภชนาการระดับรุนแรง (Severe Malnutrition)';
@@ -312,16 +326,16 @@ if ($latest_activity) {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold"><?= $patient['patients_hn'] ?></span></div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold"><?= $patient['admissions_an'] ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold text-primary-custom" style="font-size: 1.1rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block">อายุ</small><span class="font-weight-bold"><?= $age ?></span></div>
-                            <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold"><?= $patient['health_insurance_name'] ?: '-' ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold"><?= $patient['doctor_name'] ?: '-' ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย / เตียง</small><span class="font-weight-bold"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold"><?= $admit_date ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold"><?= $patient['patients_phone'] ?: '-' ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold"><?= $patient['patients_congenital_disease'] ?: '-' ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_hn'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['admissions_an'] ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
+                            <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['health_insurance_name'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['doctor_name'] ?: '-' ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย / เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_congenital_disease'] ?: '-' ?></span></div>
                         </div>
                     </div>
                 </div>
@@ -376,7 +390,9 @@ if ($latest_activity) {
                             </div>
                             <div class="d-flex align-items-start mb-3">
                                 <div class="flex-grow-1 pr-3">
-                                    <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">ผลการคัดกรอง (SPENT)</small>
+                                    <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">
+                                        <?= $status_label ?>
+                                    </small>
                                     <h4 class="mt-1 mb-2 <?= $cur_color_class ?>" style="font-size: 1.5rem; font-weight: 700;"><?= $cur_title ?></h4>
                                     <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5;"><?= $cur_desc ?></p>
                                 </div>
@@ -508,7 +524,7 @@ if ($latest_activity) {
                                             ?>
                                                 <tr data-type="NAF" style="background-color: #f9fff9;">
                                                     <td>
-                                                        <a href="nutrition_alert_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                        <a href="nutrition_alert_form_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fa-solid fa-clipboard-user fa-lg mr-2 icon-naf"></i>
                                                                 <div>
@@ -531,7 +547,7 @@ if ($latest_activity) {
                                                         <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_alert_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_alert_form_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>

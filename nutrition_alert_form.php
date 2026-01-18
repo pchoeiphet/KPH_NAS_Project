@@ -7,10 +7,10 @@ $hn = $_GET['hn'] ?? '';
 $an = $_GET['an'] ?? '';
 $ref_screening_doc = $_GET['ref_screening'] ?? '';
 
-// 2. เตรียมตัวแปรเก็บข้อมูล
+// ตรียมตัวแปรเก็บข้อมูล
 $screening_data = [];
 
-// 3. ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
+// ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
 if (!empty($ref_screening_doc)) {
     try {
         // Query ค้นหาข้อมูลจากตาราง nutrition_screening ด้วยเลขที่เอกสาร
@@ -19,10 +19,9 @@ if (!empty($ref_screening_doc)) {
         $result = $stmt_find->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
-            $screening_data = $result; // เก็บข้อมูลทั้งหมด (รวมถึง ID) ลงตัวแปรนี้
+            $screening_data = $result;
         }
     } catch (Exception $e) {
-        // กรณี Error ข้ามไป
     }
 }
 
@@ -261,15 +260,15 @@ try {
                             <div class="row">
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">HN</small>
-                                    <span class="font-weight-bold" id="p_hn"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_hn" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_hn'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-3 col-lg-2 mb-3">
                                     <small class="text-muted d-block">AN</small>
-                                    <span class="font-weight-bold" id="p_an"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_an" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['admissions_an'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                    <span class="font-weight-bold" style="font-size: 1.1rem;">
+                                    <span class="font-weight-bold" id="p_name" style="font-size: 0.95rem;">
                                         <?php
                                         $fname = $patient['patients_firstname'] ?? '';
                                         $lname = $patient['patients_lastname'] ?? '';
@@ -283,15 +282,15 @@ try {
                                 </div>
                                 <div class="col-6 col-md-8 col-lg-2 mb-3">
                                     <small class="text-muted d-block">สิทธิการรักษา</small>
-                                    <span class="font-weight-bold" id="p_rights"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_rights" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['health_insurance_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
-                                    <span class="font-weight-bold" id="p_doctor"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_doctor" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                    <span class="font-weight-bold" id="p_ward">
+                                    <span class="font-weight-bold" id="p_ward" style="font-size: 0.95rem;">
                                         <?php
                                         $ward = $patient['ward_name'] ?? '-';
                                         $bed = $patient['bed_number'] ?? '-';
@@ -301,15 +300,15 @@ try {
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">วันที่ Admit</small>
-                                    <span class="font-weight-bold" id="p_admit"><?= htmlspecialchars($admit_date) ?></span>
+                                    <span class="font-weight-bold" id="p_admit" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span>
                                 </div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                    <span class="font-weight-bold" id="p_phone"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_phone" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span>
                                 </div>
                                 <div class="col-12 col-md-6 col-lg-3 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold" id="p_underlying"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
+                                    <span class="font-weight-bold" id="p_underlying" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_congenital_disease'] ?? '-') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +322,7 @@ try {
                 </button>
             </div>
 
-            <div class="card form-card mb-5">
+            <div class="card mb-5 border-0 shadow-sm" style="border-top: 5px solid #33691e!important;">
                 <div class="form-header-box">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
@@ -378,22 +377,25 @@ try {
                         <label class="section-label">2. ข้อมูลได้จาก (Source of Information)</label>
                         <div class="d-flex align-items-center">
                             <div class="custom-control custom-radio custom-control-inline mr-4">
-                                <input type="radio" id="source1" name="infoSource" class="custom-control-input"
-                                    value="patient" checked onchange="toggleOtherSource()">
+                                <input type="radio" id="source1" name="info_source" class="custom-control-input"
+                                    value="ผู้ป่วย" checked onchange="toggleOtherSource()">
                                 <label class="custom-control-label" for="source1">ผู้ป่วย</label>
                             </div>
+
                             <div class="custom-control custom-radio custom-control-inline mr-4">
-                                <input type="radio" id="source2" name="infoSource" class="custom-control-input"
-                                    value="relative" onchange="toggleOtherSource()">
+                                <input type="radio" id="source2" name="info_source" class="custom-control-input"
+                                    value="ญาติ" onchange="toggleOtherSource()">
                                 <label class="custom-control-label" for="source2">ญาติ</label>
                             </div>
+
                             <div class="d-flex align-items-center flex-grow-1">
                                 <div class="custom-control custom-radio custom-control-inline mr-2">
-                                    <input type="radio" id="source3" name="infoSource" class="custom-control-input"
-                                        value="other" onchange="toggleOtherSource()">
+                                    <input type="radio" id="source3" name="info_source" class="custom-control-input"
+                                        value="อื่นๆ" onchange="toggleOtherSource()">
                                     <label class="custom-control-label" for="source3">อื่นๆ</label>
                                 </div>
                                 <input type="text" class="form-control form-control-sm" id="otherSourceText"
+                                    name="other_source"
                                     placeholder="ระบุอื่นๆ..." disabled style="max-width: 300px;">
                             </div>
                         </div>
@@ -1020,7 +1022,7 @@ try {
     </div>
 
     <script>
-        // 1. ฟังก์ชันเปิด/ปิด ช่องระบุอื่นๆ
+        // ฟังก์ชันเปิด/ปิด ช่องระบุอื่นๆ
         function toggleOtherSource() {
             const otherRadio = document.getElementById('source3');
             const otherInput = document.getElementById('otherSourceText');
@@ -1040,7 +1042,7 @@ try {
             }
         }
 
-        // 2. ฟังก์ชันคำนวณ BMI และให้คะแนนอัตโนมัติ
+        // ฟังก์ชันคำนวณ BMI และให้คะแนนอัตโนมัติ
         function calculateBMI() {
             // ดึงค่า
             const weight = parseFloat(document.getElementById('currentWeight').value) || 0;
@@ -1059,7 +1061,7 @@ try {
                 // แสดงผล BMI
                 document.getElementById('bmiValue').value = bmi.toFixed(2);
 
-                // [สำคัญ] อัปเดตลง Hidden Input สำหรับส่งเข้า Database
+                // อัปเดตลง Hidden Input สำหรับส่งเข้า Database
                 document.getElementById('hidden_bmi').value = bmi.toFixed(2);
 
                 // คำนวณคะแนน BMI ตามเกณฑ์
@@ -1091,7 +1093,7 @@ try {
             calculateScore();
         }
 
-        // 3. สลับโหมด น้ำหนัก vs Lab
+        // สลับโหมด น้ำหนัก vs Lab
         function toggleWeightMode() {
             const isUnknown = document.getElementById('unknownWeight').checked;
             const weightSec = document.getElementById('standardWeightSection');
@@ -1122,7 +1124,7 @@ try {
             calculateScore();
         }
 
-        // 4. เลือก Lab (Albumin / TLC)
+        // เลือก Lab (Albumin / TLC)
         function selectLab(type) {
             // Reset Card Styles
             document.querySelectorAll('.lab-choice-card').forEach(card => {
@@ -1154,11 +1156,11 @@ try {
 
             if (useAlb) {
                 inpAlb.focus();
-                inpTLC.value = ''; // ล้างค่าอีกช่อง
+                inpTLC.value = '';
             }
             if (useTLC) {
                 inpTLC.focus();
-                inpAlb.value = ''; // ล้างค่าอีกช่อง
+                inpAlb.value = '';
             }
 
             calculateLabScore();
@@ -1190,24 +1192,24 @@ try {
             // แสดงผลคะแนน Lab
             document.getElementById('labScoreText').innerText = labScore;
 
-            // [สำคัญ] อัปเดตลง Hidden Input
+            // อัปเดตลง Hidden Input
             document.getElementById('hidden_lab_score').value = labScore;
 
             calculateScore();
         }
 
-        // 5. คำนวณคะแนนรวม (Main Logic)
+        //คำนวณคะแนนรวม (Main Logic)
         function calculateScore() {
             let total = 0;
 
-            // 5.1 รวมคะแนนจาก Radio/Checkbox ทั่วไปที่มี class 'score-calc' (เช่น โรค, การกินอาหาร)
+            // รวมคะแนนจาก Radio/Checkbox ทั่วไปที่มี class 'score-calc' (เช่น โรค, การกินอาหาร)
             const inputs = document.querySelectorAll('.score-calc:checked');
             inputs.forEach(el => {
                 const sc = parseInt(el.getAttribute('data-score'));
                 if (!isNaN(sc)) total += sc;
             });
 
-            // 5.2 ตรวจสอบโหมด (น้ำหนัก หรือ Lab)
+            // ตรวจสอบโหมด (น้ำหนัก หรือ Lab)
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
 
             if (isUnknownWeight) {
@@ -1225,7 +1227,7 @@ try {
             updateNafResult(total);
         }
 
-        // 6. อัปเดต UI ผลลัพธ์ (NAF Level)
+        // อัปเดต UI ผลลัพธ์ (NAF Level)
         function updateNafResult(score) {
             const box = document.getElementById('nafResultBox');
             const level = document.getElementById('nafLevel');
@@ -1259,7 +1261,7 @@ try {
             }
         }
 
-        // 7. บันทึกข้อมูล
+        // บันทึกข้อมูล
         function saveData() {
             // ตรวจสอบขั้นพื้นฐาน (Validation)
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
