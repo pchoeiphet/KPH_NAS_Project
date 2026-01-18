@@ -397,7 +397,7 @@ function isSymChecked($id, $saved_array)
                     <i class="fa-solid fa-eye mr-2"></i> โหมดดูประวัติ (Read Only)
                 </div>
 
-                <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
+                <a href="nutrition_alert_form_pdf.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
                     target="_blank"
                     class="btn btn-info btn-sm shadow-sm px-3"
                     style="border-radius: 6px;">
