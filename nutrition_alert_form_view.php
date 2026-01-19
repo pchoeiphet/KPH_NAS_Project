@@ -326,16 +326,22 @@ function isSymChecked($id, $saved_array)
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['admissions_an'] ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_firstname'] . ' ' . $data['patients_lastname'] ?></span></div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['ward_name'] ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['bed_number'] ?></span></div>
 
-                            <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['health_insurance_name'] ?: '-' ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['doctor_name'] ?: '-' ?></span></div>
-
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_phone'] ?: '-' ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_congenital_disease'] ?: '-' ?></span></div>
+
+                            <div class="col-12 col-md-6 col-lg-2 mb-3">
+                                <small class="text-muted d-block">โรคประจำตัว</small>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_congenital_disease'] ?: '-' ?></span>
+                            </div>
+
+                            <div class="col-12 col-md-6 col-lg-4 mb-3">
+                                <small class="text-muted d-block">สิทธิการรักษา</small>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['health_insurance_name'] ?: '-' ?></span>
+                            </div>
                         </div>
                     </div>
                 </div>
