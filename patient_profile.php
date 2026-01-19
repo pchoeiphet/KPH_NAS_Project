@@ -359,7 +359,7 @@ if ($latest_activity) {
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="index.php" class="btn btn-outline-secondary btn-sm" style="border-radius: 4px;">
+            <a href="index.php" class="btn btn-secondary btn-sm" style="border-radius: 4px;">
                 <i class="fa-solid fa-chevron-left mr-1"></i> กลับหน้าหลัก
             </a>
             <div class="btn-group">

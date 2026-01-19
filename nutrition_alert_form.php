@@ -279,7 +279,7 @@ try {
             </div>
 
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>
@@ -968,19 +968,18 @@ try {
                             </div>
                         </div>
                     </div>
-
+                    <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
+                        <button type="button" class="btn btn-secondary shadow-sm px-4"
+                            onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                            <i class="fa-solid fa-chevron-left mr-2"></i> ยกเลิก / ย้อนกลับ
+                        </button>
+                        <button type="button" class="btn btn-success shadow-sm px-4" style="background-color: #2e7d32; border: none;" onclick="saveData()">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
-        <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
-            <button type="button" class="btn btn-secondary shadow-sm px-4"
-                onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
-                <i class="fa-solid fa-chevron-left mr-2"></i> ยกเลิก / ย้อนกลับ
-            </button>
-            <button type="button" class="btn btn-success shadow-sm px-4" style="background-color: #2e7d32; border: none;" onclick="saveData()">
-                <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
-            </button>
-        </div>
     </div>
 
     <script>
