@@ -417,24 +417,24 @@ $html = '
     <thead>
         <tr>
             <th width="15%">คะแนน</th>
-            <th width="20%">ระดับความเสี่ยง</th>
+            <th width="25%">ระดับความเสี่ยง</th>
             <th width="65%">แนวทางการจัดการ (Management)</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td align="center"><span class="interp-score">0 - 5</span></td>
-            <td><b>NAF A</b><br>(Normal - Mild)</td>
+            <td><b>NAF A</b><br>(Normal - Mild Malnutrition)</td>
             <td>ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน</td>
         </tr>
         <tr>
             <td align="center"><span class="interp-score">6 - 10</span></td>
-            <td><b>NAF B</b><br>(Moderate)</td>
+            <td><b>NAF B</b><br>(Moderate Malnutrition)</td>
             <td>กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน</td>
         </tr>
         <tr>
             <td align="center"><span class="interp-score">≥ 11</span></td>
-            <td><b>NAF C</b><br>(Severe)</td>
+            <td><b>NAF C</b><br>(Severe Malnutrition)</td>
             <td>กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง</td>
         </tr>
     </tbody>
