@@ -91,11 +91,17 @@ try {
         $scoreVal = null;
         $nafScore = null;
 
+        // [เพิ่ม] ตัวแปรสำหรับเก็บเลขที่เอกสารที่จะส่งไป
+        $target_ref_doc = '';
+
         // คำนวณคะแนน SPENT
         $spentScore = 0;
         if ($spent) {
             $spentScore = (intval($spent['q1_weight_loss']) + intval($spent['q2_eat_less']) + intval($spent['q3_bmi_abnormal']) + intval($spent['q4_critical']));
             $screenDate = thaiDate($spent['screening_datetime']);
+
+            // [เพิ่ม] เก็บเลขที่เอกสาร (doc_no) จากใบ SPENT ล่าสุด
+            $target_ref_doc = $spent['doc_no'];
         }
 
         // Determine Status logic
@@ -131,7 +137,9 @@ try {
             'assessDate' => $assessDate,
             'status' => $status,
             'scoreVal' => $scoreVal,
-            'nafScore' => $nafScore
+            'nafScore' => $nafScore,
+            // ส่งเลขที่เอกสารไปด้วย
+            'target_doc_no' => $target_ref_doc
         ];
     }
 } catch (PDOException $e) {
@@ -387,9 +395,7 @@ try {
             });
         });
 
-        // ❌ ลบฟังก์ชัน syncWithLocalStorage() ทิ้งไปได้เลย
-
-        // --- Helper Functions (คงเดิม) ---
+        // --- Helper Functions ---
         function handleSort(column) {
             if (currentSort.column === column) {
                 currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -538,7 +544,7 @@ try {
                 } else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ต้องประเมิน NAF';
                     nextActionClass = 'text-action-urgent';
-                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}&ref_screening=${p.screenDate}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}&ref_screening=${p.target_doc_no}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
                         nextActionDisplay = 'Re-screen (เกินกำหนด)';

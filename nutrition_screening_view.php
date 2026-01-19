@@ -170,58 +170,20 @@ try {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                                <small class="text-muted d-block">HN</small>
-                                <span class="font-weight-bold" id="p_hn" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_hn'] ?? '-') ?></span>
-                            </div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                                <small class="text-muted d-block">AN</small>
-                                <span class="font-weight-bold" id="p_an" style="font-size: 0.95rem;"><?= htmlspecialchars($data['admissions_an'] ?? '-') ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">ชื่อ - นามสกุล</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;" id="p_name">
-                                    <?php
-                                    $fname = $data['patients_firstname'] ?? '';
-                                    $lname = $data['patients_lastname'] ?? '';
-                                    echo htmlspecialchars($fname . ' ' . $lname);
-                                    ?>
-                                </span>
-                            </div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3">
-                                <small class="text-muted d-block">อายุ</small>
-                                <span class="font-weight-bold" id="p_age" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span>
-                            </div>
-                            <div class="col-6 col-md-8 col-lg-2 mb-3">
-                                <small class="text-muted d-block">สิทธิการรักษา</small>
-                                <span class="font-weight-bold" id="p_rights" style="font-size: 0.95rem;"><?= htmlspecialchars($data['health_insurance_name'] ?? '-') ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">แพทย์เจ้าของไข้</small>
-                                <span class="font-weight-bold" id="p_doctor" style="font-size: 0.95rem;"><?= htmlspecialchars($data['doctor_name'] ?? '-') ?></span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">หอผู้ป่วย / เตียง</small>
-                                <span class="font-weight-bold" id="p_ward" style="font-size: 0.95rem;">
-                                    <?php
-                                    $ward = $data['ward_name'] ?? '-';
-                                    $bed = $data['bed_number'] ?? '-';
-                                    echo htmlspecialchars($ward . ' / ' . $bed);
-                                    ?>
-                                </span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">วันที่ Admit</small>
-                                <span class="font-weight-bold" id="p_admit" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span>
-                            </div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3">
-                                <small class="text-muted d-block">เบอร์โทรศัพท์</small>
-                                <span class="font-weight-bold" id="p_phone" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_phone'] ?? '-') ?></span>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3 mb-3">
-                                <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" id="p_underlying" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_congenital_disease'] ?? '-') ?></span>
-                            </div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_hn'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['admissions_an'] ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_firstname'] . ' ' . $data['patients_lastname'] ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
+
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['ward_name'] ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['bed_number'] ?></span></div>
+
+                            <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['health_insurance_name'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['doctor_name'] ?: '-' ?></span></div>
+
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_congenital_disease'] ?: '-' ?></span></div>
                         </div>
                     </div>
                 </div>

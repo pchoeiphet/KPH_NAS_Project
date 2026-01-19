@@ -131,16 +131,28 @@ $cur_score = '-';
 $cur_date = '-';
 $cur_assessor = '-';
 $cur_color_class = 'text-muted';
-
 $status_label = 'ผลการคัดกรอง (SPENT)';
 
+// สร้าง Link ไปหน้า NAF โดยตรง (กรณีไม่ทราบน้ำหนัก)
+$link_direct_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'];
 
-// ใส่ปุ่ม Link ให้กดไปหน้าฟอร์มได้
+// [แก้ไขใหม่] เพิ่มปุ่ม "กรณีไม่ทราบน้ำหนัก" ไว้คู่กัน
 $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
     <h6 class="font-weight-bold mb-2 text-secondary"><i class="fa-solid fa-circle-info mr-2"></i>ยังไม่มีข้อมูล</h6>
-    <a href="' . $link_start_spent . '" class="btn btn-sm btn-primary px-4 shadow-sm">
-        <i class="fa-solid fa-play mr-2"></i>เริ่มทำแบบคัดกรอง SPENT
-    </a>
+    
+    <div class="d-flex justify-content-center">
+        <a href="' . $link_start_spent . '" class="btn btn-sm btn-primary px-3 shadow-sm mr-2">
+            <i class="fa-solid fa-play mr-1"></i> เริ่มคัดกรอง SPENT
+        </a>
+
+        <a href="' . $link_direct_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm" title="ไปประเมิน NAF ทันที">
+            <i class="fa-solid fa-weight-scale mr-1"></i> ไม่ทราบน้ำหนักผู้ป่วย
+        </a>
+    </div>
+    
+    <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+        *หากไม่สามารถชั่งน้ำหนักได้ ให้เลือกปุ่มสีแดง
+    </div>
 </div>';
 
 if ($latest_activity) {
@@ -330,9 +342,13 @@ if ($latest_activity) {
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['admissions_an'] ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
+
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['bed_number'] ?></span></div>
+
                             <div class="col-6 col-md-8 col-lg-2 mb-3"><small class="text-muted d-block">สิทธิการรักษา</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['health_insurance_name'] ?: '-' ?></span></div>
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['doctor_name'] ?: '-' ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย / เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?> / <?= $patient['bed_number'] ?></span></div>
+
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_phone'] ?: '-' ?></span></div>
                             <div class="col-12 col-md-6 col-lg-3 mb-3"><small class="text-muted d-block">โรคประจำตัว</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_congenital_disease'] ?: '-' ?></span></div>
