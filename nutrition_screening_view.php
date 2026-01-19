@@ -241,7 +241,7 @@ try {
                     <i class="fa-solid fa-eye mr-1"></i> โหมดดูประวัติ (Read Only)
                 </div>
 
-                <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
+                <a href="nutrition_screening_report.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
                     target="_blank"
                     class="btn btn-info btn-sm shadow-sm px-3">
                     <i class="fas fa-file-pdf mr-1"></i> ดาวน์โหลด PDF

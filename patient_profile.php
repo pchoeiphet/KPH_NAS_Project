@@ -500,7 +500,7 @@ if ($latest_activity) {
                                                         <span class="badge <?= $status_badge ?> font-weight-normal px-2"><?= $row['screening_status'] ?></span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_screening_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_screening_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
@@ -547,7 +547,7 @@ if ($latest_activity) {
                                                         <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_alert_form_pdf.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_alert_form_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>

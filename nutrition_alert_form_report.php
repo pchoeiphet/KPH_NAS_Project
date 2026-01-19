@@ -237,7 +237,7 @@ $html = '
     .table-assess th { border: 1px solid #000; background-color: #f5f5f5; padding: 6px; text-align: center; font-weight: bold; font-size: 15pt; }
     .table-assess td { border: 1px solid #000; padding: 6px; vertical-align: top; }
     
-    .col-topic { width: 45%; font-weight: bold; }
+    .col-topic { width: 25%; font-weight: bold; }
     .col-detail { width: 40%; }
     .col-score { width: 15%; text-align: center; font-weight: bold; vertical-align: middle; font-size: 16pt; }
     
