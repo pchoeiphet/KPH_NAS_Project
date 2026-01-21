@@ -34,15 +34,30 @@ $ward_options = [];
 $doctor_options = [];
 
 try {
-    // ดึงรายชื่อหอผู้ป่วย
-    $stmt_w = $conn->prepare("SELECT ward_name FROM wards ORDER BY ward_name ASC");
+    // ดึงรายชื่อหอผู้ป่วย (เฉพาะที่มีใน Admissions และยังไม่จำหน่าย)
+    $sql_ward_options = "
+        SELECT DISTINCT wards.ward_name 
+        FROM admissions 
+        JOIN wards ON admissions.ward_id = wards.ward_id 
+        WHERE admissions.discharge_datetime IS NULL 
+        ORDER BY wards.ward_name ASC
+    ";
+    $stmt_w = $conn->prepare($sql_ward_options);
     $stmt_w->execute();
     $ward_options = $stmt_w->fetchAll(PDO::FETCH_ASSOC);
 
-    // ดึงรายชื่อแพทย์
-    $stmt_d = $conn->prepare("SELECT doctor_name FROM doctor ORDER BY doctor_name ASC");
+    // ดึงรายชื่อแพทย์ (เฉพาะที่มีใน Admissions และยังไม่จำหน่าย)
+    $sql_doctor_options = "
+        SELECT DISTINCT doctor.doctor_name 
+        FROM admissions 
+        JOIN doctor ON admissions.doctor_id = doctor.doctor_id 
+        WHERE admissions.discharge_datetime IS NULL 
+        ORDER BY doctor.doctor_name ASC
+    ";
+    $stmt_d = $conn->prepare($sql_doctor_options);
     $stmt_d->execute();
     $doctor_options = $stmt_d->fetchAll(PDO::FETCH_ASSOC);
+
     // ตัวแปรเก็บข้อมูลผู้ป่วยเพื่อส่งให้ JS
     $patients_data = [];
 } catch (PDOException $e) {
@@ -537,12 +552,12 @@ try {
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted text-center';
                         countdownDisplay = `<div class="text-muted">Re-screen ใน ${daysRemaining} วัน</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {
                     nextActionDisplay = 'ติดตามผล';
                     nextActionClass = 'text-action-muted text-center';
-                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
                 // สร้าง HTML แถว
@@ -556,7 +571,7 @@ try {
         
                             <td class="font-weight-bold text-dark">${p.hn}</td>
         
-                            <td><a href="patient_profile.php?hn=${p.hn}" class="patient-link">${p.name}</a></td>
+                            <td><a href="patient_profile.php?hn=${p.hn}&an=${p.an}" class="patient-link">${p.name}</a></td>
         
                             <td class="text-center">${p.age} ปี</td>
         

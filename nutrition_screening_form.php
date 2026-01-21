@@ -214,7 +214,7 @@ try {
             </div>
 
             <div class="mb-3">
-                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>&an=<?= htmlspecialchars($an) ?>'">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>

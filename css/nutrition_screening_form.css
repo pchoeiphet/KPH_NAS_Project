@@ -175,11 +175,11 @@ body {
 }
 
 .patient-icon-box {
-  width: 120px;
-  height: 150px;
+  width: 130px;
+  height: 155px;
   background-color: #e3f2fd;
   color: #2c3e50;
-  border-radius: 8px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;

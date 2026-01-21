@@ -3,9 +3,10 @@ require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
 $hn = $_GET['hn'] ?? '';
+$an = $_GET['an'] ?? '';
 
-if (empty($hn)) {
-    die("Error: ไม่พบข้อมูล HN");
+if (empty($hn) || empty($an)) {
+    die("Error: ไม่พบข้อมูล HN หรือ AN");
 }
 
 try {
@@ -150,7 +151,7 @@ $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" sty
         </a>
     </div>
     
-    <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+    <div class="mt-2 text-muted" style="font-size: 0.9rem;">
         *หากไม่สามารถชั่งน้ำหนักได้ ให้เลือกปุ่มสีแดง
     </div>
 </div>';
