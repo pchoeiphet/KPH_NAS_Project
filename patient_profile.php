@@ -133,10 +133,10 @@ $cur_assessor = '-';
 $cur_color_class = 'text-muted';
 $status_label = 'ผลการคัดกรอง (SPENT)';
 
-// สร้าง Link ไปหน้า NAF โดยตรง (กรณีไม่ทราบน้ำหนัก)
+// Link ไปหน้า NAF โดยตรง (กรณีไม่ทราบน้ำหนัก)
 $link_direct_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'];
 
-// [แก้ไขใหม่] เพิ่มปุ่ม "กรณีไม่ทราบน้ำหนัก" ไว้คู่กัน
+// กรณีไม่ทราบน้ำหนัก
 $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
     <h6 class="font-weight-bold mb-2 text-secondary"><i class="fa-solid fa-circle-info mr-2"></i>ยังไม่มีข้อมูล</h6>
     
@@ -231,7 +231,7 @@ if ($latest_activity) {
     <title>ข้อมูลผู้ป่วย | โรงพยาบาลกำแพงเพชร</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
     <link rel="stylesheet" href="css/patient_profile.css">
 </head>
 
