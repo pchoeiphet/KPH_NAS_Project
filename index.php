@@ -34,12 +34,12 @@ $ward_options = [];
 $doctor_options = [];
 
 try {
-    // 1. ดึงรายชื่อหอผู้ป่วย
+    // ดึงรายชื่อหอผู้ป่วย
     $stmt_w = $conn->prepare("SELECT ward_name FROM wards ORDER BY ward_name ASC");
     $stmt_w->execute();
     $ward_options = $stmt_w->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. ดึงรายชื่อแพทย์
+    // ดึงรายชื่อแพทย์
     $stmt_d = $conn->prepare("SELECT doctor_name FROM doctor ORDER BY doctor_name ASC");
     $stmt_d->execute();
     $doctor_options = $stmt_d->fetchAll(PDO::FETCH_ASSOC);
@@ -55,15 +55,15 @@ try {
         SELECT 
             patients.patients_id, patients.patients_hn, patients.patients_firstname, patients.patients_lastname, 
             patients.patients_dob, patients.patients_congenital_disease,
-            a.admissions_an, a.admit_datetime, a.bed_number,
-            w.ward_name,
-            d.doctor_name
-        FROM admissions a
-        JOIN patients ON a.patients_id = patients.patients_id
-        LEFT JOIN wards w ON a.ward_id = w.ward_id
-        LEFT JOIN doctor d ON a.doctor_id = d.doctor_id
-        WHERE a.discharge_datetime IS NULL
-        ORDER BY a.ward_id, a.bed_number ASC
+            admissions.admissions_an, admissions.admit_datetime, admissions.bed_number,
+            wards.ward_name,
+            doctor.doctor_name
+        FROM admissions
+        JOIN patients ON admissions.patients_id = patients.patients_id
+        LEFT JOIN wards ON admissions.ward_id = wards.ward_id
+        LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
+        WHERE admissions.discharge_datetime IS NULL
+        ORDER BY admissions.ward_id, admissions.bed_number ASC
     ";
 
     $stmt = $conn->prepare($sql);
@@ -74,24 +74,24 @@ try {
         $hn = $row['patients_hn'];
         $an = $row['admissions_an'];
 
-        // 2. หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
+        // หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
         $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patients_hn = :hn ORDER BY screening_datetime DESC LIMIT 1");
         $stmt_spent->execute([':hn' => $hn]);
         $spent = $stmt_spent->fetch(PDO::FETCH_ASSOC);
 
-        // 3. หาข้อมูลการประเมิน (NAF) ล่าสุด
+        // หาข้อมูลการประเมิน (NAF) ล่าสุด
         $stmt_naf = $conn->prepare("SELECT * FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY assessment_datetime DESC LIMIT 1");
         $stmt_naf->execute([':hn' => $hn]);
         $naf = $stmt_naf->fetch(PDO::FETCH_ASSOC);
 
-        // 4. คำนวณสถานะ
+        // คำนวณสถานะ
         $status = 'wait_screen';
         $screenDate = '-';
         $assessDate = '-';
         $scoreVal = null;
         $nafScore = null;
 
-        // [เพิ่ม] ตัวแปรสำหรับเก็บเลขที่เอกสารที่จะส่งไป
+        // ตัวแปรสำหรับเก็บเลขที่เอกสารที่จะส่งไป
         $target_ref_doc = '';
 
         // คำนวณคะแนน SPENT
@@ -100,7 +100,7 @@ try {
             $spentScore = (intval($spent['q1_weight_loss']) + intval($spent['q2_eat_less']) + intval($spent['q3_bmi_abnormal']) + intval($spent['q4_critical']));
             $screenDate = thaiDate($spent['screening_datetime']);
 
-            // [เพิ่ม] เก็บเลขที่เอกสาร (doc_no) จากใบ SPENT ล่าสุด
+            // เก็บเลขที่เอกสาร (doc_no) จากใบ SPENT ล่าสุด
             $target_ref_doc = $spent['doc_no'];
         }
 
@@ -463,7 +463,7 @@ try {
             data.forEach((p, index) => {
                 let actionBtn = '';
 
-                // จัดการวันเวลา Admit (บรรทัดเดียวกัน)
+                // จัดการวันเวลา Admit
                 let admitDateShow = p.admitDate;
                 let admitTimeShow = '';
                 if (p.admitDate && p.admitDate !== '-') {
@@ -477,13 +477,10 @@ try {
                 const daysSinceScreen = getDaysDiff(p.screenDate);
                 const daysRemaining = 7 - daysSinceScreen;
 
-                // -----------------------------------------------------------
-                // 1. Logic Status (ปรับเอา small ออก)
-                // -----------------------------------------------------------
+                // Logic Status
                 let statusDisplay = '';
                 let dateDisplay = '';
 
-                // ปรับ style ของวันที่ใต้สถานะ ให้ตัวเท่ากัน (ไม่ใช้ small)
                 const dateStyle = 'class="text-muted mt-1" style="font-size: 0.8rem;"';
 
                 if (p.status === 'wait_screen') {
@@ -513,9 +510,7 @@ try {
                     dateDisplay = `<div ${dateStyle}>ประเมิน: ${p.assessDate}</div>`;
                 }
 
-                // -----------------------------------------------------------
-                // 2. Logic Action (ปรับเอา small ออก)
-                // -----------------------------------------------------------
+                // Logic Action
                 let nextActionDisplay = '';
                 let nextActionClass = 'text-action-normal text-center';
                 let countdownDisplay = '';
@@ -555,23 +550,23 @@ try {
                         <tr>
                             <td class="text-center text-muted">${index + 1}</td>
         
-        <td class="text-center font-weight-bold text-dark">${p.bed}</td>
+                            <td class="text-center font-weight-bold text-dark">${p.bed}</td>
         
-        <td><span class="text-muted">${p.an}</span></td>
+                            <td><span class="text-muted">${p.an}</span></td>
         
-        <td class="font-weight-bold text-dark">${p.hn}</td>
+                            <td class="font-weight-bold text-dark">${p.hn}</td>
         
-        <td><a href="patient_profile.php?hn=${p.hn}" class="patient-link">${p.name}</a></td>
+                            <td><a href="patient_profile.php?hn=${p.hn}" class="patient-link">${p.name}</a></td>
         
-        <td class="text-center">${p.age} ปี</td>
+                            <td class="text-center">${p.age} ปี</td>
         
-        <td><span class="text-secondary">${p.doctor}</span></td>
+                            <td><span class="text-secondary">${p.doctor}</span></td>
         
-        <td>
-            <span class="font-weight-bold text-dark">${admitDateShow}</span>
-            <span class="text-muted pl-1">${admitTimeShow}</span>
-        </td>
-                            
+                            <td>
+                                 <span class="font-weight-bold text-dark">${admitDateShow}</span>
+                                <span class="text-muted pl-1">${admitTimeShow}</span>
+                            </td>
+                                                
                             <td>
                                 ${statusDisplay}
                                 ${dateDisplay}
@@ -594,13 +589,14 @@ try {
             const ward = document.getElementById('wardFilter').value;
             const doctor = document.getElementById('doctorFilter').value;
 
+            // กรองข้อมูลผู้ป่วยตามเงื่อนไข
             let result = patients.filter(p => {
                 const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
 
-                // กรอง Ward (ต้องเช็คว่าค่า value ใน <option> ตรงกับค่า ward_name หรือ ward_id ที่ส่งมาจาก PHP)
-                // ถ้า PHP ส่ง ward_name มา ก็ใช้ p.ward ได้เลย
+                // กรองหอผู้ป่วย
                 const matchesWard = ward === 'all' || p.ward === ward;
 
+                // กรองแพทย์เจ้าของไข้
                 const matchesDoctor = doctor === 'all' || p.doctor === doctor;
                 return matchesSearch && matchesWard && matchesDoctor;
             });
