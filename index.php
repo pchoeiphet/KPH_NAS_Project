@@ -182,7 +182,7 @@ try {
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 290px;">
                         <div class="user-profile-btn">
                             <div class="user-avatar">
                                 <i class="fa-solid fa-user-doctor"></i>
@@ -194,61 +194,43 @@ try {
                             <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
-                        style="border-radius: 12px; min-width: 250px;">
+
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2 pb-0" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px; overflow: hidden;">
 
                         <div class="dropdown-header bg-light border-bottom py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                            <div class="d-flex align-items-center px-2">
+                                <div class="user-avatar mr-3 bg-white border"
+                                    style="width: 45px; height: 45px; font-size: 1.3rem; color: #2c3e50;">
                                     <i class="fa-solid fa-user-doctor"></i>
                                 </div>
                                 <div style="line-height: 1.3;">
-                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
-                                        เชยเพ็ชร</strong>
-                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
-                                    <br>
-                                    <span class="badge badge-info mt-1"
-                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                    <h6 class="font-weight-bold text-dark mb-0">เพชรลดา เชยเพ็ชร</h6>
+                                    <small class="text-muted d-block">นักโภชนาการชำนาญการ</small>
+                                    <span class="badge badge-info mt-1 font-weight-normal px-2">License: DT-66099</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="p-2">
-                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
-                                งานของฉัน</h6>
-                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
-                                href="#">
-                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
-                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
-                                <span class="badge badge-danger badge-pill">5</span>
+                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
+                                    ประวัติการประเมินของฉัน</span>
                             </a>
+
                             <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
-                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
-                            </a>
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
-                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                                <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
+                                    ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>
                         </div>
 
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <i class="fa-solid fa-file-signature mr-2 text-warning"
-                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                        <div class="bg-light border-top p-2">
+                            <a class="dropdown-item py-2 rounded text-danger font-weight-bold" href="#"
+                                onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px;"></i> ออกจากระบบ
                             </a>
                         </div>
 
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
-                                <i class="fa-solid fa-right-from-bracket mr-2"
-                                    style="width:20px; text-align:center;"></i> ออกจากระบบ
-                            </a>
-                        </div>
                     </div>
                 </li>
             </ul>
@@ -535,7 +517,7 @@ try {
                 // 2. Logic Action (ปรับเอา small ออก)
                 // -----------------------------------------------------------
                 let nextActionDisplay = '';
-                let nextActionClass = 'text-action-normal';
+                let nextActionClass = 'text-action-normal text-center';
                 let countdownDisplay = '';
 
                 if (p.status === 'wait_screen') {
@@ -543,12 +525,12 @@ try {
                     actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 } else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ต้องประเมิน NAF';
-                    nextActionClass = 'text-action-urgent';
+                    nextActionClass = 'text-action-urgent text-center';
                     actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}&ref_screening=${p.target_doc_no}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
                         nextActionDisplay = 'Re-screen (เกินกำหนด)';
-                        nextActionClass = 'text-action-urgent';
+                        nextActionClass = 'text-action-urgent text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
@@ -558,13 +540,13 @@ try {
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
                         nextActionDisplay = 'ติดตามผล';
-                        nextActionClass = 'text-action-muted';
+                        nextActionClass = 'text-action-muted text-center';
                         countdownDisplay = `<div class="text-muted">Re-screen ใน ${daysRemaining} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {
                     nextActionDisplay = 'ติดตามผล';
-                    nextActionClass = 'text-action-muted';
+                    nextActionClass = 'text-action-muted text-center';
                     actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                 }
 
