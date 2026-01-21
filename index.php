@@ -530,12 +530,12 @@ try {
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
                         nextActionDisplay = 'Re-screen (เกินกำหนด)';
-                        nextActionClass = 'text-action-urgent text-center';
+                        nextActionClass = 'text-action-urgentม text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
                         nextActionDisplay = 'Re-screen (วันนี้)';
-                        nextActionClass = 'text-action-warning';
+                        nextActionClass = 'text-action-warning ียtext-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">ครบกำหนดวันนี้</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
