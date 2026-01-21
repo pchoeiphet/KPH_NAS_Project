@@ -406,10 +406,6 @@ $html = '
     </tr>
 </table>
 
-<div class="footer-audit">
-    (เอกสารนี้เป็นส่วนหนึ่งของเวชระเบียนผู้ป่วย - Medical Record)
-</div>
-
 <pagebreak>
 
 <div style="margin-top: 15px; font-weight: bold; font-size: 16pt; margin-bottom: 10px;">เกณฑ์การแปลผล (Interpretation Criteria):</div>
