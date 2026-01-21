@@ -307,7 +307,7 @@ try {
                                 </th>
                                 <th class="text-center" onclick="handleSort('hn')">HN <i class="fas fa-sort sort-icon" id="sort-hn"></i>
                                 </th>
-                                <th class="text-center" style="width: 14%;" onclick="handleSort('name')">
+                                <th class="text-center" style="width: 12%;" onclick="handleSort('name')">
                                     ชื่อ-นามสกุล <i class="fas fa-sort sort-icon" id="sort-name"></i>
                                 </th>
                                 <th class="text-center" onclick="handleSort('age')">อายุ <i
