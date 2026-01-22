@@ -552,7 +552,7 @@ try {
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted text-center';
                         countdownDisplay = `<div class="text-muted">Re-screen ใน ${daysRemaining} วัน</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {
                     nextActionDisplay = 'ติดตามผล';
