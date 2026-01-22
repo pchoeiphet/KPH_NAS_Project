@@ -199,7 +199,7 @@ try {
         <div class="d-flex justify-content-between align-items-center mb-3 no-print">
 
             <div>
-                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>'">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>&an=<?= htmlspecialchars($data['admissions_an'] ?? '') ?>';">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>

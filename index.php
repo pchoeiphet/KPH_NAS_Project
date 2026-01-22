@@ -539,19 +539,19 @@ try {
                     actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}&ref_screening=${p.target_doc_no}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
-                        nextActionDisplay = 'Re-screen (เกินกำหนด)';
+                        nextActionDisplay = 'คัดกรองซ้ำ (เกินกำหนด)';
                         nextActionClass = 'text-action-urgentม text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
-                        nextActionDisplay = 'Re-screen (วันนี้)';
+                        nextActionDisplay = 'คัดกรองซ้ำ (วันนี้)';
                         nextActionClass = 'text-action-warning ียtext-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">ครบกำหนดวันนี้</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted text-center';
-                        countdownDisplay = `<div class="text-muted">Re-screen ใน ${daysRemaining} วัน</div>`;
+                        countdownDisplay = `<div class="text-muted">คัดกรองซ้ำ ใน ${daysRemaining} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {

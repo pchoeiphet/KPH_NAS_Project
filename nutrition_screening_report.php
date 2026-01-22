@@ -358,5 +358,5 @@ $html = '
 ';
 
 $mpdf->WriteHTML($html);
-$mpdf->Output('Nutrition_Screening_Form.pdf', 'I');
+$mpdf->Output($data['doc_no'] . '.pdf', 'I');
 ?>

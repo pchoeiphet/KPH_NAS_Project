@@ -353,7 +353,7 @@ function isSymChecked($id, $saved_array)
             <div>
                 <button type="button" class="btn btn-secondary btn-sm shadow-sm"
                     style="border-radius: 6px;"
-                    onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>'">
+                    onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>&an=<?= htmlspecialchars($data['admissions_an'] ?? '') ?>';">  
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>

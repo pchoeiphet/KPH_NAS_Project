@@ -465,6 +465,6 @@ $mpdf = new \Mpdf\Mpdf([
 ]);
 
 $mpdf->WriteHTML($html);
-$mpdf->Output("NAF_" . $doc_no . ".pdf", "I");
+$mpdf->Output($doc_no . ".pdf", "I");
 exit;
 ?>
