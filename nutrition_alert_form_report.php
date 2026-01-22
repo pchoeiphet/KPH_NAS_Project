@@ -109,17 +109,18 @@ if (isset($assessment['is_no_weight']) && $assessment['is_no_weight'] == 0) {
     $bmi_score_calc = 0;
     $bmi_range_text = "";
 
-    if ($bmi_val < 18.5) {
+    if ($bmi_val < 18.0) {
         if ($bmi_val < 17.0) {
             $bmi_score_calc = 2;
             $bmi_range_text = "(< 17.0)";
         } else {
             $bmi_score_calc = 1;
-            $bmi_range_text = "(17.0 - 18.49)";
+            $bmi_range_text = "(17.0 - 18.0)";
         }
-    } elseif ($bmi_val >= 18.5 && $bmi_val < 23.0) {
+    } elseif ($bmi_val >= 18.1 && $bmi_val < 30.0) {
         $bmi_score_calc = 0;
-    } elseif ($bmi_val >= 23.0) {
+        $bmi_range_text = "(18.1 - 29.9)";
+    } elseif ($bmi_val >= 30.0) {
         if ($bmi_val >= 30.0) {
             $bmi_score_calc = 1;
             $bmi_range_text = "(≥ 30.0)";

@@ -493,7 +493,7 @@ try {
                                     <?php endif; ?>
                                 </div>
                                 <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), &gt; 30 (1 คะแนน)
+                                    <i class="fas fa-info-circle mr-1"></i> <strong>เกณฑ์ BMI:</strong> &lt; 17.0 (2 คะแนน), 17.0-18.1 (1 คะแนน), 18.1-29.9 (0 คะแนน), &gt;= 30 (1 คะแนน)
                                 </small>
                             </div>
                         </div>
@@ -1034,11 +1034,11 @@ try {
                 // คำนวณคะแนน BMI ตามเกณฑ์
                 // < 17 (2 คะแนน), 17-18 (1 คะแนน), 18.1-29.9 (0 คะแนน), > 30 (1 คะแนน)
                 let bmiScore = 0;
-                if (bmi < 17) {
+                if (bmi < 17.0) {
                     bmiScore = 2;
-                } else if (bmi <= 18) {
+                } else if (bmi <= 18.0) {
                     bmiScore = 1;
-                } else if (bmi > 30) {
+                } else if (bmi >= 30.0) {
                     bmiScore = 1;
                 } else {
                     bmiScore = 0; // 18.1 - 29.9 (รวมถึง 30 เป๊ะๆ ถ้าอิงตามตรรกะ >30)
