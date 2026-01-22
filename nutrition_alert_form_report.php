@@ -99,13 +99,15 @@ if (!empty($assessment['height_relative']) && $assessment['height_relative'] > 0
 }
 $height_detail = !empty($height_detail_parts) ? implode("<br/>", $height_detail_parts) : "-";
 
-// 2.2 น้ำหนัก/BMI
+// น้ำหนัก/BMI
 $q2_detail = "";
 $q2_score = 0;
 
 if (isset($assessment['is_no_weight']) && $assessment['is_no_weight'] == 0) {
     $weight_opt_score = $assessment['weight_option_score'] ?? 0;
-    $bmi_val = $assessment['bmi'];
+
+    // แปลงเป็น float เพื่อความชัวร์ในการคำนวณ
+    $bmi_val = (float)$assessment['bmi'];
     $bmi_score_calc = 0;
     $bmi_range_text = "";
 
@@ -117,21 +119,20 @@ if (isset($assessment['is_no_weight']) && $assessment['is_no_weight'] == 0) {
             $bmi_score_calc = 1;
             $bmi_range_text = "(17.0 - 18.0)";
         }
-    } elseif ($bmi_val >= 18.1 && $bmi_val < 30.0) {
+    } elseif ($bmi_val < 30.0) {
         $bmi_score_calc = 0;
         $bmi_range_text = "(18.1 - 29.9)";
-    } elseif ($bmi_val >= 30.0) {
-        if ($bmi_val >= 30.0) {
-            $bmi_score_calc = 1;
-            $bmi_range_text = "(≥ 30.0)";
-        } else {
-            $bmi_score_calc = 0;
-        }
+    } else {
+        $bmi_score_calc = 1;
+        $bmi_range_text = "(≥ 30.0)";
     }
 
     $q2_detail .= "<b>น้ำหนัก:</b> " . ($assessment['weight'] ?? '-') . " กก.<br/>";
     $q2_detail .= "<b>วิธีการชั่ง:</b> " . ($assessment['weight_option_label'] ?? '-') . " (" . $weight_opt_score . ")<br/>";
-    $q2_detail .= "<b>BMI:</b> " . number_format((float)$bmi_val, 2) . " กก./ม² " . $bmi_range_text;
+
+    // แสดงผล
+    $q2_detail .= "<b>BMI:</b> " . number_format($bmi_val, 2) . " กก./ม² " . $bmi_range_text;
+
     $q2_score = $bmi_score_calc + $weight_opt_score;
 } else {
     $lab_method = $assessment['lab_method'] ?? '';
@@ -151,7 +152,7 @@ if (isset($assessment['is_no_weight']) && $assessment['is_no_weight'] == 0) {
     }
 }
 
-// 2.3 อาการ
+// อาการ
 $sql_sym = "SELECT sp.symptom_problem_name, sps.symptom_problem_score 
             FROM symptom_problem_saved sps
             JOIN symptom_problem sp ON sp.symptom_problem_id = sps.symptom_problem_id 
@@ -278,7 +279,7 @@ $html = '
 <div class="info-box">
     <table width="100%" style="border-collapse: collapse;">
         <tr style="border-bottom: 1px dotted #ccc;">
-            <td width="22%" style="padding-bottom: 5px;">
+            <td width="24%" style="padding-bottom: 5px;">
                 <b>ชื่อ-สกุล:</b> ' . $patient_full_name . '
             </td>
             <td width="22%" style="padding-bottom: 5px;">
@@ -300,10 +301,10 @@ $html = '
                 <b>หอผู้ป่วย:</b> ' . ($assessment['ward_name'] ?? '-') . '
                 &nbsp;&nbsp;
                 <b>เตียง:</b> ' . ($assessment['bed_number'] ?? '-') . '
+                <b>วันที่รับเข้ารักษา:</b> ' . $admit_date_th . '
             </td>
-            <td colspan="3" style="padding-top: 5px; padding-bottom: 5px;">
-                <b>วันที่รับเข้ารักษา:</b> ' . $admit_date_th . ' 
-                &nbsp;|&nbsp; 
+            
+            <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
                 <b>วันที่ประเมิน:</b> ' . $assess_datetime_th . '
             </td>
         </tr>
@@ -312,8 +313,7 @@ $html = '
             <td colspan="2" style="padding-top: 5px;">
                 <b>การวินิจฉัยเบื้องต้น:</b> ' . ($assessment['initial_diagnosis'] ?? '-') . '
             </td>
-            <td colspan="2" style="padding-top: 5px;">
-                <b>ข้อมูลจาก:</b> ' . $infoSourceText . '
+            <td colspan="3" style="padding-top: 5px;"> <b>ข้อมูลจาก:</b> ' . $infoSourceText . '
             </td>
         </tr>
     </table>

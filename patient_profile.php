@@ -545,7 +545,7 @@ if ($latest_activity) {
                                                     $naf_res_html = '<span class="text-danger font-weight-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>NAF C</span>';
                                                 }
                                             ?>
-                                                <tr data-type="NAF" style="background-color: #f9fff9;">
+                                                <tr data-type="NAF">
                                                     <td>
                                                         <a href="nutrition_alert_form_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
                                                             <div class="d-flex align-items-center">

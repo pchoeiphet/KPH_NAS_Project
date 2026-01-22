@@ -44,6 +44,22 @@ if (!empty($ref_screening_doc)) {
     }
 }
 
+if ($result) {
+    $screening_data = $result;
+}
+
+$val_diagnosis = '';
+$val_weight = '';
+$val_height = '';
+$val_bmi = '';
+
+if (!empty($screening_data)) {
+    $val_diagnosis = $screening_data['initial_diagnosis'] ?? '';
+    $val_weight = $screening_data['present_weight'] ?? '';
+    $val_height = $screening_data['height'] ?? '';
+    $val_bmi = $screening_data['bmi'] ?? '';
+}
+
 try {
     // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
@@ -336,7 +352,9 @@ try {
 
                     <div class="form-group mb-4">
                         <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis)</label>
-                        <input type="text" class="form-control" name="initial_diagnosis" placeholder="ระบุการวินิจฉัยโรค...">
+                        <input type="text" class="form-control" name="initial_diagnosis"
+                            placeholder="ระบุการวินิจฉัยโรค..."
+                            value="<?= htmlspecialchars($val_diagnosis) ?>"> <small class="text-muted">ดึงข้อมูลอัตโนมัติจากแบบคัดกรอง (แก้ไขได้)</small>
                     </div>
 
                     <hr class="my-4">
@@ -383,7 +401,8 @@ try {
                                     <input type="number" step="0.1" class="form-control anthro-input"
                                         id="anthroHeight"
                                         name="height_measure"
-                                        placeholder="0.0" oninput="calculateBMI()">
+                                        placeholder="0.0" oninput="calculateBMI()"
+                                        value="<?= htmlspecialchars($val_height) ?>">
                                     <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                                 </div>
                             </div>
@@ -451,21 +470,26 @@ try {
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" id="currentWeight"
                                             name="weight"
-                                            placeholder="0.0" oninput="calculateBMI()">
+                                            placeholder="0.0" oninput="calculateBMI()"
+                                            value="<?= htmlspecialchars($val_weight) ?>">
                                         <div class="input-group-append"><span class="input-group-text">กก.</span></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-4 mb-3">
                                     <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control bmi-display-box" id="bmiValue" value="-" readonly>
+                                        <input type="text" class="form-control bmi-display-box"
+                                            id="bmiValue"
+                                            value="<?= htmlspecialchars($val_bmi) ?>"
+                                            readonly>
+
                                         <div class="input-group-append">
                                             <span class="input-group-text small" id="bmiScoreText"
                                                 style="background-color: #e9ecef; font-weight: 500;">Score: 0</span>
                                         </div>
                                     </div>
 
-                                    <input type="hidden" name="bmi" id="hidden_bmi">
+                                    <input type="hidden" name="bmi" id="hidden_bmi" value="<?= htmlspecialchars($val_bmi) ?>">
                                     <input type="hidden" name="bmi_score" id="hidden_bmi_score" value="0">
                                 </div>
                             </div>
