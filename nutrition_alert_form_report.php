@@ -277,10 +277,10 @@ $html = '
 <div class="info-box">
     <table width="100%" style="border-collapse: collapse;">
         <tr style="border-bottom: 1px dotted #ccc;">
-            <td width="24%" style="padding-bottom: 5px;">
+            <td width="22%" style="padding-bottom: 5px;">
                 <b>ชื่อ-สกุล:</b> ' . $patient_full_name . '
             </td>
-            <td width="20%" style="padding-bottom: 5px;">
+            <td width="22%" style="padding-bottom: 5px;">
                 <b>อายุ:</b> ' . $age . '
             </td>
             <td width="10%" style="padding-bottom: 5px;">
