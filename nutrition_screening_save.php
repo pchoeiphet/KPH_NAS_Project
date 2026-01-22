@@ -99,7 +99,7 @@ try {
         header("Location: nutrition_alert_form.php?hn=$hn&an=$an&ref_screening=$doc_no");
     } else {
         // กลับหน้าเดิม หรือหน้า Profile ผู้ป่วย
-        header("Location: patient_profile.php?hn=$hn");
+        header("Location: patient_profile.php?hn=$hn&an=$an");
     }
     exit;
 } catch (PDOException $e) {

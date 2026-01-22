@@ -278,19 +278,19 @@ try {
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">ส่วนสูง</label>
+                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" id="heightVal" name="height" placeholder="0" oninput="calculateBMI()" required>
-                                        <div class="input-group-append"><span class="input-group-text input-unit">ซม.</span></div>
+                                        <input type="number" step="0.1" class="form-control" name="normal_weight" placeholder="0.0">
+                                        <div class="input-group-append"><span class="input-group-text input-unit">กก.</span></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
+                                    <label class="text-muted small mb-1">ส่วนสูง</label>
                                     <div class="input-group">
-                                        <input type="number" step="0.1" class="form-control" name="normal_weight" placeholder="0.0">
-                                        <div class="input-group-append"><span class="input-group-text input-unit">กก.</span></div>
+                                        <input type="number" class="form-control" id="heightVal" name="height" placeholder="0" oninput="calculateBMI()" required>
+                                        <div class="input-group-append"><span class="input-group-text input-unit">ซม.</span></div>
                                     </div>
                                 </div>
                             </div>

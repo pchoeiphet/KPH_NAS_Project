@@ -242,7 +242,7 @@ try {
     }
 
     $conn->commit();
-    header("Location: patient_profile.php?hn=" . urlencode($hn));
+    header("Location: patient_profile.php?hn=" . urlencode($hn) . "&an=" . urlencode($an));
     exit;
 } catch (PDOException $e) {
     $conn->rollBack();
