@@ -301,10 +301,13 @@ $html = '
                 <b>หอผู้ป่วย:</b> ' . ($assessment['ward_name'] ?? '-') . '
                 &nbsp;&nbsp;
                 <b>เตียง:</b> ' . ($assessment['bed_number'] ?? '-') . '
-                <b>วันที่รับเข้ารักษา:</b> ' . $admit_date_th . '
             </td>
             
             <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
+                <b>วันที่รับเข้ารักษา:</b> ' . $admit_date_th . '
+            </td>
+
+            <td style="padding-top: 5px; padding-bottom: 5px;">
                 <b>วันที่ประเมิน:</b> ' . $assess_datetime_th . '
             </td>
         </tr>
@@ -468,4 +471,3 @@ $mpdf = new \Mpdf\Mpdf([
 $mpdf->WriteHTML($html);
 $mpdf->Output($doc_no . ".pdf", "I");
 exit;
-?>
