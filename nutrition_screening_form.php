@@ -2,6 +2,12 @@
 require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 $hn = $_GET['hn'] ?? '';
 $an = $_GET['an'] ?? '';
 
@@ -95,74 +101,57 @@ try {
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" style="min-width: 250px;">
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 290px;">
                         <div class="user-profile-btn">
                             <div class="user-avatar">
                                 <i class="fa-solid fa-user-doctor"></i>
                             </div>
                             <div class="user-info d-none d-md-block" style="flex-grow: 1;">
-                                <div class="user-name">เพชรลดา เชยเพ็ชร</div>
-                                <div class="user-role">นักโภชนาการ</div>
+                                <div class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></div>
+                                <div class="user-role"><?php echo htmlspecialchars($_SESSION['user_position']); ?></div>
                             </div>
                             <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2" aria-labelledby="userDropdown"
-                        style="border-radius: 12px; min-width: 250px;">
+
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2 pb-0" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px; overflow: hidden;">
 
                         <div class="dropdown-header bg-light border-bottom py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar mr-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                            <div class="d-flex align-items-center px-2">
+                                <div class="user-avatar mr-3 bg-white border"
+                                    style="width: 45px; height: 45px; font-size: 1.3rem; color: #2c3e50;">
                                     <i class="fa-solid fa-user-doctor"></i>
                                 </div>
                                 <div style="line-height: 1.3;">
-                                    <strong class="text-dark d-block" style="font-size: 0.95rem;">เพชรลดา
-                                        เชยเพ็ชร</strong>
-                                    <small class="text-muted">นักโภชนาการชำนาญการ</small>
-                                    <br>
-                                    <span class="badge badge-info mt-1"
-                                        style="font-weight: normal; font-size: 0.7rem;">License: DT-66099</span>
+                                    <h6 class="font-weight-bold text-dark mb-0"><?php echo htmlspecialchars($_SESSION['user_name']); ?></h6>
+                                    <small class="text-muted d-block"><?php echo htmlspecialchars($_SESSION['hospital']); ?></small>
+                                    <span class="badge badge-info mt-1 font-weight-normal px-2">
+                                        License: <?php echo htmlspecialchars($_SESSION['user_code'] ?? '-'); ?>
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="p-2">
-                            <h6 class="dropdown-header text-uppercase text-muted small font-weight-bold pl-2 mb-1">
-                                งานของฉัน</h6>
-                            <a class="dropdown-item py-2 rounded d-flex justify-content-between align-items-center"
-                                href="#">
-                                <span><i class="fa-solid fa-clipboard-user mr-2 text-primary"
-                                        style="width:20px; text-align:center;"></i> ผู้ป่วยที่รับผิดชอบ</span>
-                                <span class="badge badge-danger badge-pill">5</span>
+                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
+                                    ประวัติการประเมินของฉัน</span>
                             </a>
+
                             <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-comment-medical mr-2 text-success"
-                                        style="width:20px; text-align:center;"></i> จัดการข้อความด่วน</span>
-                            </a>
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-secondary"
-                                        style="width:20px; text-align:center;"></i> ประวัติการประเมิน</span>
+                                <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
+                                    ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>
                         </div>
 
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded" href="#">
-                                <i class="fa-solid fa-file-signature mr-2 text-warning"
-                                    style="width:20px; text-align:center;"></i> ตั้งค่าลายเซ็น (E-Sign)
+                        <div class="bg-light border-top p-2">
+                            <a class="dropdown-item py-2 rounded text-danger font-weight-bold" href="#"
+                                onclick="confirmLogout()">
+                                <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px;"></i> ออกจากระบบ
                             </a>
                         </div>
 
-                        <div class="dropdown-divider m-0"></div>
-
-                        <div class="p-2">
-                            <a class="dropdown-item py-2 rounded text-danger" href="#" onclick="confirmLogout()">
-                                <i class="fa-solid fa-right-from-bracket mr-2"
-                                    style="width:20px; text-align:center;"></i>
-                                ออกจากระบบ
-                            </a>
-                        </div>
                     </div>
                 </li>
             </ul>

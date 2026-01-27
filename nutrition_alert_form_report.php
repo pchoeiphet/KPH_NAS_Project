@@ -2,6 +2,12 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require_once 'connect_db.php';
 
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 date_default_timezone_set('Asia/Bangkok');
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 

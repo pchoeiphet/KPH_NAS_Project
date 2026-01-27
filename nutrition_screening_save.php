@@ -2,6 +2,12 @@
 require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 // 1. รับค่าจากฟอร์ม
 $hn = $_POST['hn'] ?? '';
 $an = $_POST['an'] ?? '';

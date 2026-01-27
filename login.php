@@ -24,6 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // --- ล็อกอินสำเร็จ ---
                 $_SESSION['user_id'] = $row['nut_id'];
                 $_SESSION['user_name'] = $row['nut_fullname'];
+                $_SESSION['user_position'] = !empty($row['nut_position']) ? $row['nut_position'] : 'นักโภชนาการ';
                 $_SESSION['user_code'] = $row['nut_code'];
                 $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
 

@@ -2,6 +2,14 @@
 require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
+session_start();
+
+// ตรวจสอบว่ามี Session user_id หรือไม่ (ถ้าไม่มีให้ดีดกลับไปหน้า login.php)
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 // ฟังก์ชันแปลงวันที่เป็นภาษาไทย
 function thaiDate($datetime)
 {
@@ -203,8 +211,8 @@ try {
                                 <i class="fa-solid fa-user-doctor"></i>
                             </div>
                             <div class="user-info d-none d-md-block" style="flex-grow: 1;">
-                                <div class="user-name">เพชรลดา เชยเพ็ชร</div>
-                                <div class="user-role">นักโภชนาการ</div>
+                                <div class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></div>
+                                <div class="user-role"><?php echo htmlspecialchars($_SESSION['user_position']); ?></div>
                             </div>
                             <i class="fa-solid fa-chevron-down text-muted mr-2" style="font-size: 0.8rem;"></i>
                         </div>
@@ -220,9 +228,11 @@ try {
                                     <i class="fa-solid fa-user-doctor"></i>
                                 </div>
                                 <div style="line-height: 1.3;">
-                                    <h6 class="font-weight-bold text-dark mb-0">เพชรลดา เชยเพ็ชร</h6>
-                                    <small class="text-muted d-block">นักโภชนาการชำนาญการ</small>
-                                    <span class="badge badge-info mt-1 font-weight-normal px-2">License: DT-66099</span>
+                                    <h6 class="font-weight-bold text-dark mb-0"><?php echo htmlspecialchars($_SESSION['user_name']); ?></h6>
+                                    <small class="text-muted d-block"><?php echo htmlspecialchars($_SESSION['hospital']); ?></small>
+                                    <span class="badge badge-info mt-1 font-weight-normal px-2">
+                                        License: <?php echo htmlspecialchars($_SESSION['user_code'] ?? '-'); ?>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -252,11 +262,14 @@ try {
         </div>
     </nav>
 
+
+
     <div class="container-fluid px-lg-5 mt-4 mb-5">
+
+        <h4>สวัสดี, คุณ </span><?php echo htmlspecialchars($_SESSION['user_name']); ?></h4>
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <div class="form-row align-items-end">
-
                     <div class="col-12 col-md-6 mb-3 mb-md-0">
                         <label class="font-weight-bold small text-muted">ค้นหาผู้ป่วย</label>
                         <div class="input-group">
@@ -641,7 +654,9 @@ try {
         }
 
         function confirmLogout() {
-            if (confirm('ยืนยันการออกจากระบบ?')) window.location.href = 'index.html';
+            if (confirm('ยืนยันการออกจากระบบ?')) {
+                window.location.href = 'logout.php';
+            }
         }
     </script>
 </body>

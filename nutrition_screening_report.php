@@ -3,6 +3,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 $doc_no = $_GET['doc_no'] ?? '';
 if (empty($doc_no)) die("Error: ไม่พบเลขที่เอกสาร");
 
