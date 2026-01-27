@@ -1271,7 +1271,7 @@ try {
 
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'index.php';
+                window.location.href = 'logout.php';
             }
         }
     </script>

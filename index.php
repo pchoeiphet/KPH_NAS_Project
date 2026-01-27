@@ -262,8 +262,6 @@ try {
         </div>
     </nav>
 
-
-
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
         <h4>สวัสดี, คุณ </span><?php echo htmlspecialchars($_SESSION['user_name']); ?></h4>

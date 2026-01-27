@@ -901,7 +901,7 @@ function isSymChecked($id, $saved_array)
     <script>
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'login.php'; // เปลี่ยนเป็นหน้า Login ของคุณ
+                window.location.href = 'logout.php';
             }
         }
     </script>
