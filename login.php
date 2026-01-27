@@ -1,26 +1,43 @@
 <?php
 session_start();
+require_once 'connect_db.php'; // 1. เรียกไฟล์นี้จะได้ตัวแปร $conn มาใช้งาน
 
-// ตัวแปรสำหรับเก็บข้อความแจ้งเตือน
 $error_msg = "";
 
-// ตรวจสอบว่ามีการกดปุ่ม Login หรือไม่
+// 2. ตรวจสอบว่ามีการกดปุ่ม Login หรือไม่
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    // --- ส่วนจำลองการตรวจสอบ (ให้คุณไปแก้เชื่อมต่อ Database ตรงนี้) ---
-    // ตัวอย่าง: username = admin, password = 1234
-    if ($username == "admin" && $password == "1234") {
-        $_SESSION['user_id'] = 1;
-        $_SESSION['user_name'] = "Admin User";
-        $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
+    try {
+        $sql = "SELECT * FROM nutritionists WHERE nut_username = ? AND is_active = 1";
 
-        // ล็อกอินสำเร็จ -> ไปหน้า index.php
-        header("Location: index.php");
-        exit;
-    } else {
-        $error_msg = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$username]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC); // ดึงข้อมูลแบบ Array ชื่อคอลัมน์
+
+        // 4. ตรวจสอบผลลัพธ์
+        if ($row) {
+            // เจอ Username -> ตรวจสอบรหัสผ่าน
+            if ($password == $row['nut_password']) {
+
+                // --- ล็อกอินสำเร็จ ---
+                $_SESSION['user_id'] = $row['nut_id'];
+                $_SESSION['user_name'] = $row['nut_fullname'];
+                $_SESSION['user_code'] = $row['nut_code'];
+                $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
+
+                header("Location: index.php");
+                exit;
+            } else {
+                $error_msg = "รหัสผ่านไม่ถูกต้อง";
+            }
+        } else {
+            // ไม่เจอ Username หรือ is_active ไม่ใช่ 1
+            $error_msg = "ไม่พบชื่อผู้ใช้งานนี้ในระบบ";
+        }
+    } catch (PDOException $e) {
+        $error_msg = "เกิดข้อผิดพลาดในระบบ: " . $e->getMessage();
     }
 }
 ?>
@@ -155,9 +172,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="col-md-5 col-lg-4">
                 <div class="card card-login">
 
-                    <!-- ส่วนหัวแสดงชื่อระบบและโรงพยาบาล -->
                     <div class="login-header">
-                        <!-- ถ้ามีไฟล์โลโก้จริง ให้ใช้ <img src="path/to/logo.png" height="60"> แทน icon -->
                         <div class="hospital-logo">
                             <img src="img/logo_kph.jpg" height="80">
                         </div>
@@ -204,7 +219,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <hr class="mt-0 mb-3 w-75 mx-auto">
                         <div class="footer-text">
                             &copy; <?= date("Y") ?> Kamphaeng Phet Hospital.<br>
-                            กลุ่มงานโภชนศาสตร์
+                            กลุ่มงานโภชนศาสตร์ โรงพยาบาลกำแพงเพชร
                         </div>
                     </div>
 
