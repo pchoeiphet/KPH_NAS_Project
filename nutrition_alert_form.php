@@ -151,6 +151,15 @@ try {
         $type = $d['disease_type'];
         $diseases_grouped[$type][] = $d;
     }
+
+    $stmt_user = $conn->prepare("SELECT nut_fullname FROM nutritionists WHERE nut_id = :uid");
+    $stmt_user->execute([':uid' => $_SESSION['user_id']]);
+    $current_user_name = $stmt_user->fetchColumn();
+
+    // ถ้าหาไม่เจอ ให้ใช้ชื่อจาก Session หรือขีด -
+    if (empty($current_user_name)) {
+        $current_user_name = $_SESSION['user_name'] ?? '-';
+    }
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -331,7 +340,11 @@ try {
                         <div class="col-md-4">
                             <div class="input-group input-group-sm">
                                 <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้ประเมิน</span></div>
-                                <input type="text" class="form-control text-center text-primary" name="assessor_name" value="เพชรลดา เชยเพ็ชร" readonly>
+                                <input type="text"
+                                    class="form-control text-center text-primary"
+                                    name="assessor_name_display"
+                                    value="<?php echo htmlspecialchars($current_user_name); ?>"
+                                    readonly>
                             </div>
                         </div>
                     </div>

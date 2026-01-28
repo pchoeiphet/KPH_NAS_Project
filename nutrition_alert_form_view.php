@@ -58,6 +58,7 @@ try {
     $sql_main = "
         SELECT 
             nutrition_assessment.*, 
+            nutritionists.nut_fullname,   -- 1. เพิ่มบรรทัดนี้ เพื่อดึงชื่อจริง
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -71,6 +72,8 @@ try {
             doctor.doctor_name, 
             health_insurance.health_insurance_name
         FROM nutrition_assessment
+        LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id
+
         JOIN patients ON nutrition_assessment.patients_hn = patients.patients_hn
         JOIN admissions ON nutrition_assessment.admissions_an = admissions.admissions_an
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
@@ -412,8 +415,12 @@ function isSymChecked($id, $saved_array)
                     </div>
                     <div class="col-md-4">
                         <div class="input-group input-group-sm">
-                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้ประเมิน</span></div>
-                            <input type="text" class="form-control text-center text-primary" value="<?= htmlspecialchars($data['assessor_name']) ?>" readonly>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white text-muted">ผู้ประเมิน</span>
+                            </div>
+                            <input type="text" class="form-control text-center text-primary"
+                                value="<?= htmlspecialchars(!empty($data['nut_fullname']) ? $data['nut_fullname'] : ($data['assessor_name'] ?? '-')) ?>"
+                                readonly>
                         </div>
                     </div>
                 </div>

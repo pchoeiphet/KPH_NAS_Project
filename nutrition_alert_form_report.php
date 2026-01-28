@@ -22,7 +22,9 @@ if (empty($doc_no)) {
 // ----------------------------------------------------
 $sql = "
 SELECT 
-    nutrition_assessment.*, 
+    nutrition_assessment.*,
+    nutritionists.nut_fullname, 
+    nutritionists.nut_position, 
     patients.patients_firstname, 
     patients.patients_lastname, 
     patients.patients_gender, 
@@ -50,6 +52,7 @@ FROM nutrition_assessment
 JOIN patients ON patients.patients_hn = nutrition_assessment.patients_hn
 JOIN admissions ON admissions.admissions_an = nutrition_assessment.admissions_an
 LEFT JOIN wards ON wards.ward_id = admissions.ward_id 
+LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id
 
 LEFT JOIN weight_option ON weight_option.weight_option_id = nutrition_assessment.weight_option_id
 LEFT JOIN patient_shape ON patient_shape.patient_shape_id = nutrition_assessment.patient_shape_id
@@ -224,7 +227,17 @@ $assessment_no = ($key !== false) ? $key + 1 : 1;
 $patient_full_name = $assessment['patients_firstname'] . ' ' . $assessment['patients_lastname'];
 $admit_date_th = date('d/m/', strtotime($assessment['admit_datetime'])) . (date('Y', strtotime($assessment['admit_datetime'])) + 543);
 
-// --- [FIXED] เตรียมตัวแปรวันที่ประเมินให้ครบถ้วน ---
+
+// ตรวจสอบว่ามีชื่อใหม่ไหม ถ้าไม่มีใช้ชื่อเก่า ถ้าไม่มีอีกให้เป็นขีด
+$assessor_show = !empty($assessment['nut_fullname'])
+    ? $assessment['nut_fullname']
+    : ($assessment['assessor_name'] ?? '.................................................................');
+
+// ตรวจสอบตำแหน่ง
+$position_show = !empty($assessment['nut_position'])
+    ? $assessment['nut_position']
+    : 'นักโภชนาการ';
+
 $assess_timestamp = strtotime($assessment['assessment_datetime']);
 // 1. แบบสั้น (สำหรับ Header)
 $assess_date_th = date('d/m/', $assess_timestamp) . (date('Y', $assess_timestamp) + 543);
@@ -408,10 +421,9 @@ $html = '
         <td width="60%" align="center">
             <div style="margin-bottom: 25px;">ลงชื่อ ................................................................. ผู้ประเมิน</div>
             <div style="font-weight: bold; margin-bottom: 5px;">
-                (' . (!empty($assessment['assessor_name']) ? $assessment['assessor_name'] : ".................................................................") . ')
-            </div>
-            <div>ตำแหน่ง .................................................................</div>
-            <div>วันที่ ' . $assess_date_th . '</div>
+    ( ' . $assessor_show . ' )
+</div>
+<div>ตำแหน่ง ' . $position_show . '</div>
         </td>
     </tr>
 </table>

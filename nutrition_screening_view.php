@@ -19,6 +19,7 @@ try {
     $sql = "
         SELECT 
             nutrition_screening.*, 
+            nutritionists.nut_fullname,   -- 1. เพิ่มบรรทัดนี้ เพื่อดึงชื่อจริง
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -36,6 +37,8 @@ try {
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
+        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id
+        
         WHERE nutrition_screening.doc_no = :doc_no
         LIMIT 1
     ";
@@ -257,8 +260,12 @@ try {
                     </div>
                     <div class="col-md-4">
                         <div class="input-group input-group-sm">
-                            <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span></div>
-                            <input type="text" class="form-control text-center text-primary" value="<?= htmlspecialchars($data['assessor_name'] ?? '-') ?>" disabled>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span>
+                            </div>
+                            <input type="text" class="form-control text-center text-primary"
+                                value="<?= htmlspecialchars(!empty($data['nut_fullname']) ? $data['nut_fullname'] : ($data['assessor_name'] ?? '-')) ?>"
+                                disabled>
                         </div>
                     </div>
                 </div>

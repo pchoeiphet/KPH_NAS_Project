@@ -16,6 +16,8 @@ try {
     $sql = "
         SELECT 
             nutrition_screening.*, 
+            nutritionists.nut_fullname,  -- 1. ดึงชื่อจริง
+            nutritionists.nut_position,  -- 2. ดึงตำแหน่ง
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -32,6 +34,10 @@ try {
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
+        
+        -- 3. เพิ่มบรรทัดนี้ครับ เพื่อเชื่อมตารางนักโภชนาการ
+        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id
+        
         WHERE nutrition_screening.doc_no = :doc_no
         LIMIT 1
     ";
@@ -60,6 +66,9 @@ try {
 } catch (PDOException $e) {
     die($e->getMessage());
 }
+
+$assessor_show = !empty($data['nut_fullname']) ? $data['nut_fullname'] : '-';
+$position_show = !empty($data['nut_position']) ? $data['nut_position'] : 'นักโภชนาการ';
 
 $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();
 $fontDirs = $defaultConfig['fontDir'];
@@ -346,8 +355,8 @@ $html = '
         </td>
         <td width="50%" class="text-center" style="vertical-align: bottom;">
     ลงชื่อ................................................................ ผู้คัดกรอง<br>
-    ( ' . $data['assessor_name'] . ' )<br>
-    <span class="bold">ตำแหน่ง นักโภชนาการ</span><br>
+    ( ' . $assessor_show . ' )<br>
+    <span class="bold">ตำแหน่ง ' . $position_show . '</span><br>
     วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
 </td>
     </tr>

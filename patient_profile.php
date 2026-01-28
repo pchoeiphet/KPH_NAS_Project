@@ -64,22 +64,34 @@ try {
 
     // ดึงประวัติ (SPENT)
     $sql_spent = "
-        SELECT *, 'SPENT' as form_type, screening_datetime as action_datetime 
+        SELECT 
+            nutrition_screening.*, 
+            nutritionists.nut_fullname,
+            'SPENT' as form_type, 
+            nutrition_screening.screening_datetime as action_datetime 
         FROM nutrition_screening 
-        WHERE patients_hn = :hn 
-        ORDER BY screening_datetime DESC
+        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id 
+        WHERE nutrition_screening.patients_hn = :hn 
+        ORDER BY nutrition_screening.screening_datetime DESC
     ";
+
     $stmt_spent = $conn->prepare($sql_spent);
     $stmt_spent->execute([':hn' => $hn]);
     $spent_list = $stmt_spent->fetchAll(PDO::FETCH_ASSOC);
 
     // ดึงประวัติ (NAF)
     $sql_naf = "
-        SELECT *, 'NAF' as form_type, assessment_datetime as action_datetime 
+        SELECT 
+            nutrition_assessment.*, 
+            nutritionists.nut_fullname,
+            'NAF' as form_type, 
+            assessment_datetime as action_datetime 
         FROM nutrition_assessment 
+        LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id 
         WHERE patients_hn = :hn 
         ORDER BY assessment_datetime DESC
     ";
+
     $stmt_naf = $conn->prepare($sql_naf);
     $stmt_naf->execute([':hn' => $hn]);
     $naf_list = $stmt_naf->fetchAll(PDO::FETCH_ASSOC);
@@ -164,7 +176,9 @@ $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" sty
 
 if ($latest_activity) {
     $cur_date = thaiDate($latest_activity['action_datetime']);
-    $cur_assessor = $latest_activity['assessor_name'];
+    $cur_assessor = !empty($latest_activity['nut_fullname'])
+        ? $latest_activity['nut_fullname']
+        : ($latest_activity['assessor_name'] ?? '-');
 
     // กรณีล่าสุดเป็น SPENT
     if ($latest_activity['form_type'] == 'SPENT') {
@@ -441,7 +455,6 @@ if ($latest_activity) {
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> ประวัติการบันทึกข้อมูลทั้งหมด
                         </h6>
                         <div class="form-inline mt-2 mt-md-0">
-                            <!-- <button type="button" class="btn btn-outline-danger btn-sm mr-3" onclick="alert('ฟังก์ชันนี้ยังไม่เปิดใช้งาน')"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มต้นใหม่ (Reset)</button> -->
                             <label class="small mr-2 text-muted">ตัวกรอง:</label>
                             <select class="custom-select custom-select-sm" id="typeFilter" onchange="filterHistory()">
                                 <option value="all">ทั้งหมด (All)</option>
@@ -461,9 +474,9 @@ if ($latest_activity) {
                                         <th style="width: 60px;" class="text-center">คะแนน</th>
                                         <th style="width: 100px" class="text-center">ผลการคัดกรอง (SPENT)</th>
                                         <th style="width: 100px" class="text-center">ผลการประเมิน (NAF)</th>
-                                        <th style="width: 100px">ผู้ประเมิน</th>
-                                        <th style="width: 100px">วัน/เวลาที่บันทึก</th>
-                                        <th style="width: 120px" class="text-center">สถานะเอกสาร</th>
+                                        <th style="width: 130px" class="text-center">ผู้ประเมิน</th>
+                                        <th style="width: 120px" class="text-center">วัน/เวลาที่บันทึก</th>
+                                        <th style="width: 100px" class="text-center">สถานะเอกสาร</th>
                                         <th style="width: 90px;" class="text-center">ไฟล์ PDF</th>
                                     </tr>
                                 </thead>
@@ -506,7 +519,7 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
                                                     <td class="text-center align-middle <?= $res_class ?>"><?= $row['screening_result'] ?></td>
                                                     <td class="text-center align-middle text-muted">-</td>
-                                                    <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
+                                                    <td class="align-middle"><?= $row['nut_fullname'] ?></td>
                                                     <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
                                                     <td class="text-center align-middle">
                                                         <span class="badge <?= $status_badge ?> font-weight-normal px-2"><?= $row['screening_status'] ?></span>
@@ -522,9 +535,8 @@ if ($latest_activity) {
                                             // --- กรณี NAF (สีเขียว) ---
                                             elseif ($row['form_type'] == 'NAF'):
                                                 $score = $row['total_score'];
-                                                $naf_level = $row['naf_level']; // e.g., "NAF A", "NAF B"
+                                                $naf_level = $row['naf_level'];
 
-                                                // สีผลลัพธ์ NAF (Severity Colors)
                                                 $naf_res_html = '<span class="text-muted">-</span>';
                                                 if ($naf_level == 'NAF A') {
                                                     $naf_res_html = '<span class="text-success font-weight-bold"><i class="fa-solid fa-circle-check mr-1"></i>NAF A</span>';
@@ -553,7 +565,7 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
                                                     <td class="text-center align-middle text-muted"><small>-</small></td>
                                                     <td class="text-center align-middle"><?= $naf_res_html ?></td>
-                                                    <td class="align-middle"><small><?= $row['assessor_name'] ?></small></td>
+                                                    <td class="align-middle"><?= $row['nut_fullname'] ?></td>
                                                     <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>

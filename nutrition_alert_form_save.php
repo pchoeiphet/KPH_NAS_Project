@@ -15,7 +15,7 @@ $doc_no = $_POST['doc_no'] ?? '';
 $naf_seq = $_POST['naf_seq'] ?? 1;
 $screening_id = !empty($_POST['screening_id']) ? $_POST['screening_id'] : NULL;
 $ref_screening_doc = $_POST['ref_screening_doc'] ?? '';
-$assessor_name = $_POST['assessor_name'] ?? '';
+$current_user_id = $_SESSION['user_id'];
 
 // ข้อมูลทั่วไป
 $initial_diagnosis = $_POST['initial_diagnosis'] ?? NULL;
@@ -149,7 +149,7 @@ try {
             lab_method, albumin_val, tlc_val, lab_score,
             weight_option_id, patient_shape_id, weight_change_4_weeks_id, 
             food_type_id, food_amount_id, food_access_id,
-            total_score, naf_level, assessor_name, 
+            total_score, naf_level, nut_id,  -- << เปลี่ยนจาก assessor_name เป็น nut_id
             ref_screening_doc_no, nutrition_screening_id
         ) VALUES (
             :doc_no, :naf_seq, :an, :hn, NOW(),
@@ -159,7 +159,7 @@ try {
             :lab_m, :alb, :tlc, :lab_s,
             :w_opt, :p_shp, :w_chg, 
             :f_typ, :f_amt, :f_acc,
-            :total, :level, :assessor, 
+            :total, :level, :nut_id, -- << เปลี่ยน Placeholder
             :ref_doc, :screen_id
         )
     ";
@@ -193,7 +193,7 @@ try {
         ':f_acc'    => $food_access_id,
         ':total'    => $total_score,
         ':level'    => $naf_level,
-        ':assessor' => $assessor_name,
+        ':nut_id'   => $current_user_id,
         ':ref_doc'  => $ref_screening_doc,
         ':screen_id' => $screening_id
     ]);
@@ -250,6 +250,7 @@ try {
     $conn->commit();
     header("Location: patient_profile.php?hn=" . urlencode($hn) . "&an=" . urlencode($an));
     exit;
+    
 } catch (PDOException $e) {
     $conn->rollBack();
     echo "<h3>เกิดข้อผิดพลาดในการบันทึกข้อมูล:</h3>";

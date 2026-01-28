@@ -66,6 +66,16 @@ try {
     $next_seq = ($stmt_seq->fetch(PDO::FETCH_ASSOC)['max_seq'] ?? 0) + 1;
 
     $doc_no_show = 'SPENT-' . $patient['patients_hn'] . '-' . str_pad($next_seq, 3, '0', STR_PAD_LEFT);
+
+    // [เพิ่มตรงนี้] ดึงชื่อผู้คัดกรอง (User ปัจจุบัน) เพื่อไปแสดงใน Input
+    $stmt_user = $conn->prepare("SELECT nut_fullname FROM nutritionists WHERE nut_id = :uid");
+    $stmt_user->execute([':uid' => $_SESSION['user_id']]);
+    $current_user_name = $stmt_user->fetchColumn();
+
+    // ถ้าหาไม่เจอ ให้ใช้ชื่อจาก Session หรือ default
+    if (empty($current_user_name)) {
+        $current_user_name = $_SESSION['user_name'] ?? 'Unknown';
+    }
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -238,7 +248,11 @@ try {
                         </div>
                         <div class="col-md-4">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span></div><input type="text" class="form-control text-center text-primary" name="assessor_name" value="เพชรลดา เชยเพ็ชร" readonly>
+                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span></div><input type="text"
+                                    class="form-control text-center text-primary"
+                                    name="assessor_name_display"
+                                    value="<?php echo htmlspecialchars($current_user_name); ?>"
+                                    readonly>
                             </div>
                         </div>
                     </div>
