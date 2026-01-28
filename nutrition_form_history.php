@@ -164,7 +164,7 @@ try {
                 <i class="fa-solid fa-folder-open mr-2" style="color:#2c3e50;"></i> ทะเบียนประวัติการทำงาน
             </h3>
             <div class="text-muted small">
-                ข้อมูล ณ วันที่: <?php echo date("d/m/Y"); ?>
+                ข้อมูล ณ วันที่: <?php echo date("d/m/") . (date("Y") + 543); ?>
             </div>
         </div>
 
@@ -310,4 +310,5 @@ try {
             }
         </script>
 </body>
+
 </html>
