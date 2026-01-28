@@ -238,7 +238,7 @@ try {
                         </div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
                                     ประวัติการประเมินของฉัน</span>
                             </a>
@@ -264,7 +264,23 @@ try {
 
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
-        <h4>สวัสดี, คุณ </span><?php echo htmlspecialchars($_SESSION['user_name']); ?></h4>
+        <div class="welcome-banner">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4>
+                        สวัสดี, คุณ <?php echo htmlspecialchars($_SESSION['user_name']); ?> 👋
+                    </h4>
+                    <p>
+                        <i class="fa-regular fa-calendar px-1"></i>
+                        วันนี้ <?php echo thaiDate(date('Y-m-d H:i:s')); ?>
+                        | <span class="text-info"><?php echo htmlspecialchars($_SESSION['user_position']); ?></span>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-right d-none d-md-block">
+                    <i class="fa-solid fa-user-doctor bg-icon-deco"></i>
+                </div>
+            </div>
+        </div>
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <div class="form-row align-items-end">
@@ -556,7 +572,7 @@ try {
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
                         nextActionDisplay = 'คัดกรองซ้ำ (วันนี้)';
-                        nextActionClass = 'text-action-warning ียtext-center';
+                        nextActionClass = 'text-action-warning text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">ครบกำหนดวันนี้</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {

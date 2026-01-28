@@ -502,7 +502,7 @@ if ($latest_activity) {
                                             ?>
                                                 <tr data-type="SPENT">
                                                     <td>
-                                                        <a href="nutrition_screening_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                        <a href="nutrition_screening_form_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fa-solid fa-file-medical fa-lg mr-2 icon-spent"></i>
                                                                 <div>
@@ -525,7 +525,7 @@ if ($latest_activity) {
                                                         <span class="badge <?= $status_badge ?> font-weight-normal px-2"><?= $row['screening_status'] ?></span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_screening_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_screening_form_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>

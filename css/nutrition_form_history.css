@@ -1,0 +1,199 @@
+body {
+  font-family: "Sarabun", sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  padding-top: 80px;
+}
+
+/* Navbar Styling */
+.navbar-custom {
+  height: 80px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.brand-logo {
+  height: 45px;
+  width: auto;
+}
+
+.brand-text h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0;
+  line-height: 1.1;
+}
+
+.brand-text small {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* User Profile Styling */
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  padding: 5px 15px 5px 5px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.user-profile-btn:hover,
+.show > .user-profile-btn {
+  background-color: #f8f9fa;
+  border-color: #e2e6ea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  background-color: #2c3e50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.user-info {
+  margin-left: 10px;
+  margin-right: 15px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.card-formal {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+}
+
+/* Header ของ Card */
+.card-header-formal {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #2c3e50;
+  /* เส้นใต้สีเข้ม */
+  padding: 15px 20px;
+}
+
+.card-header-formal h5 {
+  margin: 0;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+/* Tabs แบบแฟ้มเอกสาร */
+.nav-tabs-formal {
+  border-bottom: 1px solid #dee2e6;
+  padding-left: 20px;
+  padding-top: 20px;
+  background-color: #fff;
+}
+
+.nav-tabs-formal .nav-link {
+  border: 1px solid transparent;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  color: #6c757d;
+  font-weight: 600;
+  padding: 12px 25px;
+  font-size: 1rem;
+  margin-right: 5px;
+}
+
+.nav-tabs-formal .nav-link:hover {
+  border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.nav-tabs-formal .nav-link.active {
+  color: #2c3e50;
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+  border-top: 3px solid #2c3e50;
+  /* Highlight Tab ที่เลือก */
+}
+
+/* ตารางแบบทางการ */
+.table-formal th {
+  background-color: #e9ecef;
+  color: #2c3e50;
+  font-weight: 700;
+  border-bottom: 2px solid #dee2e6;
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
+.table-formal td {
+  vertical-align: middle;
+  color: #333;
+  font-size: 1rem;
+  padding: 12px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Doc Number Badge */
+.doc-badge {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  background-color: #f1f3f5;
+  color: #2c3e50;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+/* Status Label (เปลี่ยนจาก Badge กลมๆ เป็น Label เหลี่ยมมน) */
+.status-label {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  display: inline-block;
+  width: 100%;
+  max-width: 140px;
+  text-align: center;
+}
+
+.status-normal {
+  background-color: #e6f9ee;
+  color: #0f5132;
+  border-color: #badbcc;
+}
+
+.status-risk {
+  background-color: #fff8e1;
+  color: #856404;
+  border-color: #ffeeba;
+}
+
+.status-severe {
+  background-color: #fce8e6;
+  color: #a50e0e;
+  border-color: #f5c6cb;
+}

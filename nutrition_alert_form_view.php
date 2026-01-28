@@ -245,7 +245,7 @@ function isSymChecked($id, $saved_array)
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -290,7 +290,7 @@ function isSymChecked($id, $saved_array)
                         </div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
                                     ประวัติการประเมินของฉัน</span>
                             </a>
@@ -313,6 +313,7 @@ function isSymChecked($id, $saved_array)
             </ul>
         </div>
     </nav>
+
 
     <div class="container-fluid px-lg-5 mt-4">
 

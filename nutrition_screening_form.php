@@ -99,7 +99,7 @@ try {
 <body>
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -144,7 +144,7 @@ try {
                         </div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
                                     ประวัติการประเมินของฉัน</span>
                             </a>
@@ -170,7 +170,7 @@ try {
 
     <div class="container-fluid px-lg-5 mt-4">
 
-        <form id="mainForm" method="POST" action="nutrition_screening_save.php">
+        <form id="mainForm" method="POST" action="nutrition_screening_form_save.php">
             <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
             <input type="hidden" name="an" value="<?= htmlspecialchars($an) ?>">
             <input type="hidden" name="redirect_to_naf" id="redirect_to_naf" value="false">

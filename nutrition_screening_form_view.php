@@ -95,7 +95,7 @@ try {
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -140,7 +140,7 @@ try {
                         </div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
                                     ประวัติการประเมินของฉัน</span>
                             </a>
@@ -163,6 +163,7 @@ try {
             </ul>
         </div>
     </nav>
+
 
     <div class="container-fluid px-lg-5 mt-4">
         <div class="card border-0 shadow-sm mb-4">
@@ -215,7 +216,7 @@ try {
                     <i class="fa-solid fa-eye mr-1"></i> โหมดดูประวัติ (Read Only)
                 </div>
 
-                <a href="nutrition_screening_report.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
+                <a href="nutrition_screening_form_report.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
                     target="_blank"
                     class="btn btn-info btn-sm shadow-sm px-3">
                     <i class="fas fa-file-pdf mr-1"></i> ดาวน์โหลด PDF
