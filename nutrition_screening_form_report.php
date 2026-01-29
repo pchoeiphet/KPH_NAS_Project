@@ -12,12 +12,13 @@ if (!isset($_SESSION['user_id'])) {
 $doc_no = $_GET['doc_no'] ?? '';
 if (empty($doc_no)) die("Error: ไม่พบเลขที่เอกสาร");
 
+// ดึงข้อมูลหลัก
 try {
     $sql = "
         SELECT 
             nutrition_screening.*, 
-            nutritionists.nut_fullname,  -- 1. ดึงชื่อจริง
-            nutritionists.nut_position,  -- 2. ดึงตำแหน่ง
+            nutritionists.nut_fullname,
+            nutritionists.nut_position,
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -34,8 +35,6 @@ try {
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
-        
-        -- 3. เพิ่มบรรทัดนี้ครับ เพื่อเชื่อมตารางนักโภชนาการ
         LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id
         
         WHERE nutrition_screening.doc_no = :doc_no
@@ -95,6 +94,7 @@ $mpdf = new \Mpdf\Mpdf([
     'default_font_size' => 14
 ]);
 
+// HTML Structure
 $html = '
 <style>
     body { font-family: "sarabun"; color: #000; line-height: 1.1; }

@@ -17,9 +17,7 @@ if (empty($doc_no)) {
     die("Error: Missing Document Number (doc_no)");
 }
 
-// ----------------------------------------------------
-// 1. ดึงข้อมูลหลัก (Main Query)
-// ----------------------------------------------------
+// ดึงข้อมูลหลัก
 $sql = "
 SELECT 
     nutrition_assessment.*,
@@ -74,14 +72,12 @@ if (!$assessment) {
 
 $assessment_id = $assessment['nutrition_assessment_id'];
 
-// ----------------------------------------------------
-// 2. Prepare Data & Formatting
-// ----------------------------------------------------
+// Prepare Data & Formatting
 
 // Path Logo
 $logo_path = 'img/logo_kph.jpg';
 
-// 2.0 แปลงเพศ
+// เพศ
 $gender_th = '-';
 $g_code = strtoupper($assessment['patients_gender']);
 if ($g_code == 'M' || $g_code == '1' || $g_code == 'CHAI') {
@@ -178,7 +174,7 @@ foreach ($symptomsData as $s) {
 }
 $symptom_detail = !empty($symptom_list) ? implode("<br/>", $symptom_list) : "- ไม่มีอาการ -";
 
-// 2.4 โรค
+// โรค
 $sql_dis = "SELECT d.disease_name, ds.disease_other_name, ds.disease_score 
             FROM disease_saved ds
             LEFT JOIN disease d ON d.disease_id = ds.disease_id 
@@ -239,15 +235,12 @@ $position_show = !empty($assessment['nut_position'])
     : 'นักโภชนาการ';
 
 $assess_timestamp = strtotime($assessment['assessment_datetime']);
-// 1. แบบสั้น (สำหรับ Header)
+// แบบสั้น (สำหรับ Header)
 $assess_date_th = date('d/m/', $assess_timestamp) . (date('Y', $assess_timestamp) + 543);
-// 2. แบบยาวมีเวลา (สำหรับตารางข้อมูล)
+// แบบยาวมีเวลา (สำหรับตารางข้อมูล)
 $assess_datetime_th = $assess_date_th . " " . date('H:i', $assess_timestamp) . " น.";
 
-
-// ----------------------------------------------------
-// 3. HTML Structure
-// ----------------------------------------------------
+// HTML Structure
 $html = '
 <style>
     body { font-family: "thsarabunnew"; font-size: 14pt; color: #000; line-height: 1.2; }
@@ -459,9 +452,7 @@ $html = '
 </table>
 ';
 
-// ----------------------------------------------------
-// 4. Generate PDF
-// ----------------------------------------------------
+// Generate PDF
 $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
 $fontDirs = $defaultConfig['fontDir'];
 $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
