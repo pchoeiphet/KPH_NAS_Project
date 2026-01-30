@@ -244,6 +244,31 @@ $position_show = !empty($assessment['nut_position'])
     ? htmlspecialchars($assessment['nut_position'])
     : 'นักโภชนาการ';
 
+// ดึงลายเซ็นถ้ามี
+$signature_html = '';
+try {
+    $stmt_sig = $conn->prepare("
+        SELECT signature_type, signature_data FROM nutrition_signature 
+        WHERE doc_no = :doc_no LIMIT 1
+    ");
+    $stmt_sig->execute([':doc_no' => $doc_no]);
+    $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
+
+    if ($signature) {
+        if ($signature['signature_type'] === 'canvas') {
+            // ลายเซ็นแบบวาด (base64 image)
+            $base64_image = $signature['signature_data'];
+            $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 60px; margin: 5px 0;">';
+        } else {
+            // ลายเซ็นแบบพิมพ์
+            $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 20px;">' .
+                htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
+        }
+    }
+} catch (PDOException $e) {
+    error_log("Error fetching signature: " . $e->getMessage());
+}
+
 $assess_timestamp = strtotime($assessment['assessment_datetime']);
 // แบบสั้น (สำหรับ Header)
 $assess_date_th = date('d/m/', $assess_timestamp) . (date('Y', $assess_timestamp) + 543);

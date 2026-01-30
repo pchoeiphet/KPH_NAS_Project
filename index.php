@@ -243,7 +243,7 @@ try {
                                     ประวัติการประเมินของฉัน</span>
                             </a>
 
-                            <a class="dropdown-item py-2 rounded" href="#">
+                            <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
                                 <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
                                     ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>

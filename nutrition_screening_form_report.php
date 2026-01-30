@@ -77,6 +77,31 @@ try {
 
     $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
     $fullname = ($data['patients_firstname'] ?? '') . ' ' . ($data['patients_lastname'] ?? '');
+
+    // ดึงลายเซ็นถ้ามี
+    $signature_html = '';
+    try {
+        $stmt_sig = $conn->prepare("
+            SELECT signature_type, signature_data FROM nutrition_signature 
+            WHERE nut_id = :nut_id LIMIT 1
+        ");
+        $stmt_sig->execute([':nut_id' => $nut_id]);
+        $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
+        
+        if ($signature) {
+            if ($signature['signature_type'] === 'canvas') {
+                // ลายเซ็นแบบวาด (base64 image)
+                $base64_image = $signature['signature_data'];
+                $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 60px; margin: 5px 0;">';
+            } else {
+                // ลายเซ็นแบบพิมพ์
+                $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 20px;">' . 
+                                 htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("Error fetching signature: " . $e->getMessage());
+    }
 } catch (PDOException $e) {
     error_log("Database error in nutrition_screening_form_report.php: " . $e->getMessage());
     die("ข้อผิดพลาด: ไม่สามารถดึงข้อมูลได้");
@@ -370,7 +395,8 @@ $html = '
             </div>
         </td>
         <td width="50%" class="text-center" style="vertical-align: bottom;">
-    ลงชื่อ................................................................ ผู้คัดกรอง<br>
+    ' . $signature_html . '
+    <br>ลงชื่อ................................................................ ผู้คัดกรอง<br>
     ( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )<br>
     <span class="bold">ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</span><br>
     วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
