@@ -9,6 +9,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// สร้าง CSRF token หากไม่มี
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 $my_id = $_SESSION['user_id'];
 
 // ฟังก์ชันวันที่แบบทางการ
@@ -66,7 +71,9 @@ try {
     $stmt->execute([':uid' => $my_id]);
     $history_naf = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo "Error: " . $e->getMessage();
+    error_log("Database Error: " . $e->getMessage());
+    $history_spent = [];
+    $history_naf = [];
 }
 ?>
 
@@ -159,11 +166,14 @@ try {
 
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-center align-items-center mb-3 position-relative">
+            <a href="index.php" class="btn btn-sm btn-outline-secondary position-absolute" style="left: 0;" title="ย้อนกลับ">
+                <i class="fas fa-arrow-left mr-2"></i> ย้อนกลับ
+            </a>
             <h3 class="text-dark font-weight-bold mb-0">
-                <i class="fa-solid fa-folder-open mr-2" style="color:#2c3e50;"></i> ทะเบียนประวัติการทำงาน
+                ประวัติการทำงานของ <?php echo htmlspecialchars($_SESSION['user_name']); ?>
             </h3>
-            <div class="text-muted small">
+            <div class="text-muted small position-absolute" style="right: 0;">
                 ข้อมูล ณ วันที่: <?php echo date("d/m/") . (date("Y") + 543); ?>
             </div>
         </div>
@@ -207,11 +217,11 @@ try {
                                             $statusText = ($score >= 2) ? 'มีความเสี่ยง' : 'ปกติ';
                                             ?>
                                             <tr>
-                                                <td><span class="doc-badge"><?php echo $row['doc_no']; ?></span></td>
+                                                <td><span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span></td>
                                                 <td><?php echo thaiDateOfficial($row['screening_datetime']); ?></td>
                                                 <td>
-                                                    <strong><?php echo $row['patients_firstname'] . ' ' . $row['patients_lastname']; ?></strong><br>
-                                                    <span class="text-muted small">HN: <?php echo $row['patients_hn']; ?> | AN: <?php echo $row['admissions_an'] ?: '-'; ?></span>
+                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
+                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="status-label <?php echo $statusClass; ?>">
@@ -262,15 +272,15 @@ try {
                                             if ($naf_level == 'NAF C') $bgClass = 'status-severe';
                                             ?>
                                             <tr>
-                                                <td><span class="doc-badge"><?php echo $row['doc_no']; ?></span></td>
+                                                <td><span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span></td>
                                                 <td><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
                                                 <td>
-                                                    <strong><?php echo $row['patients_firstname'] . ' ' . $row['patients_lastname']; ?></strong><br>
-                                                    <span class="text-muted small">HN: <?php echo $row['patients_hn']; ?></span>
+                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
+                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?></span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="status-label <?php echo $bgClass; ?>">
-                                                        <?php echo $naf_level; ?>
+                                                    <span class="status-label <?php echo htmlspecialchars($bgClass); ?>">
+                                                        <?php echo htmlspecialchars($naf_level); ?>
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
@@ -305,7 +315,16 @@ try {
         <script>
             function confirmLogout() {
                 if (confirm('ยืนยันการออกจากระบบ?')) {
-                    window.location.href = 'logout.php';
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'logout.php';
+                    var token = document.createElement('input');
+                    token.type = 'hidden';
+                    token.name = 'csrf_token';
+                    token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                    form.appendChild(token);
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             }
         </script>

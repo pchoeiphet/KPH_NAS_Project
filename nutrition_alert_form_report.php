@@ -8,13 +8,22 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Session timeout check (30 minutes)
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    session_destroy();
+    error_log("Session timeout for user: " . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: หมดเวลาการใช้งาน");
+}
+$_SESSION['last_activity'] = time();
+
 date_default_timezone_set('Asia/Bangkok');
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-$doc_no = $_GET['doc_no'] ?? '';
-
-if (empty($doc_no)) {
-    die("Error: Missing Document Number (doc_no)");
+// Input validation for doc_no
+$doc_no = trim($_GET['doc_no'] ?? '');
+if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
+    error_log("Invalid doc_no parameter: $doc_no");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
 }
 
 // ดึงข้อมูลหลัก
@@ -67,7 +76,8 @@ $stmt->execute([':doc_no' => $doc_no]);
 $assessment = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$assessment) {
-    die("Error: Assessment data not found for Doc No: " . htmlspecialchars($doc_no));
+    error_log("NAF form not found: doc_no=$doc_no, user=" . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: ไม่พบข้อมูล");
 }
 
 $assessment_id = $assessment['nutrition_assessment_id'];
@@ -79,13 +89,13 @@ $logo_path = 'img/logo_kph.jpg';
 
 // เพศ
 $gender_th = '-';
-$g_code = strtoupper($assessment['patients_gender']);
+$g_code = strtoupper($assessment['patients_gender'] ?? '');
 if ($g_code == 'M' || $g_code == '1' || $g_code == 'CHAI') {
     $gender_th = 'ชาย';
 } elseif ($g_code == 'F' || $g_code == '2' || $g_code == 'YING') {
     $gender_th = 'หญิง';
 } else {
-    $gender_th = $assessment['patients_gender'];
+    $gender_th = htmlspecialchars($assessment['patients_gender'] ?? '-');
 }
 
 // 2.1 ข้อมูลส่วนสูง
@@ -208,7 +218,7 @@ if ($infoSourceText == 'patient') $infoSourceText = 'ผู้ป่วย';
 elseif ($infoSourceText == 'relative') $infoSourceText = 'ญาติ';
 elseif ($infoSourceText == 'other') $infoSourceText = 'อื่นๆ';
 if (!empty($assessment['other_source'])) {
-    $infoSourceText .= ' (' . $assessment['other_source'] . ')';
+    $infoSourceText .= ' (' . htmlspecialchars($assessment['other_source']) . ')';
 }
 
 // ครั้งที่ประเมิน
@@ -220,18 +230,18 @@ $all_docs = $stmt_seq->fetchAll(PDO::FETCH_COLUMN);
 $key = array_search($doc_no, $all_docs);
 $assessment_no = ($key !== false) ? $key + 1 : 1;
 
-$patient_full_name = $assessment['patients_firstname'] . ' ' . $assessment['patients_lastname'];
+$patient_full_name = htmlspecialchars($assessment['patients_firstname'] . ' ' . $assessment['patients_lastname']);
 $admit_date_th = date('d/m/', strtotime($assessment['admit_datetime'])) . (date('Y', strtotime($assessment['admit_datetime'])) + 543);
 
 
 // ตรวจสอบว่ามีชื่อใหม่ไหม ถ้าไม่มีใช้ชื่อเก่า ถ้าไม่มีอีกให้เป็นขีด
 $assessor_show = !empty($assessment['nut_fullname'])
-    ? $assessment['nut_fullname']
-    : ($assessment['assessor_name'] ?? '.................................................................');
+    ? htmlspecialchars($assessment['nut_fullname'])
+    : htmlspecialchars($assessment['assessor_name'] ?? '.................................................................');
 
 // ตรวจสอบตำแหน่ง
 $position_show = !empty($assessment['nut_position'])
-    ? $assessment['nut_position']
+    ? htmlspecialchars($assessment['nut_position'])
     : 'นักโภชนาการ';
 
 $assess_timestamp = strtotime($assessment['assessment_datetime']);
@@ -282,8 +292,8 @@ $html = '
             <div style="font-size: 14pt;">(การประเมินครั้งที่ ' . $assessment_no . ')</div>
         </td>
         <td width="15%" align="right" style="font-size: 12pt;">
-            <b>เลขที่เอกสาร:</b> ' . $doc_no . '<br>
-            <b>วันที่:</b> ' . $assess_date_th . '
+            <b>เลขที่เอกสาร:</b> ' . htmlspecialchars($doc_no) . '<br>
+            <b>วันที่:</b> ' . htmlspecialchars($assess_date_th) . '
         </td>
     </tr>
 </table>
@@ -295,40 +305,40 @@ $html = '
                 <b>ชื่อ-สกุล:</b> ' . $patient_full_name . '
             </td>
             <td width="22%" style="padding-bottom: 5px;">
-                <b>อายุ:</b> ' . $age . '
+                <b>อายุ:</b> ' . htmlspecialchars($age) . '
             </td>
             <td width="10%" style="padding-bottom: 5px;">
-                <b>เพศ:</b> ' . $gender_th . '
+                <b>เพศ:</b> ' . htmlspecialchars($gender_th) . '
             </td>
             <td width="10%" style="padding-bottom: 5px;">
-                <b>HN:</b> ' . $assessment['patients_hn'] . '
+                <b>HN:</b> ' . htmlspecialchars($assessment['patients_hn']) . '
             </td>
             <td width="15%" style="padding-bottom: 5px;">
-                <b>AN:</b> ' . ($assessment['admissions_an'] ?? '-') . '
+                <b>AN:</b> ' . htmlspecialchars($assessment['admissions_an'] ?? '-') . '
             </td>
         </tr>
 
         <tr style="border-bottom: 1px dotted #ccc;">
             <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
-                <b>หอผู้ป่วย:</b> ' . ($assessment['ward_name'] ?? '-') . '
+                <b>หอผู้ป่วย:</b> ' . htmlspecialchars($assessment['ward_name'] ?? '-') . '
                 &nbsp;&nbsp;
-                <b>เตียง:</b> ' . ($assessment['bed_number'] ?? '-') . '
+                <b>เตียง:</b> ' . htmlspecialchars($assessment['bed_number'] ?? '-') . '
             </td>
             
             <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
-                <b>วันที่รับเข้ารักษา:</b> ' . $admit_date_th . '
+                <b>วันที่รับเข้ารักษา:</b> ' . htmlspecialchars($admit_date_th) . '
             </td>
 
             <td style="padding-top: 5px; padding-bottom: 5px;">
-                <b>วันที่ประเมิน:</b> ' . $assess_datetime_th . '
+                <b>วันที่ประเมิน:</b> ' . htmlspecialchars($assess_datetime_th) . '
             </td>
         </tr>
 
         <tr>
             <td colspan="2" style="padding-top: 5px;">
-                <b>การวินิจฉัยเบื้องต้น:</b> ' . ($assessment['initial_diagnosis'] ?? '-') . '
+                <b>การวินิจฉัยเบื้องต้น:</b> ' . htmlspecialchars($assessment['initial_diagnosis'] ?? '-') . '
             </td>
-            <td colspan="3" style="padding-top: 5px;"> <b>ข้อมูลจาก:</b> ' . $infoSourceText . '
+            <td colspan="3" style="padding-top: 5px;"> <b>ข้อมูลจาก:</b> ' . htmlspecialchars($infoSourceText) . '
             </td>
         </tr>
     </table>

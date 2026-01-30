@@ -9,8 +9,20 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$doc_no = $_GET['doc_no'] ?? '';
-if (empty($doc_no)) die("Error: ไม่พบเลขที่เอกสาร");
+// Session timeout check (30 minutes)
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    session_destroy();
+    error_log("Session timeout for user: " . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: หมดเวลาการใช้งาน");
+}
+$_SESSION['last_activity'] = time();
+
+// Input validation for doc_no
+$doc_no = trim($_GET['doc_no'] ?? '');
+if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
+    error_log("Invalid doc_no parameter: $doc_no");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
+}
 
 // ดึงข้อมูลหลัก
 try {
@@ -43,7 +55,10 @@ try {
     $stmt = $conn->prepare($sql);
     $stmt->execute([':doc_no' => $doc_no]);
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$data) die("ไม่พบข้อมูล");
+    if (!$data) {
+        error_log("SPENT form not found: doc_no=$doc_no, user=" . $_SESSION['user_id']);
+        die("ข้อผิดพลาด: ไม่พบข้อมูล");
+    }
 
     $age = '-';
     if (!empty($data['patients_dob'])) {
@@ -63,7 +78,8 @@ try {
     $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
     $fullname = ($data['patients_firstname'] ?? '') . ' ' . ($data['patients_lastname'] ?? '');
 } catch (PDOException $e) {
-    die($e->getMessage());
+    error_log("Database error in nutrition_screening_form_report.php: " . $e->getMessage());
+    die("ข้อผิดพลาด: ไม่สามารถดึงข้อมูลได้");
 }
 
 $assessor_show = !empty($data['nut_fullname']) ? $data['nut_fullname'] : '-';
@@ -170,27 +186,27 @@ $html = '
         <tr>
             <td colspan="2" class="bold"
                 style="font-size:15pt; border-bottom:1px solid #000; padding:4px;">
-                ' . $fullname . '
+                ' . htmlspecialchars($fullname, ENT_QUOTES, 'UTF-8') . '
             </td>
         </tr>
         <tr>
-            <td width="50%"><b>HN:</b> ' . $data['patients_hn'] . '</td>
-            <td width="50%"><b>AN:</b> ' . $data['admissions_an'] . '</td>
+            <td width="50%"><b>HN:</b> ' . htmlspecialchars($data['patients_hn'], ENT_QUOTES, 'UTF-8') . '</td>
+            <td width="50%"><b>AN:</b> ' . htmlspecialchars($data['admissions_an'], ENT_QUOTES, 'UTF-8') . '</td>
         </tr>
         <tr>
-            <td><b>อายุ:</b> ' . $age . '</td>
-            <td><b>เพศ:</b> ' . $gender . '</td>
+            <td><b>อายุ:</b> ' . htmlspecialchars($age, ENT_QUOTES, 'UTF-8') . '</td>
+            <td><b>เพศ:</b> ' . htmlspecialchars($gender, ENT_QUOTES, 'UTF-8') . '</td>
         </tr>
         <tr>
-            <td><b>หอผู้ป่วย:</b> ' . $data['ward_name'] . '</td>
-            <td><b>เตียง:</b> ' . ($data['bed_number'] ?? '-') . '</td>
+            <td><b>หอผู้ป่วย:</b> ' . htmlspecialchars($data['ward_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+            <td><b>เตียง:</b> ' . htmlspecialchars($data['bed_number'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
         </tr>
         <tr>
-            <td colspan="2"><b>สิทธิการรักษา:</b> ' . ($data['health_insurance_name'] ?? '-') . '</td>
+            <td colspan="2"><b>สิทธิการรักษา:</b> ' . htmlspecialchars($data['health_insurance_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
         </tr>
         <tr>
             <td colspan="2">
-                <b>แพทย์เจ้าของไข้:</b> ' . ($data['doctor_name'] ?? '-') . '
+                <b>แพทย์เจ้าของไข้:</b> ' . htmlspecialchars($data['doctor_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '
             </td>
         </tr>
     </table>
@@ -219,7 +235,7 @@ $html = '
     <tr>
         <td colspan="3">
             <b>การวินิจฉัยโรค (Diagnosis):</b><br>
-            ' . ($data['initial_diagnosis'] ?: '-') . '
+            ' . htmlspecialchars($data['initial_diagnosis'] ?? '-', ENT_QUOTES, 'UTF-8') . '
         </td>
     </tr>
 </table>
@@ -234,11 +250,11 @@ $html = '
         <td width="20%">ประเมินน้ำหนักโดย</td>
     </tr>
     <tr class="text-center" style="font-size: 15pt;">
-        <td class="bold">' . ($data['present_weight'] ?? '-') . '</td>
-        <td>' . ($data['normal_weight'] ?? '-') . '</td>
-        <td>' . ($data['height'] ?? '-') . '</td>
-        <td class="bold">' . ($data['bmi'] ?? '-') . '</td>
-        <td style="font-size: 13pt;">' . ($data['weight_method'] ?? '-') . '</td>
+        <td class="bold">' . htmlspecialchars($data['present_weight'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+        <td>' . htmlspecialchars($data['normal_weight'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+        <td>' . htmlspecialchars($data['height'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+        <td class="bold">' . htmlspecialchars($data['bmi'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+        <td style="font-size: 13pt;">' . htmlspecialchars($data['weight_method'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
     </tr>
 </table>
 
@@ -338,7 +354,7 @@ $html = '
    <tr>
     <td colspan="2" style="height:50px; font-size:13pt;">
         <b>หมายเหตุ / ข้อสังเกตเพิ่มเติม:</b><br>
-        ' . ($data['notes'] ?: '') . '
+        ' . htmlspecialchars($data['notes'] ?? '', ENT_QUOTES, 'UTF-8') . '
     </td>
 </tr>
 
@@ -355,8 +371,8 @@ $html = '
         </td>
         <td width="50%" class="text-center" style="vertical-align: bottom;">
     ลงชื่อ................................................................ ผู้คัดกรอง<br>
-    ( ' . $assessor_show . ' )<br>
-    <span class="bold">ตำแหน่ง ' . $position_show . '</span><br>
+    ( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )<br>
+    <span class="bold">ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</span><br>
     วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
 </td>
     </tr>
@@ -365,7 +381,7 @@ $html = '
 <div style="position: absolute; bottom: 5px; width: 100%; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt;">
     <table width="100%">
         <tr>
-            <td width="40%">เลขที่ใบงาน: ' . $data['doc_no'] . '</td>
+            <td width="40%">เลขที่ใบงาน: ' . htmlspecialchars($data['doc_no'], ENT_QUOTES, 'UTF-8') . '</td>
             <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
         </tr>
     </table>

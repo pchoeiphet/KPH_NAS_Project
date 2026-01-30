@@ -3,16 +3,35 @@ require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
 session_start();
+
+// ตรวจสอบ session
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$hn = $_GET['hn'] ?? '';
-$an = $_GET['an'] ?? '';
+// สร้าง CSRF token หากไม่มี
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-if (empty($hn) || empty($an)) {
-    die("Error: ไม่พบข้อมูล HN หรือ AN");
+// ตรวจสอบ session timeout (30 นาที)
+$timeout = 1800;
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
+    session_destroy();
+    header("Location: login.php?timeout=1");
+    exit;
+}
+$_SESSION['last_activity'] = time();
+
+// Validate และ sanitize input
+$hn = trim($_GET['hn'] ?? '');
+$an = trim($_GET['an'] ?? '');
+
+// ตรวจสอบ HN และ AN (อนุญาตเฉพาะตัวอักษร ตัวเลข - เท่านั้น)
+if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_match('/^[A-Za-z0-9\-]+$/', $an)) {
+    error_log("Invalid HN or AN parameter: HN=$hn, AN=$an");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
 }
 
 try {
@@ -45,7 +64,10 @@ try {
     $stmt->execute([':hn' => $hn]);
     $patient = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$patient) die("ไม่พบข้อมูลผู้ป่วยในระบบ");
+    if (!$patient) {
+        error_log("Patient not found: HN=$hn");
+        die("ข้อผิดพลาด: ไม่พบข้อมูลผู้ป่วย");
+    }
 
     $age = '-';
     if (!empty($patient['patients_dob'])) {
@@ -104,7 +126,8 @@ try {
         return strtotime($b['action_datetime']) - strtotime($a['action_datetime']);
     });
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    error_log("Database Error: " . $e->getMessage());
+    die("ข้อผิดพลาดในระบบ");
 }
 
 // ฟังก์ชันแปลงวันที่
@@ -342,25 +365,25 @@ if ($latest_activity) {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_hn'] ?></span></div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['admissions_an'] ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['bed_number'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_hn']); ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['admissions_an']); ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_firstname']) . ' ' . htmlspecialchars($patient['patients_lastname']); ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($age); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['ward_name'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['bed_number'] ?? '-'); ?></span></div>
 
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['doctor_name'] ?: '-' ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['doctor_name'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($admit_date); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_phone'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_congenital_disease'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_congenital_disease'] ?? '-'); ?></span>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 mb-3">
                                 <small class="text-muted d-block">สิทธิการรักษา</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['health_insurance_name'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['health_insurance_name'] ?? '-'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -381,7 +404,7 @@ if ($latest_activity) {
                     <div class="bg-light px-3 py-2 border-bottom">
                         <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">เลือกประเภทเอกสาร</small>
                     </div>
-                    <a href="nutrition_screening_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_screening_form.php?hn=<?php echo htmlspecialchars($patient['patients_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;"><i class="fa-solid fa-file-medical fa-lg"></i></div>
                             <div class="w-100">
@@ -390,7 +413,7 @@ if ($latest_activity) {
                             </div>
                         </div>
                     </a>
-                    <a href="nutrition_alert_form.php?hn=<?= $patient['patients_hn'] ?>&an=<?= $patient['admissions_an'] ?>&ref_screening=<?= $latest_screening['doc_no'] ?? '' ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_alert_form.php?hn=<?php echo htmlspecialchars($patient['patients_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>&ref_screening=<?php echo htmlspecialchars($latest_screening['doc_no'] ?? ''); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
                                 <i class="fa-solid fa-clipboard-user fa-lg"></i>
@@ -502,12 +525,12 @@ if ($latest_activity) {
                                             ?>
                                                 <tr data-type="SPENT">
                                                     <td>
-                                                        <a href="nutrition_screening_form_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                        <a href="nutrition_screening_form_view.php?doc_no=<?php echo htmlspecialchars($row['doc_no']); ?>" class="doc-link text-decoration-none">
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fa-solid fa-file-medical fa-lg mr-2 icon-spent"></i>
                                                                 <div>
                                                                     <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">แบบคัดกรองภาวะโภชนาการ (SPENT)</span>
-                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?php echo htmlspecialchars($row['doc_no']); ?></small>
                                                                 </div>
                                                             </div>
                                                         </a>
@@ -515,17 +538,17 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-pill badge-spent px-3 py-1">SPENT</span>
                                                     </td>
-                                                    <td class="text-center align-middle text-muted"><?= $row['screening_seq'] ?></td>
-                                                    <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
-                                                    <td class="text-center align-middle <?= $res_class ?>"><?= $row['screening_result'] ?></td>
+                                                    <td class="text-center align-middle text-muted"><?php echo htmlspecialchars($row['screening_seq']); ?></td>
+                                                    <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
+                                                    <td class="text-center align-middle <?php echo htmlspecialchars($res_class); ?>"><?php echo htmlspecialchars($row['screening_result']); ?></td>
                                                     <td class="text-center align-middle text-muted">-</td>
-                                                    <td class="align-middle"><?= $row['nut_fullname'] ?></td>
-                                                    <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
+                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nut_fullname']); ?></td>
+                                                    <td class="align-middle"><small><?php echo htmlspecialchars(thaiDate($row['action_datetime'])); ?></small></td>
                                                     <td class="text-center align-middle">
-                                                        <span class="badge <?= $status_badge ?> font-weight-normal px-2"><?= $row['screening_status'] ?></span>
+                                                        <span class="badge <?php echo htmlspecialchars($status_badge); ?> font-weight-normal px-2"><?php echo htmlspecialchars($row['screening_status']); ?></span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_screening_form_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_screening_form_report.php?doc_no=<?php echo htmlspecialchars($row['doc_no']); ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
@@ -548,12 +571,12 @@ if ($latest_activity) {
                                             ?>
                                                 <tr data-type="NAF">
                                                     <td>
-                                                        <a href="nutrition_alert_form_view.php?doc_no=<?= $row['doc_no'] ?>" class="doc-link text-decoration-none">
+                                                        <a href="nutrition_alert_form_view.php?doc_no=<?php echo htmlspecialchars($row['doc_no']); ?>" class="doc-link text-decoration-none">
                                                             <div class="d-flex align-items-center">
                                                                 <i class="fa-solid fa-clipboard-user fa-lg mr-2 icon-naf"></i>
                                                                 <div>
                                                                     <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">แบบประเมินภาวะโภชนาการ (NAF)</span>
-                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?= $row['doc_no'] ?></small>
+                                                                    <small class="text-muted d-block" style="font-size: 0.75rem;">เลขที่เอกสาร: <?php echo htmlspecialchars($row['doc_no']); ?></small>
                                                                 </div>
                                                             </div>
                                                         </a>
@@ -561,17 +584,17 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-pill badge-naf px-3 py-1">NAF</span>
                                                     </td>
-                                                    <td class="text-center align-middle text-muted"><?= $row['naf_seq'] ?></td>
-                                                    <td class="text-center align-middle font-weight-bold"><?= $score ?></td>
+                                                    <td class="text-center align-middle text-muted"><?php echo htmlspecialchars($row['naf_seq']); ?></td>
+                                                    <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
                                                     <td class="text-center align-middle text-muted"><small>-</small></td>
-                                                    <td class="text-center align-middle"><?= $naf_res_html ?></td>
-                                                    <td class="align-middle"><?= $row['nut_fullname'] ?></td>
-                                                    <td class="align-middle"><small><?= thaiDate($row['action_datetime']) ?></small></td>
+                                                    <td class="text-center align-middle"><?php echo $naf_res_html; ?></td>
+                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nut_fullname']); ?></td>
+                                                    <td class="align-middle"><small><?php echo htmlspecialchars(thaiDate($row['action_datetime'])); ?></small></td>
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>
                                                     </td>
                                                     <td class="text-center align-middle">
-                                                        <a href="nutrition_alert_form_report.php?doc_no=<?= htmlspecialchars($row['doc_no']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
+                                                        <a href="nutrition_alert_form_report.php?doc_no=<?php echo htmlspecialchars($row['doc_no']); ?>" target="_blank" class="btn btn-sm btn-outline-secondary border-0 text-danger">
                                                             <i class="fa-solid fa-file-pdf fa-lg"></i>
                                                         </a>
                                                     </td>
@@ -616,7 +639,16 @@ if ($latest_activity) {
 
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'logout.php';
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'logout.php';
+                var token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = 'csrf_token';
+                token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                form.appendChild(token);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>

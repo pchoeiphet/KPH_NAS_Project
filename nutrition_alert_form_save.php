@@ -8,43 +8,64 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// รับค่าจากฟอร์ม
-$hn = $_POST['hn'] ?? '';
-$an = $_POST['an'] ?? '';
-$doc_no = $_POST['doc_no'] ?? '';
-$naf_seq = $_POST['naf_seq'] ?? 1;
-$screening_id = !empty($_POST['screening_id']) ? $_POST['screening_id'] : NULL;
-$ref_screening_doc = $_POST['ref_screening_doc'] ?? '';
+// Validate REQUEST_METHOD
+if ($_SERVER["REQUEST_METHOD"] != "POST") {
+    error_log("Invalid request method for nutrition_alert_form_save.php: " . $_SERVER["REQUEST_METHOD"]);
+    die("ข้อผิดพลาด: การร้องขอไม่ถูกต้อง");
+}
+
+// CSRF token validation
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    error_log("CSRF token validation failed for user: " . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: โทเคนไม่ถูกต้อง");
+}
+
+// รับค่าจากฟอร์ม และ Input validation
+$hn = trim($_POST['hn'] ?? '');
+$an = trim($_POST['an'] ?? '');
+
+// Input validation for HN and AN
+if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_match('/^[A-Za-z0-9\-]+$/', $an)) {
+    error_log("Invalid HN or AN in form_save: HN=$hn, AN=$an, user=" . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
+}
+
+$doc_no = trim($_POST['doc_no'] ?? '');
+$naf_seq = intval($_POST['naf_seq'] ?? 1);
+$screening_id = !empty($_POST['screening_id']) ? intval(trim($_POST['screening_id'])) : NULL;
+$ref_screening_doc = trim($_POST['ref_screening_doc'] ?? '');
 $current_user_id = $_SESSION['user_id'];
 
 // ข้อมูลทั่วไป
-$initial_diagnosis = $_POST['initial_diagnosis'] ?? NULL;
-$info_source = $_POST['info_source'] ?? 'ผู้ป่วย';
-$other_source = $_POST['other_source'] ?? NULL;
+$initial_diagnosis = trim($_POST['initial_diagnosis'] ?? '');
+$info_source = trim($_POST['info_source'] ?? 'ผู้ป่วย');
+$other_source = trim($_POST['other_source'] ?? '');
 
-$weight = !empty($_POST['weight']) ? $_POST['weight'] : NULL;
-$height_measure = !empty($_POST['height_measure']) ? $_POST['height_measure'] : NULL;
-$body_length = !empty($_POST['body_length']) ? $_POST['body_length'] : NULL;
-$arm_span = !empty($_POST['arm_span']) ? $_POST['arm_span'] : NULL;
-$height_relative = !empty($_POST['height_relative']) ? $_POST['height_relative'] : NULL;
+// Anthropometry - sanitize numeric values
+$weight = !empty($_POST['weight']) ? floatval(trim($_POST['weight'])) : NULL;
+$height_measure = !empty($_POST['height_measure']) ? floatval(trim($_POST['height_measure'])) : NULL;
+$body_length = !empty($_POST['body_length']) ? floatval(trim($_POST['body_length'])) : NULL;
+$arm_span = !empty($_POST['arm_span']) ? floatval(trim($_POST['arm_span'])) : NULL;
+$height_relative = !empty($_POST['height_relative']) ? floatval(trim($_POST['height_relative'])) : NULL;
 
-$bmi = !empty($_POST['bmi']) ? $_POST['bmi'] : NULL;
-$bmi_score = !empty($_POST['bmi_score']) ? $_POST['bmi_score'] : 0;
+// BMI and Lab - sanitize numeric values
+$bmi = !empty($_POST['bmi']) ? floatval(trim($_POST['bmi'])) : NULL;
+$bmi_score = !empty($_POST['bmi_score']) ? intval(trim($_POST['bmi_score'])) : 0;
 $is_no_weight = isset($_POST['is_no_weight']) ? 1 : 0;
 
-// ข้อมูล Lab
-$lab_method = !empty($_POST['lab_method']) ? $_POST['lab_method'] : NULL;
-$albumin_val = !empty($_POST['albumin_val']) ? $_POST['albumin_val'] : NULL;
-$tlc_val = !empty($_POST['tlc_val']) ? $_POST['tlc_val'] : NULL;
-$lab_score = !empty($_POST['lab_score']) ? $_POST['lab_score'] : 0;
+// Lab data - sanitize numeric values
+$lab_method = trim($_POST['lab_method'] ?? '');
+$albumin_val = !empty($_POST['albumin_val']) ? floatval(trim($_POST['albumin_val'])) : NULL;
+$tlc_val = !empty($_POST['tlc_val']) ? floatval(trim($_POST['tlc_val'])) : NULL;
+$lab_score = !empty($_POST['lab_score']) ? intval(trim($_POST['lab_score'])) : 0;
 
-// Foreign Keys
-$weight_option_id = !empty($_POST['weight_option_id']) ? $_POST['weight_option_id'] : NULL;
-$weight_change_4_weeks_id = !empty($_POST['weight_change_4_week_id']) ? $_POST['weight_change_4_week_id'] : NULL;
-$food_amount_id = !empty($_POST['food_amount_id']) ? $_POST['food_amount_id'] : NULL;
-$patient_shape_id = !empty($_POST['patient_shape_id']) ? $_POST['patient_shape_id'] : NULL;
-$food_type_id = !empty($_POST['food_type_id']) ? $_POST['food_type_id'] : NULL;
-$food_access_id = !empty($_POST['food_access_id']) ? $_POST['food_access_id'] : NULL;
+// Foreign Keys - validate as integers
+$weight_option_id = !empty($_POST['weight_option_id']) ? intval(trim($_POST['weight_option_id'])) : NULL;
+$weight_change_4_weeks_id = !empty($_POST['weight_change_4_week_id']) ? intval(trim($_POST['weight_change_4_week_id'])) : NULL;
+$food_amount_id = !empty($_POST['food_amount_id']) ? intval(trim($_POST['food_amount_id'])) : NULL;
+$patient_shape_id = !empty($_POST['patient_shape_id']) ? intval(trim($_POST['patient_shape_id'])) : NULL;
+$food_type_id = !empty($_POST['food_type_id']) ? intval(trim($_POST['food_type_id'])) : NULL;
+$food_access_id = !empty($_POST['food_access_id']) ? intval(trim($_POST['food_access_id'])) : NULL;
 
 
 function getScore($conn, $table, $id_col, $id)
@@ -98,25 +119,18 @@ $total_score += intval($bmi_score);
 $total_score += intval($lab_score);
 
 // คะแนนอาการ
-$symptom_ids = $_POST['symptom_ids'] ?? [];
-if (!empty($symptom_ids) && is_array($symptom_ids)) {
-    foreach ($symptom_ids as $sid) {
-        if (!is_numeric($sid)) continue;
-        $total_score += getScore($conn, 'symptom_problem', 'symptom_problem_id', $sid);
-    }
-}
+$symptom_ids = !empty($_POST['symptom_ids']) && is_array($_POST['symptom_ids']) ? array_map('intval', $_POST['symptom_ids']) : [];
 
 // คะแนนโรค (Diseases)
-$disease_ids = $_POST['disease_ids'] ?? [];
+$disease_ids = !empty($_POST['disease_ids']) && is_array($_POST['disease_ids']) ? array_map('intval', $_POST['disease_ids']) : [];
 $check_other_mild = isset($_POST['check_other_mild']);
 $check_other_severe = isset($_POST['check_other_severe']);
-$disease_other_mild_text = $_POST['disease_other_mild'] ?? '';
-$disease_other_severe_text = $_POST['disease_other_severe'] ?? '';
+$disease_other_mild_text = trim($_POST['disease_other_mild'] ?? '');
+$disease_other_severe_text = trim($_POST['disease_other_severe'] ?? '');
 
 // วนลูปโรคทั่วไป
-if (!empty($disease_ids) && is_array($disease_ids)) {
+if (!empty($disease_ids)) {
     foreach ($disease_ids as $did) {
-        if (!is_numeric($did)) continue;
         $d_data = getDiseaseData($conn, $did);
         $total_score += $d_data['score'];
     }
@@ -253,7 +267,6 @@ try {
     
 } catch (PDOException $e) {
     $conn->rollBack();
-    echo "<h3>เกิดข้อผิดพลาดในการบันทึกข้อมูล:</h3>";
-    echo "Error: " . $e->getMessage();
-    echo "<br><br><a href='javascript:history.back()'>กลับไปแก้ไขข้อมูล</a>";
+    error_log("Database error in nutrition_alert_form_save.php: " . $e->getMessage());
+    die("ข้อผิดพลาด: ไม่สามารถบันทึกข้อมูลได้");
 }

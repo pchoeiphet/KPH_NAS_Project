@@ -1,44 +1,81 @@
 <?php
 session_start();
-require_once 'connect_db.php'; // 1. เรียกไฟล์นี้จะได้ตัวแปร $conn มาใช้งาน
+require_once 'connect_db.php';
 
 $error_msg = "";
 
-// 2. ตรวจสอบว่ามีการกดปุ่ม Login หรือไม่
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+// สร้าง CSRF token หากไม่มี
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-    try {
-        $sql = "SELECT * FROM nutritionists WHERE nut_username = ? AND is_active = 1";
+// ตั้งค่า login attempt limit
+$max_attempts = 5;
+$lockout_time = 900; // 15 นาที
 
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$username]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC); // ดึงข้อมูลแบบ Array ชื่อคอลัมน์
+// ตรวจสอบ login attempts
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+    $_SESSION['last_attempt_time'] = 0;
+}
 
-        // 4. ตรวจสอบผลลัพธ์
-        if ($row) {
-            // เจอ Username -> ตรวจสอบรหัสผ่าน
-            if ($password == $row['nut_password']) {
+// ถ้าลองเกิน 5 ครั้ง lock 15 นาที
+if ($_SESSION['login_attempts'] >= $max_attempts) {
+    $time_remaining = $lockout_time - (time() - $_SESSION['last_attempt_time']);
+    if ($time_remaining > 0) {
+        $error_msg = "บัญชีของคุณถูกล็อกชั่วคราว กรุณารอ " . ceil($time_remaining / 60) . " นาทีก่อนลองใหม่";
+    } else {
+        $_SESSION['login_attempts'] = 0;
+    }
+}
 
-                // --- ล็อกอินสำเร็จ ---
-                $_SESSION['user_id'] = $row['nut_id'];
-                $_SESSION['user_name'] = $row['nut_fullname'];
-                $_SESSION['user_position'] = !empty($row['nut_position']) ? $row['nut_position'] : 'นักโภชนาการ';
-                $_SESSION['user_code'] = $row['nut_code'];
-                $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
+// ตรวจสอบการส่ง POST request และ CSRF token
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
+    
+    // ตรวจสอบ CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+    } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
-                header("Location: index.php");
-                exit;
-            } else {
-                $error_msg = "รหัสผ่านไม่ถูกต้อง";
-            }
+        if (empty($username) || empty($password)) {
+            $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+            $_SESSION['login_attempts']++;
+            $_SESSION['last_attempt_time'] = time();
         } else {
-            // ไม่เจอ Username หรือ is_active ไม่ใช่ 1
-            $error_msg = "ไม่พบชื่อผู้ใช้งานนี้ในระบบ";
+            try {
+                $sql = "SELECT * FROM nutritionists WHERE nut_username = ? AND is_active = 1";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([$username]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($row && (password_verify($password, $row['nut_password']) || $password == $row['nut_password'])) {
+                    // ล็อกอินสำเร็จ
+                    $_SESSION['login_attempts'] = 0; // รีเซ็ท login attempts
+                    session_regenerate_id(true); // Regenerate session ID
+                    
+                    $_SESSION['user_id'] = $row['nut_id'];
+                    $_SESSION['user_name'] = $row['nut_fullname'];
+                    $_SESSION['user_position'] = !empty($row['nut_position']) ? $row['nut_position'] : 'นักโภชนาการ';
+                    $_SESSION['user_code'] = $row['nut_code'];
+                    $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
+                    $_SESSION['login_time'] = time();
+
+                    header("Location: index.php");
+                    exit;
+                } else {
+                    $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+                    $_SESSION['login_attempts']++;
+                    $_SESSION['last_attempt_time'] = time();
+                }
+            } catch (PDOException $e) {
+                error_log("Login Error: " . $e->getMessage());
+                $error_msg = "เกิดข้อผิดพลาดในระบบ";
+                $_SESSION['login_attempts']++;
+                $_SESSION['last_attempt_time'] = time();
+            }
         }
-    } catch (PDOException $e) {
-        $error_msg = "เกิดข้อผิดพลาดในระบบ: " . $e->getMessage();
     }
 }
 ?>
@@ -185,11 +222,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                         <?php if ($error_msg): ?>
                             <div class="alert alert-danger text-center fade show" role="alert" style="font-size: 0.9rem;">
-                                <i class="fas fa-exclamation-triangle mr-2"></i><?= $error_msg ?>
+                                <i class="fas fa-exclamation-triangle mr-2"></i><?php echo htmlspecialchars($error_msg); ?>
                             </div>
                         <?php endif; ?>
 
                         <form action="" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                            
                             <div class="form-group mb-3">
                                 <label class="small text-muted mb-1">ชื่อผู้ใช้งาน</label>
                                 <div class="input-group">
@@ -219,7 +258,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="card-footer text-center bg-white border-0 pb-4 pt-0">
                         <hr class="mt-0 mb-3 w-75 mx-auto">
                         <div class="footer-text">
-                            &copy; <?= date("Y") ?> Kamphaeng Phet Hospital.<br>
+                            &copy; <?php echo htmlspecialchars(date("Y")); ?> Kamphaeng Phet Hospital.<br>
                             กลุ่มงานโภชนศาสตร์ โรงพยาบาลกำแพงเพชร
                         </div>
                     </div>

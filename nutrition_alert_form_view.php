@@ -8,10 +8,24 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Session timeout check (30 minutes)
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    session_destroy();
+    error_log("Session timeout for user: " . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: หมดเวลากำรใช้งาน");
+}
+$_SESSION['last_activity'] = time();
+
 // 1. รับค่าเลขที่เอกสาร
-$doc_no = $_GET['doc_no'] ?? '';
-if (empty($doc_no)) {
-    die("Error: ไม่พบเลขที่เอกสาร");
+$doc_no = trim($_GET['doc_no'] ?? '');
+if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
+    error_log("Invalid doc_no parameter: $doc_no");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
+}
+
+// CSRF token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // 2. เตรียมตัวแปร Master Data
@@ -87,7 +101,8 @@ try {
     $data = $stmt_main->fetch(PDO::FETCH_ASSOC);
 
     if (!$data) {
-        die("ไม่พบข้อมูลเอกสาร: " . htmlspecialchars($doc_no));
+        error_log("NAF form not found: doc_no=$doc_no, user=" . $_SESSION['user_id']);
+        die("ข้อผิดพลาด: ไม่พบข้อมูลเอกสาร");
     }
 
     // คำนวณอายุ
@@ -174,7 +189,8 @@ try {
         $naf_desc = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
     }
 } catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
+    error_log("Database error in nutrition_alert_form_view.php: " . $e->getMessage());
+    die("ข้อผิดพลาด: ไม่สามารถดึงข้อมูลได้");
 }
 
 // Helper Functions
@@ -328,25 +344,25 @@ function isSymChecked($id, $saved_array)
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_hn'] ?></span></div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['admissions_an'] ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_firstname'] . ' ' . $data['patients_lastname'] ?></span></div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['ward_name'] ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['bed_number'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_hn']) ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['admissions_an']) ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_firstname'] . ' ' . $data['patients_lastname']) ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['ward_name'] ?? '-') ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['bed_number'] ?? '-') ?></span></div>
 
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['doctor_name'] ?: '-' ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['doctor_name'] ?? '-') ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_phone'] ?? '-') ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_congenital_disease'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['patients_congenital_disease'] ?? '-') ?></span>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 mb-3">
                                 <small class="text-muted d-block">สิทธิการรักษา</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['health_insurance_name'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($data['health_insurance_name'] ?? '-') ?></span>
                             </div>
                         </div>
                     </div>
@@ -475,28 +491,28 @@ function isSymChecked($id, $saved_array)
                         <div class="col-md-6 col-lg-3 mb-3">
                             <label class="small text-muted font-weight-bold">ส่วนสูง (Height)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" value="<?= $data['height_measure'] ?>" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($data['height_measure'] ?? '') ?>" disabled>
                                 <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3 mb-3">
                             <label class="small text-muted font-weight-bold">วัดความยาวตัว (Length)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" value="<?= $data['body_length'] ?>" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($data['body_length'] ?? '') ?>" disabled>
                                 <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3 mb-3">
                             <label class="small text-muted font-weight-bold">Arm Span</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" value="<?= $data['arm_span'] ?>" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($data['arm_span'] ?? '') ?>" disabled>
                                 <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3 mb-3">
                             <label class="small text-muted font-weight-bold">ญาติบอก (Reported)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" value="<?= $data['height_relative'] ?>" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($data['height_relative'] ?? '') ?>" disabled>
                                 <div class="input-group-append"><span class="input-group-text small">ซม.</span></div>
                             </div>
                         </div>
@@ -518,16 +534,16 @@ function isSymChecked($id, $saved_array)
                             <div class="col-md-6 col-lg-4 mb-3">
                                 <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" value="<?= $data['weight'] ?>" disabled>
+                                    <input type="text" class="form-control" value="<?= htmlspecialchars($data['weight'] ?? '') ?>" disabled>
                                     <div class="input-group-append"><span class="input-group-text">กก.</span></div>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4 mb-3">
                                 <label class="small text-muted font-weight-bold">ดัชนีมวลกาย (BMI)</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control font-weight-bold" value="<?= $data['bmi'] ?>" disabled>
+                                    <input type="text" class="form-control font-weight-bold" value="<?= htmlspecialchars($data['bmi'] ?? '') ?>" disabled>
                                     <div class="input-group-append">
-                                        <span class="input-group-text small font-weight-bold bg-light">Score: <?= $data['bmi_score'] ?></span>
+                                        <span class="input-group-text small font-weight-bold bg-light">Score: <?= htmlspecialchars($data['bmi_score'] ?? '') ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -562,7 +578,7 @@ function isSymChecked($id, $saved_array)
                                         <?php if ($data['lab_method'] == 'Albumin'): ?> <i class="fas fa-check-circle text-success float-right"></i> <?php endif; ?>
                                     </div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="<?= $data['albumin_val'] ?>" disabled>
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['albumin_val'] ?? '') ?>" disabled>
                                         <div class="input-group-append"><span class="input-group-text bg-white text-muted">g/dl</span></div>
                                     </div>
                                 </div>
@@ -574,7 +590,7 @@ function isSymChecked($id, $saved_array)
                                         <?php if ($data['lab_method'] == 'TLC'): ?> <i class="fas fa-check-circle text-success float-right"></i> <?php endif; ?>
                                     </div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="<?= $data['tlc_val'] ?>" disabled>
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['tlc_val'] ?? '') ?>" disabled>
                                         <div class="input-group-append"><span class="input-group-text bg-white text-muted">cells</span></div>
                                     </div>
                                 </div>
@@ -585,7 +601,7 @@ function isSymChecked($id, $saved_array)
                                 <div class="col-12 text-right">
                                     <div class="d-inline-block px-3 py-2 bg-white border rounded shadow-sm">
                                         <small class="text-muted mr-2">คะแนนจากผลเลือด (Lab Score):</small>
-                                        <span class="font-weight-bold text-primary h5 m-0"><?= $data['lab_score'] ?></span>
+                                        <span class="font-weight-bold text-primary h5 m-0"><?= htmlspecialchars($data['lab_score']) ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -909,7 +925,20 @@ function isSymChecked($id, $saved_array)
     <script>
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'logout.php';
+                // Create form to POST to logout
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'logout.php';
+                
+                // Add CSRF token
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = 'csrf_token';
+                token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                form.appendChild(token);
+                
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>

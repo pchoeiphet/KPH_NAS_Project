@@ -3,16 +3,35 @@ require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
 session_start();
+
+// ตรวจสอบ session
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$hn = $_GET['hn'] ?? '';
-$an = $_GET['an'] ?? '';
+// สร้าง CSRF token หากไม่มี
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-if (empty($hn) || empty($an)) {
-    die("Error: ไม่พบข้อมูล HN หรือ AN");
+// ตรวจสอบ session timeout (30 นาที)
+$timeout = 1800;
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
+    session_destroy();
+    header("Location: login.php?timeout=1");
+    exit;
+}
+$_SESSION['last_activity'] = time();
+
+// Validate และ sanitize input
+$hn = trim($_GET['hn'] ?? '');
+$an = trim($_GET['an'] ?? '');
+
+// ตรวจสอบ HN และ AN (อนุญาตเฉพาะตัวอักษร ตัวเลข - เท่านั้น)
+if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_match('/^[A-Za-z0-9\-]+$/', $an)) {
+    error_log("Invalid HN or AN parameter: HN=$hn, AN=$an");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
 }
 
 try {
@@ -43,7 +62,10 @@ try {
     $stmt->execute([':hn' => $hn, ':an' => $an]);
     $patient = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$patient) die("ไม่พบข้อมูลผู้ป่วย");
+    if (!$patient) {
+        error_log("Patient not found: HN=$hn, AN=$an");
+        die("ข้อผิดพลาด: ไม่พบข้อมูลผู้ป่วย");
+    }
 
     $age = '-';
     if (!empty($patient['patients_dob'])) {
@@ -77,7 +99,8 @@ try {
         $current_user_name = $_SESSION['user_name'] ?? 'Unknown';
     }
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    error_log("Database Error: " . $e->getMessage());
+    die("ข้อผิดพลาดในระบบ");
 }
 ?>
 
@@ -171,8 +194,9 @@ try {
     <div class="container-fluid px-lg-5 mt-4">
 
         <form id="mainForm" method="POST" action="nutrition_screening_form_save.php">
-            <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
-            <input type="hidden" name="an" value="<?= htmlspecialchars($an) ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="hn" value="<?php echo htmlspecialchars($hn); ?>">
+            <input type="hidden" name="an" value="<?php echo htmlspecialchars($an); ?>">
             <input type="hidden" name="redirect_to_naf" id="redirect_to_naf" value="false">
 
             <div class="card border-0 shadow-sm mb-4">
@@ -186,25 +210,25 @@ try {
                                 <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                             </h5>
                             <div class="row">
-                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_hn'] ?></span></div>
-                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['admissions_an'] ?></span></div>
-                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
-                                <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['bed_number'] ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_hn']); ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['admissions_an']); ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_firstname']) . ' ' . htmlspecialchars($patient['patients_lastname']); ?></span></div>
+                                <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($age); ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['ward_name'] ?? '-'); ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['bed_number'] ?? '-'); ?></span></div>
 
-                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['doctor_name'] ?: '-' ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_phone'] ?: '-' ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['doctor_name'] ?? '-'); ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($admit_date); ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_phone'] ?? '-'); ?></span></div>
 
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_congenital_disease'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_congenital_disease'] ?? '-'); ?></span>
                                 </div>
 
                                 <div class="col-12 col-md-6 col-lg-4 mb-3">
                                     <small class="text-muted d-block">สิทธิการรักษา</small>
-                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['health_insurance_name'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['health_insurance_name'] ?? '-'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -213,7 +237,7 @@ try {
             </div>
 
             <div class="mb-3">
-                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>&an=<?= htmlspecialchars($an) ?>'">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?php echo htmlspecialchars($hn); ?>&an=<?php echo htmlspecialchars($an); ?>'">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>
@@ -226,24 +250,24 @@ try {
                             <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                         </div>
                         <div class="text-right">
-                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?= htmlspecialchars($doc_no_show) ?></span>
+                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?php echo htmlspecialchars($doc_no_show); ?></span>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="col-md-2 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div><input type="text" class="form-control text-center font-weight-bold text-primary" value="<?= htmlspecialchars($next_seq) ?>" readonly>
+                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div><input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($next_seq); ?>" readonly>
                             </div>
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div><input type="text" class="form-control text-center" value="<?= date('d/m/') . (date('Y') + 543) ?>" readonly>
+                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div><input type="text" class="form-control text-center" value="<?php echo date('d/m/') . (date('Y') + 543); ?>" readonly>
                             </div>
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div><input type="text" class="form-control text-center" value="<?= date('H:i') ?>" readonly>
+                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div><input type="text" class="form-control text-center" value="<?php echo date('H:i'); ?>" readonly>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -527,7 +551,16 @@ try {
 
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'logout.php';
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'logout.php';
+                var token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = 'csrf_token';
+                token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                form.appendChild(token);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>

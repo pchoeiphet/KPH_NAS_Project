@@ -3,23 +3,41 @@ require_once 'connect_db.php';
 date_default_timezone_set('Asia/Bangkok');
 
 session_start();
+
+// ตรวจสอบ session
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$doc_no = $_GET['doc_no'] ?? '';
+// สร้าง CSRF token หากไม่มี
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-if (empty($doc_no)) {
-    die("<div class='alert alert-danger text-center mt-5'>Error: ไม่พบเลขที่เอกสาร</div>");
+// ตรวจสอบ session timeout (30 นาที)
+$timeout = 1800;
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
+    session_destroy();
+    header("Location: login.php?timeout=1");
+    exit;
+}
+$_SESSION['last_activity'] = time();
+
+// Validate input
+$doc_no = trim($_GET['doc_no'] ?? '');
+
+// ตรวจสอบ doc_no (อนุญาตเฉพาะ SPENT-/NAF- prefix และตัวอักษร ตัวเลข - เท่านั้น)
+if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
+    error_log("Invalid doc_no parameter: $doc_no");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
 }
 
 try {
-    // แก้ไข SQL: ไม่ใช้ตัวย่อ (Alias) ใช้ชื่อตารางเต็ม
     $sql = "
         SELECT 
             nutrition_screening.*, 
-            nutritionists.nut_fullname,   -- 1. เพิ่มบรรทัดนี้ เพื่อดึงชื่อจริง
+            nutritionists.nut_fullname,
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -47,7 +65,10 @@ try {
     $stmt->execute([':doc_no' => $doc_no]);
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$data) die("<div class='alert alert-danger text-center mt-5'>ไม่พบข้อมูลเอกสาร</div>");
+    if (!$data) {
+        error_log("Document not found: doc_no=$doc_no");
+        die("ข้อผิดพลาด: ไม่พบข้อมูลเอกสาร");
+    }
 
     // คำนวณอายุ
     $age = '-';
@@ -63,14 +84,14 @@ try {
     if (!empty($data['admit_datetime'])) {
         $dt = new DateTime($data['admit_datetime']);
         $thai_year = $dt->format('Y') + 543;
-        // แสดงผล: 12/04/2567 10:30 น.
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
     // คำนวณคะแนนรวม
     $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
 } catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
+    error_log("Database Error: " . $e->getMessage());
+    die("ข้อผิดพลาดในระบบ");
 }
 
 
@@ -177,25 +198,25 @@ try {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_hn'] ?></span></div>
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['admissions_an'] ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_firstname'] . ' ' . $data['patients_lastname'] ?></span></div>
-                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['ward_name'] ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['bed_number'] ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_hn']); ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['admissions_an']); ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_firstname']) . ' ' . htmlspecialchars($data['patients_lastname']); ?></span></div>
+                            <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($age); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['ward_name'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['bed_number'] ?? '-'); ?></span></div>
 
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['doctor_name'] ?: '-' ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_phone'] ?: '-' ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['doctor_name'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($admit_date); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_phone'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['patients_congenital_disease'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_congenital_disease'] ?? '-'); ?></span>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 mb-3">
                                 <small class="text-muted d-block">สิทธิการรักษา</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $data['health_insurance_name'] ?: '-' ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['health_insurance_name'] ?? '-'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -206,7 +227,7 @@ try {
         <div class="d-flex justify-content-between align-items-center mb-3 no-print">
 
             <div>
-                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($data['patients_hn'] ?? '') ?>&an=<?= htmlspecialchars($data['admissions_an'] ?? '') ?>';">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?php echo htmlspecialchars($data['patients_hn'] ?? ''); ?>&an=<?php echo htmlspecialchars($data['admissions_an'] ?? ''); ?>';">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>
@@ -216,7 +237,7 @@ try {
                     <i class="fa-solid fa-eye mr-1"></i> โหมดดูประวัติ (Read Only)
                 </div>
 
-                <a href="nutrition_screening_form_report.php?doc_no=<?= htmlspecialchars($data['doc_no'] ?? '') ?>"
+                <a href="nutrition_screening_form_report.php?doc_no=<?php echo htmlspecialchars($data['doc_no'] ?? ''); ?>"
                     target="_blank"
                     class="btn btn-info btn-sm shadow-sm px-3">
                     <i class="fas fa-file-pdf mr-1"></i> ดาวน์โหลด PDF
@@ -234,7 +255,7 @@ try {
                         <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
                     </div>
                     <div class="text-right">
-                        <span class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?= htmlspecialchars($data['doc_no'] ?? '-') ?></span>
+                        <span class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?php echo htmlspecialchars($data['doc_no'] ?? '-'); ?></span>
                     </div>
                 </div>
 
@@ -242,21 +263,21 @@ try {
                     <div class="col-md-2 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div>
-                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?= htmlspecialchars($data['screening_seq'] ?? '-') ?>" disabled>
+                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($data['screening_seq'] ?? '-'); ?>" disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
                             <input type="text" class="form-control text-center"
-                                value="<?= isset($data['screening_datetime']) ? date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) : '-' ?>"
+                                value="<?php echo isset($data['screening_datetime']) ? date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) : '-'; ?>"
                                 disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div>
-                            <input type="text" class="form-control text-center" value="<?= isset($data['screening_datetime']) ? date('H:i', strtotime($data['screening_datetime'])) : '-' ?>" disabled>
+                            <input type="text" class="form-control text-center" value="<?php echo isset($data['screening_datetime']) ? date('H:i', strtotime($data['screening_datetime'])) : '-'; ?>" disabled>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -265,7 +286,7 @@ try {
                                 <span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span>
                             </div>
                             <input type="text" class="form-control text-center text-primary"
-                                value="<?= htmlspecialchars(!empty($data['nut_fullname']) ? $data['nut_fullname'] : ($data['assessor_name'] ?? '-')) ?>"
+                                value="<?php echo htmlspecialchars(!empty($data['nut_fullname']) ? $data['nut_fullname'] : ($data['assessor_name'] ?? '-')); ?>"
                                 disabled>
                         </div>
                     </div>
@@ -276,7 +297,7 @@ try {
                 <form>
                     <div class="form-group mb-4">
                         <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['initial_diagnosis'] ?? '') ?>" disabled>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['initial_diagnosis'] ?? ''); ?>" disabled>
                     </div>
 
                     <hr class="my-4" style="border-top: 1px dashed #dee2e6;">
@@ -288,7 +309,7 @@ try {
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">น้ำหนักปัจจุบัน</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['present_weight'] ?? '') ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['present_weight'] ?? ''); ?>" disabled>
                                         <div class="input-group-append"><span class="input-group-text bg-light text-muted">กก.</span></div>
                                     </div>
                                 </div>
@@ -297,7 +318,7 @@ try {
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">ส่วนสูง</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['height'] ?? '') ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['height'] ?? ''); ?>" disabled>
                                         <div class="input-group-append"><span class="input-group-text bg-light text-muted">ซม.</span></div>
                                     </div>
                                 </div>
@@ -306,7 +327,7 @@ try {
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($data['normal_weight'] ?? '') ?>" disabled>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['normal_weight'] ?? ''); ?>" disabled>
                                         <div class="input-group-append"><span class="input-group-text bg-light text-muted">กก.</span></div>
                                     </div>
                                 </div>
@@ -314,7 +335,7 @@ try {
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="text-muted small mb-1">ดัชนีมวลกาย (BMI)</label>
-                                    <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($data['bmi'] ?? '') ?>" disabled>
+                                    <input type="text" class="form-control bg-light" value="<?php echo htmlspecialchars($data['bmi'] ?? ''); ?>" disabled>
                                 </div>
                             </div>
                         </div>
@@ -395,7 +416,7 @@ try {
 
                     <div class="form-group mb-4">
                         <label class="section-label">4. หมายเหตุ / ข้อสังเกตเพิ่มเติม (Optional)</label>
-                        <textarea class="form-control" rows="3" disabled><?= htmlspecialchars($data['notes'] ?? '') ?></textarea>
+                        <textarea class="form-control" rows="3" disabled><?php echo htmlspecialchars($data['notes'] ?? ''); ?></textarea>
                     </div>
 
                     <?php
@@ -425,13 +446,13 @@ try {
                         <p class="mb-2" style="font-size: 0.95rem;"><?= $descText ?></p>
 
                         <div class="mt-3 p-2 rounded d-inline-block" style="background-color: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.1);">
-                            <i class="far <?= $recommendIcon ?> mr-2"></i>
-                            <strong>ข้อแนะนำ:</strong> <?= $recommendText ?>
+                            <i class="far <?php echo htmlspecialchars($recommendIcon); ?> mr-2"></i>
+                            <strong>ข้อแนะนำ:</strong> <?php echo htmlspecialchars($recommendText); ?>
                         </div>
 
                         <?php if ($isRisk): ?>
                             <div class="mt-3">
-                                <span class="badge badge-warning p-2">สถานะ: <?= htmlspecialchars($data['screening_status'] ?? '-') ?></span>
+                                <span class="badge badge-warning p-2">สถานะ: <?php echo htmlspecialchars($data['screening_status'] ?? '-'); ?></span>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -446,7 +467,16 @@ try {
     <script>
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'logout.php';
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'logout.php';
+                var token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = 'csrf_token';
+                token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                form.appendChild(token);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>

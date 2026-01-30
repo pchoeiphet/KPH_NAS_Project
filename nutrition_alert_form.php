@@ -8,16 +8,32 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Session timeout check (30 minutes)
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    session_destroy();
+    error_log("Session timeout for user: " . $_SESSION['user_id']);
+    die("ข้อผิดพลาด: หมดเวลาการใช้งาน");
+}
+$_SESSION['last_activity'] = time();
+
 // รับค่าจาก URL
-$hn = $_GET['hn'] ?? '';
-$an = $_GET['an'] ?? '';
-$ref_screening_doc = $_GET['ref_screening'] ?? '';
+$hn = trim($_GET['hn'] ?? '');
+$an = trim($_GET['an'] ?? '');
+$ref_screening_doc = trim($_GET['ref_screening'] ?? '');
 
-// ตรียมตัวแปรเก็บข้อมูล
-$screening_data = [];
+// Input validation for HN and AN
+if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_match('/^[A-Za-z0-9\-]+$/', $an)) {
+    error_log("Invalid HN or AN parameters: HN=$hn, AN=$an");
+    die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
+}
 
-// ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
-if (!empty($ref_screening_doc)) {
+// CSRF token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// ถ้ามีเลขที่เอกสารส่งมา ให้ตรวจสอบและไปค้นหา ID ในฐานข้อมูล
+if (!empty($ref_screening_doc) && preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $ref_screening_doc)) {
     try {
         // Query ค้นหาข้อมูลจากตาราง nutrition_screening ด้วยเลขที่เอกสาร
         $stmt_find = $conn->prepare("SELECT * FROM nutrition_screening WHERE doc_no = :ref_doc LIMIT 1");
@@ -28,30 +44,10 @@ if (!empty($ref_screening_doc)) {
             $screening_data = $result;
         }
     } catch (Exception $e) {
+        error_log("Error fetching screening data: " . $e->getMessage());
     }
-}
-
-// ตรวจสอบค่าว่าง
-if (empty($hn) || empty($an)) {
-    die("Error: ไม่พบข้อมูล HN หรือ AN");
-}
-
-// ถ้ามีเลขที่เอกสารส่งมา ให้ไปค้นหา ID ในฐานข้อมูล
-if (!empty($ref_screening_doc)) {
-    try {
-        $stmt_find = $conn->prepare("SELECT nutrition_screening_id FROM nutrition_screening WHERE doc_no = :ref_doc LIMIT 1");
-        $stmt_find->execute([':ref_doc' => $ref_screening_doc]);
-        $row_find = $stmt_find->fetch(PDO::FETCH_ASSOC);
-
-        if ($row_find) {
-            $screening_id_val = $row_find['nutrition_screening_id'];
-        }
-    } catch (Exception $e) {
-    }
-}
-
-if ($result) {
-    $screening_data = $result;
+} else {
+    $screening_data = [];
 }
 
 $val_diagnosis = '';
@@ -86,7 +82,10 @@ try {
     $stmt->execute([':hn' => $hn, ':an' => $an]);
     $patient = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$patient) die("ไม่พบข้อมูลผู้ป่วย");
+    if (!$patient) {
+        error_log("Patient not found: HN=$hn, AN=$an, user=" . $_SESSION['user_id']);
+        die("ข้อผิดพลาด: ไม่พบข้อมูลผู้ป่วย");
+    }
 
     // คำนวณอายุ
     $age = '-';
@@ -161,7 +160,8 @@ try {
         $current_user_name = $_SESSION['user_name'] ?? '-';
     }
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    error_log("Database error in nutrition_alert_form.php: " . $e->getMessage());
+    die("ข้อผิดพลาด: ไม่สามารถดึงข้อมูลได้");
 }
 ?>
 
@@ -272,16 +272,16 @@ try {
                                 <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                             </h5>
                             <div class="row">
-                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_hn'] ?></span></div>
-                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['admissions_an'] ?></span></div>
-                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_firstname'] . ' ' . $patient['patients_lastname'] ?></span></div>
-                                <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $age ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['ward_name'] ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['bed_number'] ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_hn']) ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['admissions_an']) ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_firstname'] . ' ' . $patient['patients_lastname']) ?></span></div>
+                                <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['ward_name'] ?? '-') ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['bed_number'] ?? '-') ?></span></div>
 
-                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['doctor_name'] ?: '-' ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $admit_date ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_phone'] ?: '-' ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span></div>
 
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
@@ -1002,7 +1002,7 @@ try {
                     </div>
                     <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
                         <button type="button" class="btn btn-secondary shadow-sm px-4"
-                            onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>'">
+                            onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>&an=<?= htmlspecialchars($an) ?>'">
                             <i class="fa-solid fa-chevron-left mr-2"></i> ยกเลิก / ย้อนกลับ
                         </button>
                         <button type="button" class="btn btn-success shadow-sm px-4" style="background-color: #2e7d32; border: none;" onclick="saveData()">
@@ -1287,7 +1287,20 @@ try {
 
         function confirmLogout() {
             if (confirm('ยืนยันการออกจากระบบ?')) {
-                window.location.href = 'logout.php';
+                // Create form to POST to logout
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'logout.php';
+                
+                // Add CSRF token
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = 'csrf_token';
+                token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
+                form.appendChild(token);
+                
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>
