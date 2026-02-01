@@ -4,6 +4,8 @@ date_default_timezone_set('Asia/Bangkok');
 
 session_start();
 
+$currentPage = basename($_SERVER['PHP_SELF']); // ดึงชื่อไฟล์ปัจจุบัน
+
 // ตรวจสอบว่ามี Session user_id หรือไม่ (ถ้าไม่มีให้ดีดกลับไปหน้า login.php)
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -201,6 +203,22 @@ try {
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
+            <ul class="navbar-nav mx-auto d-none d-md-flex">
+                <li class="nav-item mx-2">
+                    <a class="nav-link font-weight-600 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="index.php">
+                        <i class="fa-solid fa-home mr-1"></i> หน้าแรก
+                    </a>
+                </li>
+
+                <li class="nav-item mx-2">
+                    <a class="nav-link font-weight-600 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="nutrition_form_history.php">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                    </a>
+                </li>
+            </ul>
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">

@@ -83,6 +83,23 @@ body {
   display: none;
 }
 
+.navbar-nav .nav-link {
+    font-size: 0.95rem;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: #f1f3f5;
+}
+
+.navbar-nav .nav-link.active {
+    background-color: #e7f1ff;
+    font-weight: 600;
+}
+
+
 .welcome-banner {
   /* ปรับพื้นหลังเป็น Gradient ขาวไปเทาฟ้าจางๆ ดูสะอาดและแพง */
   background: linear-gradient(120deg, #ffffff 0%, #f0f4f8 100%);
