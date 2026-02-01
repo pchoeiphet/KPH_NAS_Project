@@ -83,11 +83,11 @@ body {
   display: none;
 }
 
+
 .navbar-nav .nav-link {
     font-size: 0.95rem;
-    padding: 8px 14px;
+    font-weight: 500;
     border-radius: 6px;
-    transition: all 0.2s ease;
 }
 
 .navbar-nav .nav-link:hover {

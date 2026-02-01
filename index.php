@@ -204,22 +204,24 @@ try {
                 </div>
             </a>
 
-            <ul class="navbar-nav mx-auto d-none d-md-flex">
-                <li class="nav-item mx-2">
-                    <a class="nav-link font-weight-600 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+            <ul class="navbar-nav ml-auto align-items-center d-none d-md-flex">
+
+                <li class="nav-item">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
                         href="index.php">
                         <i class="fa-solid fa-home mr-1"></i> หน้าแรก
                     </a>
                 </li>
 
-                <li class="nav-item mx-2">
-                    <a class="nav-link font-weight-600 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                <li class="nav-item">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
                         href="nutrition_form_history.php">
                         <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
                     </a>
                 </li>
-            </ul>
 
+            </ul>
+            
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
