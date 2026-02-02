@@ -87,7 +87,6 @@ body {
 .navbar-nav .nav-link {
     font-size: 0.95rem;
     font-weight: 500;
-    border-radius: 6px;
 }
 
 .navbar-nav .nav-link:hover {
