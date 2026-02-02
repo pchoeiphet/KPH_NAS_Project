@@ -305,12 +305,10 @@ try {
                                                 <td class="text-center">
                                                     <span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span>
                                                 </td>
-                                                <td class="text-center"><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
-                                                <td class="text-left pl-3">
-                                                    <div class="font-weight-bold text-dark">
-                                                        <?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?>
-                                                    </div>
-                                                    <small class="text-muted">HN: <?php echo htmlspecialchars($row['patients_hn']); ?></small>
+                                                <td><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
+                                                <td>
+                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
+                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="status-label <?php echo $bgClass; ?>" style="display:inline-block; min-width:180px; padding: 5px 10px; border-radius: 20px;">
