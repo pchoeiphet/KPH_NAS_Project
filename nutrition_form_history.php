@@ -286,38 +286,55 @@ try {
                                     <?php if (count($history_naf) > 0): ?>
                                         <?php foreach ($history_naf as $row): ?>
                                             <?php
-                                            $naf_level = $row['naf_level'];
-                                            $bgClass = 'status-normal';
-                                            if ($naf_level == 'NAF B') $bgClass = 'status-risk';
-                                            if ($naf_level == 'NAF C') $bgClass = 'status-severe';
+                                            $naf_level = $row['naf_level']; // ค่าใน DB เช่น 'NAF A', 'NAF B'
+
+                                            // ตั้งค่าเริ่มต้น
+                                            $bgClass = 'status-normal';       // สีเขียว (Class เดิมของคุณ)
+                                            $naf_desc = 'Normal - Mild Malnutrition';
+
+                                            // เช็คเงื่อนไขเพื่อเปลี่ยน Class และข้อความ
+                                            if (strpos($naf_level, 'NAF B') !== false) {
+                                                $bgClass = 'status-risk';     // สีเหลือง (Class เดิมของคุณ)
+                                                $naf_desc = 'Moderate Malnutrition';
+                                            } elseif (strpos($naf_level, 'NAF C') !== false) {
+                                                $bgClass = 'status-severe';   // สีแดง (Class เดิมของคุณ)
+                                                $naf_desc = 'Severe Malnutrition';
+                                            }
                                             ?>
                                             <tr>
-                                                <td><span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span></td>
-                                                <td><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
-                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?></span>
+                                                <td class="text-center">
+                                                    <span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span>
+                                                </td>
+                                                <td class="text-center"><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
+                                                <td class="text-left pl-3">
+                                                    <div class="font-weight-bold text-dark">
+                                                        <?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?>
+                                                    </div>
+                                                    <small class="text-muted">HN: <?php echo htmlspecialchars($row['patients_hn']); ?></small>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="status-label <?php echo htmlspecialchars($bgClass); ?>">
-                                                        <?php echo htmlspecialchars($naf_level); ?>
+                                                    <span class="status-label <?php echo $bgClass; ?>" style="display:inline-block; min-width:180px; padding: 5px 10px; border-radius: 20px;">
+                                                        <strong><?php echo htmlspecialchars($naf_level); ?></strong>
+                                                        <div style="font-size: 0.75rem; font-weight: normal; margin-top: 2px; opacity: 0.9;">
+                                                            (<?php echo $naf_desc; ?>)
+                                                        </div>
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="nutrition_alert_form_view.php?doc_no=<?php echo $row['doc_no']; ?>"
-                                                        target="_blank" class="btn btn-sm btn-info text-white mb-1 mb-md-0 mr-1" title="ดูรายละเอียด">
+                                                        target="_blank" class="btn btn-sm btn-info text-white mb-1 mb-md-0 mr-1">
                                                         <i class="fas fa-search"></i> ดูข้อมูล
                                                     </a>
                                                     <a href="nutrition_alert_form_report.php?doc_no=<?php echo $row['doc_no']; ?>"
-                                                        target="_blank" class="btn btn-sm btn-outline-secondary" title="สั่งพิมพ์">
-                                                        <i class="fas fa-print"></i> พิมพ์ PDF
+                                                        target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-print"></i> พิมพ์
                                                     </a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="5" class="text-center py-5 text-muted">-- ไม่พบข้อมูลการประเมิน --</td>
+                                            <td colspan="5" class="text-center py-5">-- ไม่พบข้อมูล --</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
