@@ -297,7 +297,7 @@ $html = '
     .risk-large { font-size: 18pt; font-weight: bold; margin-top: 5px; }
     .risk-desc { font-size: 13pt; margin-top: 5px; color: #444; }
     
-    .signature-section { margin-top: 25px; text-align: center; page-break-inside: avoid; }
+    .signature-section { margin-top: 40px; text-align: center; page-break-inside: avoid; }
     
     .interp-table th, .interp-table td { border: 1px solid #000; padding: 5px; vertical-align: top; }
     .interp-table th { background-color: #f5f5f5; text-align: center; }
@@ -318,54 +318,60 @@ $html = '
         </td>
         <td width="15%" align="right" style="font-size: 12pt;">
             <b>เลขที่เอกสาร:</b> ' . htmlspecialchars($doc_no) . '<br>
-            <b>วันที่:</b> ' . htmlspecialchars($assess_date_th) . '
         </td>
     </tr>
 </table>
 
 <div class="info-box">
-    <table width="100%" style="border-collapse: collapse;">
+    <table width="100%" style="border-collapse: collapse; line-height: 0.95;">
+
         <tr style="border-bottom: 1px dotted #ccc;">
-            <td width="24%" style="padding-bottom: 5px;">
+            <td width="45%" style="padding: 6px 4px;">
                 <b>ชื่อ-สกุล:</b> ' . $patient_full_name . '
             </td>
-            <td width="22%" style="padding-bottom: 5px;">
-                <b>อายุ:</b> ' . htmlspecialchars($age) . '
-            </td>
-            <td width="10%" style="padding-bottom: 5px;">
-                <b>เพศ:</b> ' . htmlspecialchars($gender_th) . '
-            </td>
-            <td width="10%" style="padding-bottom: 5px;">
+            <td width="25%" style="padding: 6px 4px;">
                 <b>HN:</b> ' . htmlspecialchars($assessment['patients_hn']) . '
             </td>
-            <td width="15%" style="padding-bottom: 5px;">
+            <td width="30%" style="padding: 6px 4px;">
                 <b>AN:</b> ' . htmlspecialchars($assessment['admissions_an'] ?? '-') . '
             </td>
         </tr>
 
         <tr style="border-bottom: 1px dotted #ccc;">
-            <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
+            <td style="padding: 6px 4px;">
+                <b>อายุ:</b> ' . htmlspecialchars($age) . '
+            </td>
+            <td style="padding: 6px 4px;">
+                <b>เพศ:</b> ' . htmlspecialchars($gender_th) . '
+            </td>
+            <td style="padding: 6px 4px;">
+                <b>ข้อมูลจาก:</b> ' . htmlspecialchars($infoSourceText) . '
+            </td>
+        </tr>
+
+        <tr style="border-bottom: 1px dotted #ccc;">
+            <td style="padding: 6px 4px;">
                 <b>หอผู้ป่วย:</b> ' . htmlspecialchars($assessment['ward_name'] ?? '-') . '
-                &nbsp;&nbsp;
+            </td>
+            <td style="padding: 6px 4px;">
                 <b>เตียง:</b> ' . htmlspecialchars($assessment['bed_number'] ?? '-') . '
             </td>
-            
-            <td colspan="2" style="padding-top: 5px; padding-bottom: 5px;">
+            <td style="padding: 6px 4px;">
                 <b>วันที่รับเข้ารักษา:</b> ' . htmlspecialchars($admit_date_th) . '
-            </td>
-
-            <td style="padding-top: 5px; padding-bottom: 5px;">
-                <b>วันที่ประเมิน:</b> ' . htmlspecialchars($assess_datetime_th) . '
             </td>
         </tr>
 
         <tr>
-            <td colspan="2" style="padding-top: 5px;">
-                <b>การวินิจฉัยเบื้องต้น:</b> ' . htmlspecialchars($assessment['initial_diagnosis'] ?? '-') . '
+            <td colspan="2" style="padding: 6px 4px;">
+                <b>การวินิจฉัยเบื้องต้น:</b>
+                ' . htmlspecialchars($assessment['initial_diagnosis'] ?? '-') . '
             </td>
-            <td colspan="3" style="padding-top: 5px;"> <b>ข้อมูลจาก:</b> ' . htmlspecialchars($infoSourceText) . '
+            <td style="padding: 6px 4px;">
+                <b>วันที่ประเมิน:</b><br>
+                ' . htmlspecialchars($assess_datetime_th) . '
             </td>
         </tr>
+
     </table>
 </div>
 
@@ -448,13 +454,22 @@ $html = '
         <td width="40%"></td>
         <td width="60%" align="center">
             <div style="margin-bottom: 25px;">ลงชื่อ ................................................................. ผู้ประเมิน</div>
-            <div style="font-weight: bold; margin-bottom: 5px;">
+            <div style="margin-bottom: 5px;">
     ( ' . $assessor_show . ' )
 </div>
 <div>ตำแหน่ง ' . $position_show . '</div>
         </td>
     </tr>
 </table>
+
+<div style="position: absolute; bottom: 5px; width: 100%; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt;">
+    <table width="100%">
+        <tr>
+            <td width="40%">วันที่พิมพ์: ' . date('d/m/Y H:i') . ' น. </td>
+            <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
+        </tr>
+    </table>
+</div>
 
 <pagebreak>
 
@@ -485,6 +500,15 @@ $html = '
         </tr>
     </tbody>
 </table>
+
+<div style="position: absolute; bottom: 5px; width: 100%; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt;">
+    <table width="100%">
+        <tr>
+            <td width="40%">วันที่พิมพ์: ' . date('d/m/Y H:i') . ' น. </td>
+            <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
+        </tr>
+    </table>
+</div>
 ';
 
 // Generate PDF

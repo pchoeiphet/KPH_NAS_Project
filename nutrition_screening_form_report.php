@@ -387,7 +387,7 @@ $html = '
 
 <br>
 
-<table width="100%" style="margin-top: 30px;">
+<table width="100%" style="margin-top: 20px;">
     <tr>
         <td width="50%">
             <div style="border: 1px dashed #000; padding: 6px; font-size: 11pt; height: 70px; width: 90%;">

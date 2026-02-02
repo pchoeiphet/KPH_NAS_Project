@@ -255,6 +255,7 @@ try {
 
         <form id="nafForm" method="POST" action="nutrition_alert_form_save.php">
             <input type="hidden" name="hn" value="<?= htmlspecialchars($hn) ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <input type="hidden" name="an" value="<?= htmlspecialchars($an) ?>">
             <input type="hidden" name="doc_no" value="<?= htmlspecialchars($doc_no_show) ?>">
             <input type="hidden" name="naf_seq" value="<?= htmlspecialchars($naf_seq) ?>">
@@ -1291,14 +1292,14 @@ try {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'logout.php';
-                
+
                 // Add CSRF token
                 const token = document.createElement('input');
                 token.type = 'hidden';
                 token.name = 'csrf_token';
                 token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
                 form.appendChild(token);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }
