@@ -327,7 +327,7 @@ try {
                                                     </a>
                                                     <a href="nutrition_alert_form_report.php?doc_no=<?php echo $row['doc_no']; ?>"
                                                         target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                        <i class="fas fa-print"></i> พิมพ์
+                                                        <i class="fas fa-print"></i> พิมพ์ PDF
                                                     </a>
                                                 </td>
                                             </tr>
