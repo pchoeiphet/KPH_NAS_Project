@@ -286,18 +286,17 @@ try {
                                     <?php if (count($history_naf) > 0): ?>
                                         <?php foreach ($history_naf as $row): ?>
                                             <?php
-                                            $naf_level = $row['naf_level']; // ค่าใน DB เช่น 'NAF A', 'NAF B'
+                                            $naf_level = $row['naf_level'];
 
                                             // ตั้งค่าเริ่มต้น
-                                            $bgClass = 'status-normal';       // สีเขียว (Class เดิมของคุณ)
+                                            $bgClass = 'status-normal';       // สีเขียว
                                             $naf_desc = 'Normal - Mild Malnutrition';
 
-                                            // เช็คเงื่อนไขเพื่อเปลี่ยน Class และข้อความ
                                             if (strpos($naf_level, 'NAF B') !== false) {
-                                                $bgClass = 'status-risk';     // สีเหลือง (Class เดิมของคุณ)
+                                                $bgClass = 'status-risk';     // สีเหลือง
                                                 $naf_desc = 'Moderate Malnutrition';
                                             } elseif (strpos($naf_level, 'NAF C') !== false) {
-                                                $bgClass = 'status-severe';   // สีแดง (Class เดิมของคุณ)
+                                                $bgClass = 'status-severe';   // สีแดง
                                                 $naf_desc = 'Severe Malnutrition';
                                             }
                                             ?>
