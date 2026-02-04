@@ -36,6 +36,13 @@ $hn = trim($_POST['hn'] ?? '');
 $an = trim($_POST['an'] ?? '');
 $redirect_to_naf = trim($_POST['redirect_to_naf'] ?? 'false');
 
+// [ส่วนที่แก้ไข 1] รับค่าวันที่และเวลาจากฟอร์ม
+$s_date = $_POST['screening_date'] ?? date('Y-m-d');
+$s_time = $_POST['screening_time'] ?? date('H:i');
+
+// รวมเป็น DateTime Format (YYYY-MM-DD HH:MM:SS) สำหรับบันทึกลง MySQL
+$save_datetime = $s_date . ' ' . $s_time . ':00';
+
 // ตรวจสอบ HN และ AN (อนุญาตเฉพาะตัวอักษร ตัวเลข - เท่านั้น)
 if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_match('/^[A-Za-z0-9\-]+$/', $an)) {
     error_log("Invalid HN or AN in form save: HN=$hn, AN=$an");
@@ -83,7 +90,7 @@ try {
 
     $doc_no = 'SPENT-' . $hn . '-' . str_pad($next_seq, 3, '0', STR_PAD_LEFT);
 
-    // บันทึกลงฐานข้อมูล
+    // บันทึกข้อมูลลงฐานข้อมูล
     $sql = "INSERT INTO nutrition_screening (
                 doc_no, admissions_an, patients_hn, screening_datetime, screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
@@ -91,7 +98,7 @@ try {
                 screening_result, notes, nut_id, 
                 screening_status, has_assessment
             ) VALUES (
-                :doc_no, :an, :hn, NOW(), :seq,
+                :doc_no, :an, :hn, :screening_datetime, :seq,
                 :diagnosis, :weight, :normal_weight, :height, :bmi, :method,
                 :q1, :q2, :q3, :q4,
                 :result, :notes, :nut_id,     
@@ -99,10 +106,12 @@ try {
             )";
 
     $stmt = $conn->prepare($sql);
+
     $stmt->execute([
         ':doc_no' => $doc_no,
         ':an' => $an,
         ':hn' => $hn,
+        ':screening_datetime' => $save_datetime,
         ':seq' => $next_seq,
         ':diagnosis' => trim($_POST['initial_diagnosis'] ?? ''),
         ':weight' => floatval($_POST['present_weight'] ?? 0),
@@ -121,7 +130,7 @@ try {
         ':has_assess' => $has_assessment
     ]);
 
-    // การ Redirect (ใช้ whitelist)
+    // Redirect ตามเงื่อนไข
     if ($redirect_to_naf === 'true' && $total_score >= 2) {
         header("Location: nutrition_alert_form.php?hn=" . urlencode($hn) . "&an=" . urlencode($an) . "&ref_screening=" . urlencode($doc_no));
     } else {

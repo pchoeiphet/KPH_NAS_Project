@@ -222,7 +222,7 @@ try {
                                 <thead>
                                     <tr>
                                         <th width="15%">เลขที่เอกสาร</th>
-                                        <th width="20%">วัน-เวลา ที่บันทึก</th>
+                                        <th width="20%">วัน-เวลา ที่คัดกรอง</th>
                                         <th width="25%">ชื่อ-นามสกุล</th>
                                         <th width="20%" class="text-center">ผลการคัดกรอง</th>
                                         <th width="15%" class="text-center">การจัดการ</th>
@@ -276,7 +276,7 @@ try {
                                 <thead>
                                     <tr>
                                         <th width="15%">เลขที่เอกสาร</th>
-                                        <th width="20%">วัน-เวลา ที่บันทึก</th>
+                                        <th width="20%">วัน-เวลา ที่ประเมิน</th>
                                         <th width="25%">ชื่อ-นามสกุล</th>
                                         <th width="20%" class="text-center">ผลการประเมิน</th>
                                         <th width="15%" class="text-center">การจัดการ</th>

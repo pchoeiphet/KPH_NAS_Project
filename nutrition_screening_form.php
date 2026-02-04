@@ -262,12 +262,29 @@ try {
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div><input type="text" class="form-control text-center" value="<?php echo date('d/m/') . (date('Y') + 543); ?>" readonly>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white text-muted">วันที่</span>
+                                </div>
+                                <input type="date"
+                                    class="form-control text-center text-dark"
+                                    name="screening_date"
+                                    id="screeningDate"
+                                    value="<?php echo date('Y-m-d'); ?>"
+                                    required>
                             </div>
                         </div>
+
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div><input type="text" class="form-control text-center" value="<?php echo date('H:i'); ?>" readonly>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white text-muted">เวลา</span>
+                                </div>
+                                <input type="time"
+                                    class="form-control text-center text-dark"
+                                    name="screening_time"
+                                    id="screeningTime"
+                                    value="<?php echo date('H:i'); ?>"
+                                    required>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -429,7 +446,7 @@ try {
                         <div id="highRiskOptions" class="d-none">
                             <div class="d-flex justify-content-center mt-4">
                                 <button type="button" class="btn btn-outline-secondary mr-3 px-4 py-2" onclick="saveLater(true)">
-                                    <i class="fa-regular fa-clock mr-2"></i> ไว้ทำทีหลัง
+                                    <i class="fa-regular fa-clock mr-2"></i> ทำทีหลัง
                                 </button>
                                 <button type="button" class="btn btn-danger px-4 py-2 shadow-sm" onclick="openAssessment(true)">
                                     <i class="fa-solid fa-user-doctor mr-2"></i> ประเมิน NAF ต่อทันที

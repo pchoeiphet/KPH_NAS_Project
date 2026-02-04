@@ -55,11 +55,21 @@ $val_weight = '';
 $val_height = '';
 $val_bmi = '';
 
+$default_date = date('Y-m-d');
+$default_time = date('H:i');
+
 if (!empty($screening_data)) {
     $val_diagnosis = $screening_data['initial_diagnosis'] ?? '';
     $val_weight = $screening_data['present_weight'] ?? '';
     $val_height = $screening_data['height'] ?? '';
     $val_bmi = $screening_data['bmi'] ?? '';
+
+    // ถ้ามีข้อมูลการคัดกรอง ให้ใช้วันที่คัดกรองเป็นค่าเริ่มต้น
+    if (!empty($screening_data['screening_datetime'])) {
+        $sc_timestamp = strtotime($screening_data['screening_datetime']);
+        $default_date = date('Y-m-d', $sc_timestamp);
+        $default_time = date('H:i', $sc_timestamp);
+    }
 }
 
 try {
@@ -328,14 +338,26 @@ try {
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
-                                <input type="text" class="form-control text-center" value="<?= date('d/m/') . (date('Y') + 543) ?>" readonly>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white text-muted">วันที่</span>
+                                </div>
+                                <input type="date"
+                                    class="form-control text-center text-dark"
+                                    name="assessment_date"
+                                    value="<?= $default_date ?>"
+                                    required>
                             </div>
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <div class="input-group input-group-sm">
-                                <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div>
-                                <input type="text" class="form-control text-center" value="<?= date('H:i') ?>" readonly>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white text-muted">เวลา</span>
+                                </div>
+                                <input type="time"
+                                    class="form-control text-center text-dark"
+                                    name="assessment_time"
+                                    value="<?= $default_time ?>"
+                                    required>
                             </div>
                         </div>
                         <div class="col-md-4">

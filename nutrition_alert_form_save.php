@@ -30,6 +30,11 @@ if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_
     die("ข้อผิดพลาด: พารามิเตอร์ไม่ถูกต้อง");
 }
 
+$ass_date = $_POST['assessment_date'] ?? date('Y-m-d'); // รับวันที่
+$ass_time = $_POST['assessment_time'] ?? date('H:i');   // รับเวลา
+
+$assessment_datetime_db = $ass_date . ' ' . $ass_time . ':00';
+
 $doc_no = trim($_POST['doc_no'] ?? '');
 $naf_seq = intval($_POST['naf_seq'] ?? 1);
 $screening_id = !empty($_POST['screening_id']) ? intval(trim($_POST['screening_id'])) : NULL;
@@ -151,9 +156,7 @@ else $naf_level = 'NAF C';
 try {
     $conn->beginTransaction();
 
-    // ---------------------------------------------------------
-    // 4. INSERT ตารางหลัก
-    // ---------------------------------------------------------
+    // บันทึกข้อมูลหลัก
     $sql_main = "
         INSERT INTO nutrition_assessment (
             doc_no, naf_seq, admissions_an, patients_hn, assessment_datetime,
@@ -163,27 +166,30 @@ try {
             lab_method, albumin_val, tlc_val, lab_score,
             weight_option_id, patient_shape_id, weight_change_4_weeks_id, 
             food_type_id, food_amount_id, food_access_id,
-            total_score, naf_level, nut_id,  -- << เปลี่ยนจาก assessor_name เป็น nut_id
+            total_score, naf_level, nut_id,
             ref_screening_doc_no, nutrition_screening_id
         ) VALUES (
-            :doc_no, :naf_seq, :an, :hn, NOW(),
+            :doc_no, :naf_seq, :an, :hn, :assessment_datetime,
             :diagnosis, :src, :oth_src,
             :h, :body_l, :arm, :h_rel, 
             :w, :bmi, :bmi_s, :no_w,
             :lab_m, :alb, :tlc, :lab_s,
             :w_opt, :p_shp, :w_chg, 
             :f_typ, :f_amt, :f_acc,
-            :total, :level, :nut_id, -- << เปลี่ยน Placeholder
+            :total, :level, :nut_id,
             :ref_doc, :screen_id
         )
     ";
 
     $stmt = $conn->prepare($sql_main);
+
+    // Bind และ Execute
     $stmt->execute([
         ':doc_no'   => $doc_no,
         ':naf_seq'  => $naf_seq,
         ':an'       => $an,
         ':hn'       => $hn,
+        ':assessment_datetime' => $assessment_datetime_db,
         ':diagnosis' => $initial_diagnosis,
         ':src'      => $info_source,
         ':oth_src'  => $other_source,
@@ -214,12 +220,10 @@ try {
 
     $nutrition_assessment_id = $conn->lastInsertId();
 
-    // ---------------------------------------------------------
-    // 5. INSERT ตารางลูก: disease_saved
-    // ---------------------------------------------------------
     $sql_disease = "INSERT INTO disease_saved (nutrition_assessment_id, disease_id, disease_other_name, disease_type, disease_score) VALUES (:na_id, :d_id, :d_name, :d_type, :d_score)";
     $stmt_d = $conn->prepare($sql_disease);
 
+    // บันทึกโรค
     if (!empty($disease_ids) && is_array($disease_ids)) {
         foreach ($disease_ids as $did) {
             if (!is_numeric($did)) continue;
@@ -242,9 +246,7 @@ try {
         $stmt_d->execute([':na_id' => $nutrition_assessment_id, ':d_id' => NULL, ':d_name' => $disease_other_severe_text, ':d_type' => 'โรคที่มีความรุนแรงมาก', ':d_score' => 6]);
     }
 
-    // ---------------------------------------------------------
-    // 6. INSERT ตารางลูก: symptom
-    // ---------------------------------------------------------
+    // บันทึกอาการ
     if (!empty($symptom_ids) && is_array($symptom_ids)) {
         $sql_symptom = "INSERT INTO symptom_problem_saved (nutrition_assessment_id, symptom_problem_id, symptom_problem_score) VALUES (:na_id, :s_id, :s_score)";
         $stmt_s = $conn->prepare($sql_symptom);
@@ -255,7 +257,7 @@ try {
         }
     }
 
-    // 7. Update Status
+    // Update Status
     if (!empty($ref_screening_doc)) {
         $stmt_upd = $conn->prepare("UPDATE nutrition_screening SET screening_status='ประเมินต่อแล้ว', has_assessment=1, assessment_doc_no=:naf_doc WHERE doc_no=:ref");
         $stmt_upd->execute([':naf_doc' => $doc_no, ':ref' => $ref_screening_doc]);
@@ -264,7 +266,6 @@ try {
     $conn->commit();
     header("Location: patient_profile.php?hn=" . urlencode($hn) . "&an=" . urlencode($an));
     exit;
-    
 } catch (PDOException $e) {
     $conn->rollBack();
     error_log("Database error in nutrition_alert_form_save.php: " . $e->getMessage());

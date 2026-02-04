@@ -84,44 +84,42 @@ try {
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    // ดึงประวัติ (SPENT)
+    // ดึงประวัติ SPENT
     $sql_spent = "
         SELECT 
             nutrition_screening.*, 
             nutritionists.nut_fullname,
             'SPENT' as form_type, 
-            nutrition_screening.screening_datetime as action_datetime 
+            nutrition_screening.created_at as action_datetime  -- เปลี่ยนจาก screening_datetime เป็น created_at
         FROM nutrition_screening 
         LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id 
         WHERE nutrition_screening.patients_hn = :hn 
-        ORDER BY nutrition_screening.screening_datetime DESC
+        ORDER BY nutrition_screening.created_at DESC           -- เรียงตาม created_at
     ";
 
     $stmt_spent = $conn->prepare($sql_spent);
     $stmt_spent->execute([':hn' => $hn]);
     $spent_list = $stmt_spent->fetchAll(PDO::FETCH_ASSOC);
 
-    // ดึงประวัติ (NAF)
+
+    // ดึงประวัติ NAF
     $sql_naf = "
         SELECT 
             nutrition_assessment.*, 
             nutritionists.nut_fullname,
             'NAF' as form_type, 
-            assessment_datetime as action_datetime 
+            nutrition_assessment.created_at as action_datetime -- เปลี่ยนจาก assessment_datetime เป็น created_at
         FROM nutrition_assessment 
         LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id 
         WHERE patients_hn = :hn 
-        ORDER BY assessment_datetime DESC
+        ORDER BY nutrition_assessment.created_at DESC          -- เรียงตาม created_at
     ";
 
     $stmt_naf = $conn->prepare($sql_naf);
     $stmt_naf->execute([':hn' => $hn]);
     $naf_list = $stmt_naf->fetchAll(PDO::FETCH_ASSOC);
-
-    // รวมข้อมูลและเรียงลำดับตามเวลาล่าสุด
     $history_list = array_merge($spent_list, $naf_list);
 
-    // เรียงลำดับ array ตาม action_datetime จากมากไปน้อย (ล่าสุดขึ้นก่อน)
     usort($history_list, function ($a, $b) {
         return strtotime($b['action_datetime']) - strtotime($a['action_datetime']);
     });
