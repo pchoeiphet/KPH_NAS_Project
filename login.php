@@ -31,7 +31,7 @@ if ($_SESSION['login_attempts'] >= $max_attempts) {
 
 // ตรวจสอบการส่ง POST request และ CSRF token
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
-    
+
     // ตรวจสอบ CSRF token
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
@@ -52,9 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
 
                 if ($row && (password_verify($password, $row['nut_password']) || $password == $row['nut_password'])) {
                     // ล็อกอินสำเร็จ
-                    $_SESSION['login_attempts'] = 0; 
+                    $_SESSION['login_attempts'] = 0;
                     session_regenerate_id(true); // Regenerate session ID
-                    
+
                     $_SESSION['user_id'] = $row['nut_id'];
                     $_SESSION['user_name'] = $row['nut_fullname'];
                     $_SESSION['user_position'] = !empty($row['nut_position']) ? $row['nut_position'] : 'นักโภชนาการ';
@@ -62,8 +62,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
                     $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
                     $_SESSION['login_time'] = time();
 
-                    header("Location: index.php");
-                    exit;
+                    $_SESSION['is_admin'] = $row['is_admin'];
+
+                    if ($row['is_admin'] == 1) {
+
+                        // ถ้าเป็น Admin -> ไป Dashboard
+                        header("Location: admin/admin_dashboard.php");
+                    } else {
+                        // ถ้าไม่ใช่ Admin ส่งไปหน้า index
+                        header("Location: index.php");
+                    }
+                    exit();
                 } else {
                     $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
                     $_SESSION['login_attempts']++;
@@ -221,7 +230,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
 
                         <form action="" method="POST">
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                            
+
                             <div class="form-group mb-3">
                                 <label class="small text-muted mb-1">ชื่อผู้ใช้งาน</label>
                                 <div class="input-group">
