@@ -1101,10 +1101,8 @@ try {
                 weightSec.style.display = 'none';
                 labSec.classList.remove('hidden-section');
 
-                // Reset คะแนน BMI เป็น 0 เพื่อไม่ให้คำนวณซ้ำซ้อน
+                // Reset คะแนน BMI เป็น 0
                 document.getElementById('hidden_bmi_score').value = 0;
-
-                // (Optional) ล้างค่าการเลือกวิธีการชั่งน้ำหนัก
                 document.querySelectorAll('input[name="weight_option_id"]').forEach(el => el.checked = false);
 
             } else {
@@ -1114,8 +1112,6 @@ try {
 
                 // Reset คะแนน Lab เป็น 0
                 document.getElementById('hidden_lab_score').value = 0;
-
-                // คำนวณ BMI ใหม่อีกรอบ (เผื่อมีค่าค้างอยู่)
                 calculateBMI();
             }
             calculateScore();
@@ -1195,11 +1191,11 @@ try {
             calculateScore();
         }
 
-        //คำนวณคะแนนรวม (Main Logic)
+        //คำนวณคะแนนรวม
         function calculateScore() {
             let total = 0;
 
-            // รวมคะแนนจาก Radio/Checkbox ทั่วไปที่มี class 'score-calc' (เช่น โรค, การกินอาหาร)
+            // รวมคะแนนจาก Radio/Checkbox
             const inputs = document.querySelectorAll('.score-calc:checked');
             inputs.forEach(el => {
                 const sc = parseInt(el.getAttribute('data-score'));

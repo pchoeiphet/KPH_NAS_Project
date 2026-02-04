@@ -466,18 +466,16 @@ try {
         function parseThaiDateForSort(dateStr) {
             if (!dateStr || dateStr === '-' || dateStr === '') return 0;
 
-            // รูปแบบใหม่: "10/01/2569 08:43"
-            const parts = dateStr.split(' '); // แยกวันที่กับเวลา
+            const parts = dateStr.split(' '); 
             if (parts.length < 2) return 0;
 
-            const dateParts = parts[0].split('/'); // แยก 10, 01, 2569
+            const dateParts = parts[0].split('/'); 
             if (dateParts.length < 3) return 0;
 
             const d = parseInt(dateParts[0], 10);
-            const m = parseInt(dateParts[1], 10) - 1; // เดือนใน JS เริ่มที่ 0
-            const y = parseInt(dateParts[2], 10) - 543; // แปลงกลับเป็น ค.ศ.
+            const m = parseInt(dateParts[1], 10) - 1; 
+            const y = parseInt(dateParts[2], 10) - 543;
 
-            // จัดการเวลา (ถ้ามี)
             const timeParts = parts[1].split(':');
             const h = parseInt(timeParts[0], 10) || 0;
             const min = parseInt(timeParts[1], 10) || 0;
@@ -488,9 +486,8 @@ try {
         function getDaysDiff(dateStr) {
             if (!dateStr || dateStr === '-') return 0;
 
-            // รูปแบบใหม่: "10/01/2569 08:43"
             const parts = dateStr.split(' ');
-            const dateParts = parts[0].split('/'); // [10, 01, 2569]
+            const dateParts = parts[0].split('/');
 
             if (dateParts.length < 3) return 0;
 

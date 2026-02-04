@@ -4,7 +4,7 @@ require_once 'connect_db.php';
 
 $error_msg = "";
 
-// สร้าง CSRF token หากไม่มี
+// สร้าง CSRF token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
 
                 if ($row && (password_verify($password, $row['nut_password']) || $password == $row['nut_password'])) {
                     // ล็อกอินสำเร็จ
-                    $_SESSION['login_attempts'] = 0; // รีเซ็ท login attempts
+                    $_SESSION['login_attempts'] = 0; 
                     session_regenerate_id(true); // Regenerate session ID
                     
                     $_SESSION['user_id'] = $row['nut_id'];
@@ -88,17 +88,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>เข้าสู่ระบบ - ระบบประเมินภาวะโภชนาการ โรงพยาบาลกำแพงเพชร</title>
 
-    <!-- Bootstrap 4 & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- Google Fonts: Sarabun -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --primary-color: #00695c;
-            /* สีเขียวเข้ม แบบทางการ/การแพทย์ */
             --secondary-color: #00897b;
             --bg-color: #f0f2f5;
         }
@@ -107,7 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
             font-family: 'Sarabun', sans-serif;
             background: var(--bg-color);
             background-image: linear-gradient(135deg, #e0f2f1 0%, #eceff1 100%);
-            /* พื้นหลังไล่สีอ่อนๆ */
             height: 100vh;
             display: flex;
             align-items: center;
@@ -118,7 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
             border: none;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            /* เงานุ่มนวล */
             overflow: hidden;
             background-color: #fff;
         }
@@ -128,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
             padding: 30px 20px 10px 20px;
             text-align: center;
             border-bottom: 3px solid var(--primary-color);
-            /* เส้นขีดสีเขียวด้านล่างหัวข้อ */
         }
 
         .hospital-logo {
@@ -169,7 +163,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
             color: #888;
         }
 
-        /* ซ่อนเส้นขอบขวาของไอคอน เพื่อให้ดูเชื่อมกับ Input */
         .input-group-prepend .input-group-text {
             border-radius: 6px 0 0 6px;
         }
