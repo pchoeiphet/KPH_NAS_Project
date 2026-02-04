@@ -16,7 +16,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 }
 $_SESSION['last_activity'] = time();
 
-// 1. รับค่าเลขที่เอกสาร
+// รับค่าเลขที่เอกสาร
 $doc_no = trim($_GET['doc_no'] ?? '');
 if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
     error_log("Invalid doc_no parameter: $doc_no");
@@ -28,7 +28,7 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// 2. เตรียมตัวแปร Master Data
+// เตรียมตัวแปร Master Data
 $weight_options = [];
 $patient_shapes = [];
 $weight_changes = [];
@@ -66,9 +66,7 @@ try {
         $type = $sym['symptom_problem_type'];
         $symptoms_grouped[$type][] = $sym;
     }
-
-    // --- (B) ดึงข้อมูลที่บันทึกไว้ (Main Data) ---
-    // SQL แบบเต็ม ไม่ใช้ตัวย่อ (Alias)
+    
     $sql_main = "
         SELECT 
             nutrition_assessment.*, 
@@ -167,24 +165,23 @@ try {
     // กำหนดตัวแปรสำหรับแสดงผลตามเงื่อนไขที่ให้มา
     if ($total_score <= 5) {
         // NAF A
-        $box_bg = '#e8f5e9';        // พื้นหลังเขียวอ่อน
-        $border_color = '#28a745';  // ขอบเขียว
-        $text_color = '#28a745';    // สีตัวอักษรหัวข้อ
+        $box_bg = '#e8f5e9';        
+        $border_color = '#28a745';  
+        $text_color = '#28a745';    
         $naf_title = 'NAF A (Normal-Mild Malnutrition)';
         $naf_desc = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
     } elseif ($total_score <= 10) {
         // NAF B
-        $box_bg = '#fff3cd';        // พื้นหลังเหลืองอ่อน
-        $border_color = '#ffc107';  // ขอบเหลือง
-        $text_color = '#ffc107';    // สีตัวอักษรหัวข้อ (เหลือง/ส้ม)
-        // หมายเหตุ: อาจปรับสีตัวอักษรให้เข้มขึ้นเล็กน้อยเพื่อให้ tyto อ่านง่ายขึ้น เช่น #d39e00
+        $box_bg = '#fff3cd';      
+        $border_color = '#ffc107';  
+        $text_color = '#ffc107';    
         $naf_title = 'NAF B (Moderate Malnutrition)';
         $naf_desc = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
     } else {
         // NAF C (คะแนน 11 ขึ้นไป)
-        $box_bg = '#ffebee';        // พื้นหลังแดงอ่อน
-        $border_color = '#dc3545';  // ขอบแดง
-        $text_color = '#dc3545';    // สีตัวอักษรหัวข้อ
+        $box_bg = '#ffebee';        
+        $border_color = '#dc3545';  
+        $text_color = '#dc3545';   
         $naf_title = 'NAF C (Severe Malnutrition)';
         $naf_desc = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
     }
@@ -199,7 +196,7 @@ function isChecked($val, $db_val)
     return ($val == $db_val) ? 'checked' : '';
 }
 
-// ฟังก์ชันเช็ค Checkbox อาการ (ใช้กับ Array ที่เราดึงมาใหม่)
+// ฟังก์ชันเช็ค Checkbox อาการ
 function isSymChecked($id, $saved_array)
 {
     if (empty($saved_array) || !is_array($saved_array)) {

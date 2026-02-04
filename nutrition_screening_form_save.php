@@ -36,7 +36,7 @@ $hn = trim($_POST['hn'] ?? '');
 $an = trim($_POST['an'] ?? '');
 $redirect_to_naf = trim($_POST['redirect_to_naf'] ?? 'false');
 
-// [ส่วนที่แก้ไข 1] รับค่าวันที่และเวลาจากฟอร์ม
+// รับค่าวันที่และเวลาจากฟอร์ม
 $s_date = $_POST['screening_date'] ?? date('Y-m-d');
 $s_time = $_POST['screening_time'] ?? date('H:i');
 
