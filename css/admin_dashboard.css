@@ -1,0 +1,52 @@
+body {
+  font-family: "Sarabun", sans-serif;
+  background-color: #f8f9fa;
+}
+
+.card-stat {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  margin-bottom: 20px;
+}
+
+.card-stat:hover {
+  transform: translateY(-5px);
+}
+
+.icon-box {
+  font-size: 2.5rem;
+  opacity: 0.8;
+}
+
+.sidebar {
+  min-height: 100vh;
+  background-color: #2c3e50;
+  color: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+  color: #bdc3c7;
+  padding: 12px 20px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.nav-link.active {
+  color: white;
+  background-color: #34495e;
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  color: white;
+  background-color: #3e5871;
+  text-decoration: none;
+}
+
+.badge-warning {
+  color: #212529;
+  background-color: #ffc107;
+}

@@ -57,82 +57,106 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
 
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - KPH Nutrition</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Admin Dashboard - ระบบประเมินภาวะโภชนาการ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <style>
-        .card-stat {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: 0.3s;
-        }
-
-        .card-stat:hover {
-            transform: translateY(-5px);
-        }
-
-        .icon-box {
-            font-size: 2.5rem;
-            opacity: 0.8;
-        }
-
-        .sidebar {
-            min-height: 100vh;
-            background-color: #2c3e50;
-            color: white;
-        }
-
-        .nav-link {
-            color: #bdc3c7;
-        }
-
-        .nav-link.active {
-            color: white;
-            background-color: #34495e;
-            font-weight: bold;
-        }
-
-        .nav-link:hover {
-            color: white;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="../css/admin_dashboard.css"> -->
 </head>
+
+<style>
+    body {
+        font-family: "Sarabun", sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .card-stat {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+        margin-bottom: 20px;
+    }
+
+    .card-stat:hover {
+        transform: translateY(-5px);
+    }
+
+    .icon-box {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+
+    .sidebar {
+        min-height: 100vh;
+        background-color: #2c3e50;
+        color: white;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-link {
+        color: #bdc3c7;
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+
+    .nav-link.active {
+        color: white;
+        background-color: #34495e;
+        font-weight: bold;
+    }
+
+    .nav-link:hover {
+        color: white;
+        background-color: #3e5871;
+        text-decoration: none;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
+</style>
 
 <body>
 
     <div class="d-flex">
 
-        <div class="sidebar p-3 d-flex flex-column" style="width: 250px;">
-            <h4 class="mb-4 text-center"><i class="fas fa-user-shield"></i> Admin Panel</h4>
+        <div class="sidebar p-3 d-flex flex-column" style="width: 250px; flex-shrink: 0;">
+            <h4 class="mb-4 text-center py-2 border-bottom border-secondary">
+                <i class="fas fa-user-shield"></i> Admin Panel
+            </h4>
             <ul class="nav flex-column">
-                <li class="nav-item mb-2">
-                    <a href="#" class="nav-link active"><i class="fas fa-home me-2"></i> Dashboard</a>
+                <li class="nav-item">
+                    <a href="admin_dashboard.php" class="nav-link active"><i class="fas fa-home mr-2"></i> Dashboard</a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a href="#" class="nav-link"><i class="fas fa-users me-2"></i> จัดการผู้ใช้</a>
+                <li class="nav-item">
+                    <a href="admin_assessments.php" class="nav-link"><i class="fas fa-clipboard-list mr-2"></i> รายงานการประเมิน</a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a href="#" class="nav-link"><i class="fas fa-file-alt me-2"></i> รายงานระบบ</a>
+                <li class="nav-item">
+                    <a href="admin_users.php" class="nav-link"><i class="fas fa-users mr-2"></i> จัดการผู้ใช้</a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin_master_data.php" class="nav-link"><i class="fas fa-database mr-2"></i> ข้อมูลมาตรฐาน</a>
                 </li>
                 <li class="nav-item mt-auto">
-                    <a href="../logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt me-2"></i> ออกจากระบบ</a>
+                    <a href="../logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ</a>
                 </li>
             </ul>
         </div>
 
-        <div class="container-fluid p-4 bg-light">
+        <div class="container-fluid p-4">
 
-            <h2 class="mb-4">ภาพรวมระบบ (System Health)</h2>
+            <h2 class="mb-4 text-dark font-weight-bold">ภาพรวมระบบ (System Health)</h2>
 
-            <div class="row g-3 mb-4">
+            <div class="row mb-4">
 
                 <div class="col-md-3">
                     <div class="card card-stat bg-primary text-white h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title">นักโภชนาการทั้งหมด</h6>
+                                <h6 class="card-title font-weight-bold">นักโภชนาการทั้งหมด</h6>
                                 <h2 class="mb-0"><?php echo $stat_users['total']; ?></h2>
                                 <small>Active: <?php echo $stat_users['active_users']; ?> | Inactive: <?php echo $stat_users['inactive_users']; ?></small>
                             </div>
@@ -145,7 +169,7 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
                     <div class="card card-stat bg-success text-white h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title">การคัดกรอง (วันนี้)</h6>
+                                <h6 class="card-title font-weight-bold">การคัดกรอง (วันนี้)</h6>
                                 <h2 class="mb-0"><?php echo $stat_screen['today']; ?></h2>
                                 <small>เดือนนี้: <?php echo $stat_screen['this_month']; ?> รายการ</small>
                             </div>
@@ -158,7 +182,7 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
                     <div class="card card-stat bg-info text-white h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title">บันทึก Assess (เดือนนี้)</h6>
+                                <h6 class="card-title font-weight-bold">บันทึกการประเมิน (เดือนนี้)</h6>
                                 <h2 class="mb-0"><?php echo $stat_assess['total_month']; ?></h2>
                                 <small>ใบประเมินฉบับสมบูรณ์</small>
                             </div>
@@ -171,9 +195,9 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
                     <div class="card card-stat <?php echo ($alert_pending['pending_count'] > 0) ? 'bg-danger' : 'bg-secondary'; ?> text-white h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title">เคสเสี่ยงที่รอประเมิน</h6>
+                                <h6 class="card-title font-weight-bold">เคสเสี่ยงที่รอประเมิน</h6>
                                 <h2 class="mb-0"><?php echo $alert_pending['pending_count']; ?></h2>
-                                <small>Screened แต่ยังไม่ Assessed</small>
+                                <small>คัดกรองแล้ว แต่ยังไม่ได้ประเมิน</small>
                             </div>
                             <div class="icon-box"><i class="fas fa-exclamation-triangle"></i></div>
                         </div>
@@ -183,60 +207,61 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
 
             <div class="row">
                 <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0 text-secondary"><i class="fas fa-bell"></i> การแจ้งเตือนระบบ (System Alerts)</h5>
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0 text-secondary"><i class="fas fa-bell mr-2"></i> การแจ้งเตือนระบบ (System Alerts)</h5>
                         </div>
                         <div class="card-body p-0">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ระดับ</th>
-                                        <th>เรื่อง</th>
-                                        <th>รายละเอียด</th>
-                                        <th>สถานะ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if ($alert_pending['pending_count'] > 0): ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <td><span class="badge bg-danger">Critical</span></td>
-                                            <td>งานค้าง (Unassessed)</td>
-                                            <td>มีผู้ป่วย <?php echo $alert_pending['pending_count']; ?> ราย ที่ผลคัดกรองมีความเสี่ยง แต่ยังไม่ออกใบประเมิน</td>
-                                            <td><span class="text-danger">รอการดำเนินการ</span></td>
+                                            <th>ระดับ</th>
+                                            <th>เรื่อง</th>
+                                            <th>รายละเอียด</th>
+                                            <th>สถานะ</th>
                                         </tr>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="4" class="text-center py-4 text-success">
-                                                <i class="fas fa-check-circle fa-2x mb-2"></i><br>
-                                                ระบบปกติ ไม่พบปัญหาเร่งด่วน
-                                            </td>
-                                        </tr>
-                                    <?php endif; ?>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ($alert_pending['pending_count'] > 0): ?>
+                                            <tr>
+                                                <td><span class="badge badge-danger">Critical</span></td>
+                                                <td>งานค้าง (Unassessed)</td>
+                                                <td>มีผู้ป่วย <?php echo $alert_pending['pending_count']; ?> ราย ที่ผลคัดกรองมีความเสี่ยง แต่ยังไม่ออกใบประเมิน</td>
+                                                <td><span class="text-danger font-weight-bold">รอการดำเนินการ</span></td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-success">
+                                                    <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                                                    ระบบปกติ ไม่พบปัญหาเร่งด่วน
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
 
-                                    <?php
-                                    // ดึงข้อมูล User Inactive ที่มีการใช้งานใน 7 วันล่าสุด
-                                    $sql_ghost = "SELECT n.nut_fullname, ns.created_at 
-                                                  FROM nutrition_screening ns 
-                                                  JOIN nutritionists n ON ns.nut_id = n.nut_id 
-                                                  WHERE n.is_active = 0 AND DATE(ns.created_at) > DATE_SUB(NOW(), INTERVAL 7 DAY)";
-                                    $stmt_ghost = $conn->query($sql_ghost);
+                                        <?php
+                                        // ดึงข้อมูล User Inactive ที่มีการใช้งานใน 7 วันล่าสุด
+                                        $sql_ghost = "SELECT nutritionists.nut_fullname, nutrition_screening.created_at 
+                                                      FROM nutrition_screening
+                                                      JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id 
+                                                      WHERE nutritionists.is_active = 0 AND DATE(nutrition_screening.created_at) > DATE_SUB(NOW(), INTERVAL 7 DAY)";
+                                        $stmt_ghost = $conn->query($sql_ghost);
 
-                                    while ($ghost = $stmt_ghost->fetch(PDO::FETCH_ASSOC)) {
-                                        // แก้ไขจุดที่เคย Error: เปลี่ยนชื่อตัวแปรให้ตรงกับ SQL
-                                        $ghost_name = htmlspecialchars($ghost['nut_fullname']);
-                                        $ghost_time = htmlspecialchars($ghost['created_at']);
+                                        while ($ghost = $stmt_ghost->fetch(PDO::FETCH_ASSOC)) {
+                                            $ghost_name = htmlspecialchars($ghost['nut_fullname']);
+                                            $ghost_time = htmlspecialchars($ghost['created_at']);
 
-                                        echo "<tr>
-                                            <td><span class='badge bg-warning text-dark'>Suspicious</span></td>
-                                            <td>Inactive User Activity</td>
-                                            <td>พบการบันทึกข้อมูลโดย User ที่ถูกระงับ: {$ghost_name} เมื่อ {$ghost_time}</td>
-                                            <td>ตรวจสอบด่วน</td>
-                                        </tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
+                                            echo "<tr>
+                                                <td><span class='badge badge-warning'>Suspicious</span></td>
+                                                <td>Inactive User Activity</td>
+                                                <td>พบการบันทึกข้อมูลโดย User ที่ถูกระงับ: {$ghost_name} เมื่อ {$ghost_time}</td>
+                                                <td>ตรวจสอบด่วน</td>
+                                            </tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,7 +270,9 @@ $alert_pending = $stmt_pending->fetch(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 </body>
 
 </html>
