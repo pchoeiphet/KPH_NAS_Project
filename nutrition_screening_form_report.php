@@ -398,7 +398,7 @@ $html = '
     ' . $signature_html . '
     <br>ลงชื่อ................................................................ ผู้คัดกรอง<br>
     ( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )<br>
-    <span class="bold">ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</span><br>
+    <span>ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</span><br>
     วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
 </td>
     </tr>
