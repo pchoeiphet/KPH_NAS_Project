@@ -111,7 +111,6 @@ try {
     if (!empty($patient['admit_datetime'])) {
         $dt = new DateTime($patient['admit_datetime']);
         $thai_year = $dt->format('Y') + 543;
-        // แสดงผล: 12/04/2567 10:30 น.
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
