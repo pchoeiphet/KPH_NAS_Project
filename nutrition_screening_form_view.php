@@ -116,7 +116,7 @@ try {
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -124,6 +124,24 @@ try {
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
+            <ul class="navbar-nav ml-auto align-items-center d-none d-md-flex">
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="index.php">
+                        <i class="fa-solid fa-home mr-1"></i> รายชื่อผู้ป่วยใน
+                    </a>
+                </li>
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="nutrition_form_history.php">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                    </a>
+                </li>
+
+            </ul>
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
@@ -166,7 +184,7 @@ try {
                                     ประวัติการประเมินของฉัน</span>
                             </a>
 
-                            <a class="dropdown-item py-2 rounded" href="#">
+                            <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
                                 <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
                                     ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>
@@ -184,7 +202,6 @@ try {
             </ul>
         </div>
     </nav>
-
 
     <div class="container-fluid px-lg-5 mt-4">
         <div class="card border-0 shadow-sm mb-4">

@@ -290,6 +290,24 @@ if ($latest_activity) {
                 </div>
             </a>
 
+            <ul class="navbar-nav ml-auto align-items-center d-none d-md-flex">
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="index.php">
+                        <i class="fa-solid fa-home mr-1"></i> รายชื่อผู้ป่วยใน
+                    </a>
+                </li>
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="nutrition_form_history.php">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                    </a>
+                </li>
+
+            </ul>
+
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
@@ -326,12 +344,12 @@ if ($latest_activity) {
                         </div>
 
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="#">
+                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
                                     ประวัติการประเมินของฉัน</span>
                             </a>
 
-                            <a class="dropdown-item py-2 rounded" href="#">
+                            <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
                                 <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
                                     ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>

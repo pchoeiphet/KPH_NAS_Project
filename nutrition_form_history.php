@@ -97,7 +97,7 @@ try {
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -165,7 +165,7 @@ try {
                                     ประวัติการประเมินของฉัน</span>
                             </a>
 
-                            <a class="dropdown-item py-2 rounded" href="#">
+                            <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
                                 <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
                                     ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>

@@ -66,7 +66,7 @@ try {
         $type = $sym['symptom_problem_type'];
         $symptoms_grouped[$type][] = $sym;
     }
-    
+
     $sql_main = "
         SELECT 
             nutrition_assessment.*, 
@@ -165,23 +165,23 @@ try {
     // กำหนดตัวแปรสำหรับแสดงผลตามเงื่อนไขที่ให้มา
     if ($total_score <= 5) {
         // NAF A
-        $box_bg = '#e8f5e9';        
-        $border_color = '#28a745';  
-        $text_color = '#28a745';    
+        $box_bg = '#e8f5e9';
+        $border_color = '#28a745';
+        $text_color = '#28a745';
         $naf_title = 'NAF A (Normal-Mild Malnutrition)';
         $naf_desc = 'ไม่พบความเสี่ยงต่อการเกิดภาวะทุพโภชนาการ พยาบาลจะทำหน้าที่ประเมินภาวะโภชนาการซ้ำภายใน 7 วัน';
     } elseif ($total_score <= 10) {
         // NAF B
-        $box_bg = '#fff3cd';      
-        $border_color = '#ffc107';  
-        $text_color = '#ffc107';    
+        $box_bg = '#fff3cd';
+        $border_color = '#ffc107';
+        $text_color = '#ffc107';
         $naf_title = 'NAF B (Moderate Malnutrition)';
         $naf_desc = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันที พบความเสี่ยงต่อการเกิดภาวะโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการ ทำการประเมินภาวะโภชนาการและให้แพทย์ทำการดูแลรักษาภายใน 3 วัน';
     } else {
         // NAF C (คะแนน 11 ขึ้นไป)
-        $box_bg = '#ffebee';        
-        $border_color = '#dc3545';  
-        $text_color = '#dc3545';   
+        $box_bg = '#ffebee';
+        $border_color = '#dc3545';
+        $text_color = '#dc3545';
         $naf_title = 'NAF C (Severe Malnutrition)';
         $naf_desc = 'กรุณาแจ้งให้แพทย์และนักกำหนดอาหาร/นักโภชนาการทราบผลทันทีมีภาวะทุพโภชนาการ ให้นักกำหนดอาหาร/นักโภชนาการทำการประเมินภาวะโภชนาการ และให้แพทย์ทำการดูแลรักษาภายใน 24 ชั่วโมง';
     }
@@ -217,48 +217,13 @@ function isSymChecked($id, $saved_array)
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/nutrition_alert_form.css">
-    <style>
-        .form-control:disabled,
-        .form-control[readonly] {
-            background-color: #fff;
-            border: 1px solid #ced4da;
-            color: #212529;
-            cursor: default;
-        }
-
-        .custom-control-input:checked~.custom-control-label::before {
-            border-color: #0d47a1;
-            background-color: #0d47a1;
-            opacity: 1;
-        }
-
-        .custom-control-input:disabled~.custom-control-label {
-            color: #6c757d;
-        }
-
-        .custom-control-input:checked:disabled~.custom-control-label {
-            color: #000;
-            font-weight: bold;
-        }
-
-        .lab-choice-card.active {
-            border: 2px solid #007bff !important;
-            background-color: #f0f7ff !important;
-            opacity: 1 !important;
-        }
-
-        .lab-choice-card.inactive {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-    </style>
 </head>
 
 <body class="bg-light">
 
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand d-flex align-items-center" href="index.php">
+            <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
                     onerror="this.style.display='none'">
                 <div class="brand-text">
@@ -266,6 +231,24 @@ function isSymChecked($id, $saved_array)
                     <small>Nutrition Alert System (NAS)</small>
                 </div>
             </a>
+
+            <ul class="navbar-nav ml-auto align-items-center d-none d-md-flex">
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="index.php">
+                        <i class="fa-solid fa-home mr-1"></i> รายชื่อผู้ป่วยใน
+                    </a>
+                </li>
+
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="nutrition_form_history.php">
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                    </a>
+                </li>
+
+            </ul>
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
@@ -308,7 +291,7 @@ function isSymChecked($id, $saved_array)
                                     ประวัติการประเมินของฉัน</span>
                             </a>
 
-                            <a class="dropdown-item py-2 rounded" href="#">
+                            <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
                                 <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
                                     ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>
@@ -926,14 +909,14 @@ function isSymChecked($id, $saved_array)
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'logout.php';
-                
+
                 // Add CSRF token
                 const token = document.createElement('input');
                 token.type = 'hidden';
                 token.name = 'csrf_token';
                 token.value = '<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>';
                 form.appendChild(token);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }

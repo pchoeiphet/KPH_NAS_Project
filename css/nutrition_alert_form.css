@@ -182,7 +182,9 @@ body {
 }
 
 .transition-bg {
-  transition: background-color 0.4s ease, border-color 0.4s ease,
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
     color 0.4s ease;
 }
 
@@ -375,4 +377,39 @@ body {
 
 .btn-cancel-custom:hover {
   background-color: #f1f3f5;
+}
+
+/* Disabled and Readonly Styles */
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  color: #212529;
+  cursor: default;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  border-color: #0d47a1;
+  background-color: #0d47a1;
+  opacity: 1;
+}
+
+.custom-control-input:disabled ~ .custom-control-label {
+  color: #6c757d;
+}
+
+.custom-control-input:checked:disabled ~ .custom-control-label {
+  color: #000;
+  font-weight: bold;
+}
+
+.lab-choice-card.active {
+  border: 2px solid #007bff !important;
+  background-color: #f0f7ff !important;
+  opacity: 1 !important;
+}
+
+.lab-choice-card.inactive {
+  opacity: 0.6;
+  pointer-events: none;
 }
