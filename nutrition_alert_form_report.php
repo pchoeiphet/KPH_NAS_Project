@@ -110,7 +110,7 @@ if (!empty($assessment['arm_span']) && $assessment['arm_span'] > 0) {
     $height_detail_parts[] = "Arm span: " . $assessment['arm_span'] . " ซม.";
 }
 if (!empty($assessment['height_relative']) && $assessment['height_relative'] > 0) {
-    $height_detail_parts[] = "ญาติบอก/กะประมาณ: " . $assessment['height_relative'] . " ซม.";
+    $height_detail_parts[] = "ญาติบอก: " . $assessment['height_relative'] . " ซม.";
 }
 $height_detail = !empty($height_detail_parts) ? implode("<br/>", $height_detail_parts) : "-";
 
