@@ -98,7 +98,7 @@ if ($g_code == 'M' || $g_code == '1' || $g_code == 'CHAI') {
     $gender_th = htmlspecialchars($assessment['patients_gender'] ?? '-');
 }
 
-// 2.1 ข้อมูลส่วนสูง
+// ข้อมูลส่วนสูง
 $height_detail_parts = [];
 if (!empty($assessment['height_measure']) && $assessment['height_measure'] > 0) {
     $height_detail_parts[] = "วัดส่วนสูง: " . $assessment['height_measure'] . " ซม.";
