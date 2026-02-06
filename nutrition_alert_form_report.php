@@ -104,7 +104,7 @@ if (!empty($assessment['height_measure']) && $assessment['height_measure'] > 0) 
     $height_detail_parts[] = "วัดส่วนสูง: " . $assessment['height_measure'] . " ซม.";
 }
 if (!empty($assessment['body_length']) && $assessment['body_length'] > 0) {
-    $height_detail_parts[] = "วัดความยาวตัว (นอน): " . $assessment['body_length'] . " ซม.";
+    $height_detail_parts[] = "วัดความยาวตัว: " . $assessment['body_length'] . " ซม.";
 }
 if (!empty($assessment['arm_span']) && $assessment['arm_span'] > 0) {
     $height_detail_parts[] = "Arm span: " . $assessment['arm_span'] . " ซม.";
