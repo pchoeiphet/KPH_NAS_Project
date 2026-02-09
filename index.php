@@ -466,14 +466,14 @@ try {
         function parseThaiDateForSort(dateStr) {
             if (!dateStr || dateStr === '-' || dateStr === '') return 0;
 
-            const parts = dateStr.split(' '); 
+            const parts = dateStr.split(' ');
             if (parts.length < 2) return 0;
 
-            const dateParts = parts[0].split('/'); 
+            const dateParts = parts[0].split('/');
             if (dateParts.length < 3) return 0;
 
             const d = parseInt(dateParts[0], 10);
-            const m = parseInt(dateParts[1], 10) - 1; 
+            const m = parseInt(dateParts[1], 10) - 1;
             const y = parseInt(dateParts[2], 10) - 543;
 
             const timeParts = parts[1].split(':');
@@ -545,10 +545,10 @@ try {
                 if (p.status === 'wait_screen') {
                     statusDisplay = `<span class="badge badge-formal badge-formal-wait">รอคัดกรอง</span>`;
                 } else if (p.status === 'wait_assess') {
-                    statusDisplay = `<span class="badge badge-formal badge-formal-risk">มีความเสี่ยง (SPENT: ${p.scoreVal})</span>`;
+                    statusDisplay = `<span class="badge badge-formal badge-formal-risk">SPENT - มีความเสี่ยง (${p.scoreVal}</span>`;
                     dateDisplay = `<div ${dateStyle}>คัดกรอง: ${p.screenDate}</div>`;
                 } else if (p.status === 'normal') {
-                    statusDisplay = `<span class="badge badge-formal badge-formal-normal">ปกติ (SPENT: ${p.scoreVal})</span>`;
+                    statusDisplay = `<span class="badge badge-formal badge-formal-normal">SPENT - ปกติ ( ${p.scoreVal})</span>`;
                     dateDisplay = `<div ${dateStyle}>คัดกรอง: ${p.screenDate}</div>`;
                 } else if (p.status === 'assessed') {
                     let badgeClass = 'badge-formal-assessed';
