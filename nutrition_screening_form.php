@@ -265,7 +265,7 @@ try {
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
-                            <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
+                            <small class="text-muted">Nutrition Screening Tool for Kamphaeng Phet Hospital</small>
                         </div>
                         <div class="text-right">
                             <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?php echo htmlspecialchars($doc_no_show); ?></span>

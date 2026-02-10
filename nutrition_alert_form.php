@@ -336,7 +336,7 @@ try {
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h4 class="mb-1 font-weight-bold text-dark" style="color: #33691e;">แบบประเมินภาวะโภชนาการ (NAF)</h4>
-                            <small class="text-muted">Nutrition Alert Form (กรมอนามัย)</small>
+                            <small class="text-muted">Nutrition Alert Form for Kamphaeng Phet Hospital</small>
                         </div>
                         <div class="text-right">
                             <span class="badge p-2" style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; font-weight: 500; font-size: 0.85rem;">
@@ -392,7 +392,7 @@ try {
                 <div class="card-body p-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis)</label>
+                        <label class="section-label">1. การวินิจฉัยเบื้องต้น (Provisional Diagnosis) <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="initial_diagnosis"
                             placeholder="ระบุการวินิจฉัยโรค..."
                             value="<?= htmlspecialchars($val_diagnosis) ?>"> <small class="text-muted">ดึงข้อมูลอัตโนมัติจากแบบคัดกรอง (แก้ไขได้)</small>
@@ -401,7 +401,7 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">2. ข้อมูลได้จาก (Source of Information)</label>
+                        <label class="section-label">2. ข้อมูลได้จาก (Source of Information) <span class="text-danger">*</span></label>
                         <div class="d-flex align-items-center">
                             <div class="custom-control custom-radio custom-control-inline mr-4">
                                 <input type="radio" id="source1" name="info_source" class="custom-control-input"
@@ -437,7 +437,7 @@ try {
                             อย่างน้อย 1 ช่อง</p>
                         <div class="row" id="anthroSection">
                             <div class="col-md-6 col-lg-3 mb-3">
-                                <label class="small text-muted font-weight-bold">ส่วนสูง (Height)</label>
+                                <label class="small text-muted font-weight-bold">ส่วนสูง (Height) <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="number" step="0.1" class="form-control anthro-input"
                                         id="anthroHeight"
@@ -507,7 +507,7 @@ try {
                         <div id="standardWeightSection" class="fade-in">
                             <div class="row">
                                 <div class="col-md-6 col-lg-4 mb-3">
-                                    <label class="small text-muted font-weight-bold">น้ำหนัก (Weight)</label>
+                                    <label class="small text-muted font-weight-bold">น้ำหนัก (Weight) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" id="currentWeight"
                                             name="weight"
@@ -535,7 +535,7 @@ try {
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Method)</label>
+                                <label class="small text-muted font-weight-bold mb-1">วิธีการชั่งน้ำหนัก (Method) <span class="text-danger">*</span></label>
                                 <div class="radio-group-container">
                                     <?php if (!empty($weight_options)): ?>
                                         <?php foreach ($weight_options as $wo): ?>
@@ -690,7 +690,7 @@ try {
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="section-label">5. รูปร่างของผู้ป่วย (Body Shape)</label>
+                        <label class="section-label">5. รูปร่างของผู้ป่วย (Body Shape) <span class="text-danger">*</span></label>
                         <div class="radio-group-container">
                             <?php if (!empty($patient_shapes)): ?>
                                 <?php foreach ($patient_shapes as $row): ?>
@@ -716,7 +716,7 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change)</label>
+                        <label class="section-label">6. น้ำหนักเปลี่ยนใน 4 สัปดาห์ (Weight Change) <span class="text-danger">*</span></label>
                         <div class="radio-group-container">
                             <?php if (!empty($weight_changes)): ?>
                                 <?php foreach ($weight_changes as $row): ?>
@@ -740,10 +740,10 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">7. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา</label>
+                        <label class="section-label">7. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา <span class="text-danger">*</span></label>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <h6 class="text-secondary font-weight-bold mb-2">7.1 ลักษณะของอาหาร (Type)</h6>
+                                <h6 class="text-secondary font-weight-bold mb-2">7.1 ลักษณะของอาหาร (Type) <span class="text-danger">*</span></h6>
                                 <div class="radio-group-container">
                                     <?php if (!empty($food_types)): ?>
                                         <?php foreach ($food_types as $row): ?>
@@ -765,7 +765,7 @@ try {
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <h6 class="text-secondary font-weight-bold mb-2">7.2 ปริมาณอาหารที่กิน (Amount)</h6>
+                                <h6 class="text-secondary font-weight-bold mb-2">7.2 ปริมาณอาหารที่กิน (Amount) <span class="text-danger">*</span></h6>
                                 <div class="radio-group-container">
                                     <?php if (!empty($food_amounts)): ?>
                                         <?php foreach ($food_amounts as $row): ?>
@@ -791,7 +791,7 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา</label>
+                        <label class="section-label">8. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา <span class="text-danger">*</span></label>
                         <p class="text-muted small mb-2">
                             <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
                         </p>
@@ -799,7 +799,7 @@ try {
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <div class="symptom-box h-100">
-                                    <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน</div>
+                                    <div class="symptom-category-title">8.1 ปัญหาทางการเคี้ยว/กลืน <span class="text-danger">*</span></div>
                                     <?php
                                     $group1 = 'ปัญหาทางการเคี้ยว/กลืนอาหาร';
                                     if (!empty($symptoms_grouped[$group1])):
@@ -827,7 +827,7 @@ try {
 
                             <div class="col-md-4 mb-3">
                                 <div class="symptom-box h-100">
-                                    <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร</div>
+                                    <div class="symptom-category-title">8.2 ปัญหาทางเดินอาหาร <span class="text-danger">*</span></div>
                                     <?php
                                     $group2 = 'ปัญหาระบบทางเดินอาหาร';
                                     if (!empty($symptoms_grouped[$group2])):
@@ -853,7 +853,7 @@ try {
 
                             <div class="col-md-4 mb-3">
                                 <div class="symptom-box h-100">
-                                    <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร</div>
+                                    <div class="symptom-category-title">8.3 ปัญหาระหว่างกินอาหาร <span class="text-danger">*</span></div>
                                     <?php
                                     $group3 = 'ปัญหาระหว่างกินอาหาร';
                                     if (!empty($symptoms_grouped[$group3])):
@@ -882,7 +882,7 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity)</label>
+                        <label class="section-label">9. ความสามารถในการเข้าถึงอาหาร (Functional Capacity) <span class="text-danger">*</span></label>
                         <div class="radio-group-container" style="flex-direction: row; flex-wrap: wrap; gap: 15px;">
 
                             <?php if (!empty($food_access_list)): ?>
@@ -919,7 +919,7 @@ try {
                     <hr class="my-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease)</label>
+                        <label class="section-label">10. โรคที่เป็นอยู่ (Underlying Disease) <span class="text-danger">*</span></label>
                         <p class="text-muted small mb-2">
                             <i class="fas fa-check-square mr-1"></i> เลือกได้มากกว่า 1 ข้อ (Select all that apply)
                         </p>
