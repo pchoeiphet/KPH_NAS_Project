@@ -320,7 +320,9 @@ try {
                 <div class="card-body p-4">
 
                     <div class="form-group mb-4">
-                        <label class="section-label">1. การวินิจฉัยโรค (Diagnosis)</label>
+                        <label class="section-label">
+                            1. การวินิจฉัยโรค (Diagnosis) <span class="text-danger">*</span>
+                        </label>
                         <input type="text" class="form-control" id="diagnosis" name="initial_diagnosis" placeholder="ระบุการวินิจฉัยโรค..." required>
                     </div>
 
@@ -331,7 +333,7 @@ try {
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">น้ำหนักปัจจุบัน</label>
+                                    <label class="text-muted small mb-1">น้ำหนักปัจจุบัน <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" id="currentWeight" name="present_weight" placeholder="0.0" oninput="calculateBMI()" required>
                                         <div class="input-group-append"><span class="input-group-text input-unit">กก.</span></div>
@@ -340,7 +342,7 @@ try {
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ)</label>
+                                    <label class="text-muted small mb-1">น้ำหนักปกติ (ถ้าทราบ) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="number" step="0.1" class="form-control" name="normal_weight" placeholder="0.0">
                                         <div class="input-group-append"><span class="input-group-text input-unit">กก.</span></div>
@@ -349,7 +351,7 @@ try {
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="text-muted small mb-1">ส่วนสูง</label>
+                                    <label class="text-muted small mb-1">ส่วนสูง <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="heightVal" name="height" placeholder="0" oninput="calculateBMI()" required>
                                         <div class="input-group-append"><span class="input-group-text input-unit">ซม.</span></div>
@@ -367,7 +369,7 @@ try {
                         <div class="row mt-2">
                             <div class="col-12">
                                 <div class="d-flex align-items-center bg-light p-2 rounded border">
-                                    <span class="mr-3 font-weight-bold text-secondary small">ที่มาของน้ำหนัก:</span>
+                                    <span class="mr-3 font-weight-bold text-secondary small">ที่มาของน้ำหนัก: <span class="text-danger">*</span></span>
                                     <div class="custom-control custom-radio custom-control-inline">
                                         <input type="radio" id="method1" name="weightMethod" class="custom-control-input" value="ชั่งจริง" checked>
                                         <label class="custom-control-label" for="method1">ชั่งจริง</label>
@@ -388,7 +390,7 @@ try {
                     <hr class="my-4" style="border-top: 1px dashed #dee2e6;">
 
                     <div class="mb-4">
-                        <label class="section-label">3. แบบคัดกรอง (Screening Questions)</label>
+                        <label class="section-label">3. แบบคัดกรอง (Screening Questions) <span class="text-danger">*</span></label>
                         <table class="table table-bordered table-screening mb-0">
                             <thead>
                                 <tr>
