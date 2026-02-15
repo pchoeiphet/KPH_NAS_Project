@@ -408,6 +408,39 @@ try {
         <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px;"></div>
     </div>
 
+    <div class="modal fade" id="screeningChoiceModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-clipboard-question mr-2"></i>เลือกวิธีการประเมิน</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="mb-4 text-muted">กรุณาเลือกรูปแบบข้อมูลของผู้ป่วยรายนี้</p>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-success btn-block py-3 h-100" onclick="confirmScreening(0)">
+                                <i class="fas fa-weight-scale fa-3x mb-2"></i><br>
+                                <strong>ชั่งน้ำหนักได้</strong><br>
+                                <small>(มีข้อมูลน้ำหนัก/ส่วนสูง)</small>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-info btn-block py-3 h-100" onclick="confirmScreening(1)">
+                                <i class="fas fa-flask fa-3x mb-2"></i><br>
+                                <strong>ชั่งน้ำหนักไม่ได้</strong><br>
+                                <small>(ใช้ค่า TLC หรือ Albumin)</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
@@ -427,6 +460,26 @@ try {
             direction: 'asc'
         };
 
+        let selectedHn = '';
+        let selectedAn = '';
+
+        // ฟังก์ชันเรียก Modal (ผูกกับปุ่มในตาราง)
+        function openScreeningModal(hn, an) {
+            selectedHn = hn;
+            selectedAn = an;
+            $('#screeningChoiceModal').modal('show');
+        }
+
+        // ฟังก์ชันเมื่อกดเลือกปุ่มใน Modal
+        function confirmScreening(isNoWeight) {
+            if (isNoWeight == 1) {
+                // กรณีชั่งน้ำหนักไม่ได้ -> ข้ามไปหน้าแบบประเมิน (NAF)
+                window.location.href = `nutrition_alert_form.php?hn=${selectedHn}&an=${selectedAn}`;
+            } else {
+                // กรณีชั่งน้ำหนักได้ -> ไปหน้าคัดกรอง (SPENT)
+                window.location.href = `nutrition_screening_form.php?hn=${selectedHn}&an=${selectedAn}&no_weight=0`;
+            }
+        }
         document.addEventListener('DOMContentLoaded', function() {
             renderTable(patients);
 
@@ -576,7 +629,7 @@ try {
 
                 if (p.status === 'wait_screen') {
                     nextActionDisplay = 'คัดกรองเบื้องต้น';
-                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
+                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 100px;" onclick="openScreeningModal('${p.hn}', '${p.an}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 } else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ต้องประเมิน NAF';
                     nextActionClass = 'text-action-urgent text-center';
