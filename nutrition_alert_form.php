@@ -568,10 +568,9 @@ try {
 
                             <div class="row">
                                 <div class="col-md-6 mb-3 mb-md-0">
-                                    <div class="lab-choice-card inactive" id="cardAlbumin" onclick="selectLab('albumin')">
+                                    <div class="lab-choice-card inactive" id="cardAlbumin" style="cursor: pointer;" onclick="selectLab('albumin')">
 
-                                        <input type="radio" id="useAlbumin" name="lab_method" value="Albumin"
-                                            class="d-none" onchange="toggleLabInputs()">
+                                        <input type="radio" id="useAlbumin" name="lab_method" value="Albumin" class="d-none">
 
                                         <div class="lab-header">
                                             <i class="fas fa-vial text-primary mr-2"></i> 1. Albumin
@@ -582,9 +581,8 @@ try {
                                             <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
                                             <div class="input-group">
                                                 <input type="number" step="0.1" class="form-control" id="valAlbumin"
-                                                    name="albumin_val"
-                                                    placeholder="เช่น 3.2" disabled oninput="calculateLabScore()"
-                                                    onclick="event.stopPropagation()">
+                                                    name="albumin_val" placeholder="เช่น 3.2" disabled
+                                                    oninput="calculateLabScore()" style="background-color: #fff; pointer-events: none;">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text bg-white text-muted">g/dl</span>
                                                 </div>
@@ -623,10 +621,9 @@ try {
                                 </div>
 
                                 <div class="col-md-6">
-                                    <div class="lab-choice-card inactive" id="cardTLC" onclick="selectLab('tlc')">
+                                    <div class="lab-choice-card inactive" id="cardTLC" style="cursor: pointer;" onclick="selectLab('tlc')">
 
-                                        <input type="radio" id="useTLC" name="lab_method" value="TLC" class="d-none"
-                                            onchange="toggleLabInputs()">
+                                        <input type="radio" id="useTLC" name="lab_method" value="TLC" class="d-none">
 
                                         <div class="lab-header">
                                             <i class="fas fa-microscope text-primary mr-2"></i> 2. TLC
@@ -637,9 +634,8 @@ try {
                                             <label class="small text-muted mb-1">ระบุค่าผลเลือด:</label>
                                             <div class="input-group">
                                                 <input type="number" class="form-control" id="valTLC"
-                                                    name="tlc_val"
-                                                    placeholder="เช่น 1200" disabled oninput="calculateLabScore()"
-                                                    onclick="event.stopPropagation()">
+                                                    name="tlc_val" placeholder="เช่น 1200" disabled
+                                                    oninput="calculateLabScore()" style="background-color: #fff; pointer-events: none;">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text bg-white text-muted">cells</span>
                                                 </div>
@@ -1135,21 +1131,38 @@ try {
             const labSec = document.getElementById('labSection');
 
             if (isUnknown) {
-                // โหมดไม่รู้น้ำหนัก -> ใช้ Lab
-                weightSec.style.display = 'none';
+                // Mode: Unknown Weight -> Use Lab
+                weightSec.style.display = 'none'; // ซ่อนส่วนน้ำหนัก
+
                 labSec.classList.remove('hidden-section');
+                labSec.style.display = 'block'; // <--- เพิ่มบรรทัดนี้ เพื่อบังคับให้ส่วนผลเลือดแสดงขึ้นมา
 
                 // Reset คะแนน BMI เป็น 0
                 document.getElementById('hidden_bmi_score').value = 0;
                 document.querySelectorAll('input[name="weight_option_id"]').forEach(el => el.checked = false);
 
             } else {
-                // โหมดรู้น้ำหนัก -> ใช้ BMI
-                weightSec.style.display = 'block';
+                // Mode: Known Weight -> Use BMI
+                weightSec.style.display = 'block'; // แสดงส่วนน้ำหนัก
+
                 labSec.classList.add('hidden-section');
+                labSec.style.display = 'none'; // <--- เพิ่มบรรทัดนี้ เพื่อบังคับซ่อนส่วนผลเลือด
 
                 // Reset คะแนน Lab เป็น 0
                 document.getElementById('hidden_lab_score').value = 0;
+
+                // รีเซ็ตค่า Input ใน Lab (เพื่อความชัวร์)
+                document.getElementById('useAlbumin').checked = false;
+                document.getElementById('useTLC').checked = false;
+                document.getElementById('valAlbumin').disabled = true;
+                document.getElementById('valTLC').disabled = true;
+
+                // ลบคลาส active ออกจาก card
+                document.querySelectorAll('.lab-choice-card').forEach(c => {
+                    c.classList.remove('active', 'border-primary');
+                    c.classList.add('inactive');
+                });
+
                 calculateBMI();
             }
             calculateScore();
@@ -1182,16 +1195,26 @@ try {
             const inpAlb = document.getElementById('valAlbumin');
             const inpTLC = document.getElementById('valTLC');
 
-            inpAlb.disabled = !useAlb;
-            inpTLC.disabled = !useTLC;
-
+            // จัดการ Albumin
             if (useAlb) {
+                inpAlb.disabled = false;
+                inpAlb.style.pointerEvents = 'auto'; // อนุญาตให้คลิกพิมพ์ได้
                 inpAlb.focus();
-                inpTLC.value = '';
-            }
-            if (useTLC) {
-                inpTLC.focus();
+            } else {
+                inpAlb.disabled = true;
+                inpAlb.style.pointerEvents = 'none'; // ปิดการคลิก
                 inpAlb.value = '';
+            }
+
+            // จัดการ TLC
+            if (useTLC) {
+                inpTLC.disabled = false;
+                inpTLC.style.pointerEvents = 'auto'; // อนุญาตให้คลิกพิมพ์ได้
+                inpTLC.focus();
+            } else {
+                inpTLC.disabled = true;
+                inpTLC.style.pointerEvents = 'none'; // ปิดการคลิก
+                inpTLC.value = '';
             }
 
             calculateLabScore();
