@@ -14,35 +14,32 @@ $search     = isset($_GET['search']) ? trim($_GET['search']) : '';
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date   = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
-// 3. เตรียม SQL Query
+// 3. เตรียม SQL Query (ปรับปรุงให้ตรงกับโครงสร้าง nutrition_screening จริง)
 $sql = "SELECT 
-            na.nutrition_assessment_id, na.doc_no, na.created_at AS assessment_date,
-            na.patients_hn AS hn, na.admissions_an AS an,
-            p.patients_firstname, p.patients_lastname,
+            ns.nutrition_screening_id, 
+            ns.doc_no, 
+            ns.created_at AS screening_date,
+            ns.patients_hn AS hn, 
+            ns.admissions_an AS an,
+            p.patients_firstname, 
+            p.patients_lastname,
             n.nut_fullname AS assessor_name,
-            (
-                COALESCE(ft.food_type_score, 0) + COALESCE(fa.food_amount_score, 0) + 
-                COALESCE(ps.patient_shape_score, 0) + COALESCE(w4.weight_change_4_weeks_score, 0) + 
-                COALESCE(wo.weight_option_score, 0) + COALESCE(fac.food_access_score, 0) +
-                COALESCE((SELECT SUM(d.disease_score) FROM disease_saved ds JOIN disease d ON ds.disease_id = d.disease_id WHERE ds.nutrition_assessment_id = na.nutrition_assessment_id), 0) +
-                COALESCE((SELECT SUM(sp.symptom_problem_score) FROM symptom_problem_saved sps JOIN symptom_problem sp ON sps.symptom_problem_id = sp.symptom_problem_id WHERE sps.nutrition_assessment_id = na.nutrition_assessment_id), 0)
-            ) AS total_score
-        FROM nutrition_assessment na
-        LEFT JOIN patients p ON na.patients_hn = p.patients_hn
-        LEFT JOIN nutritionists n ON na.nut_id = n.nut_id
-        LEFT JOIN food_type ft ON na.food_type_id = ft.food_type_id
-        LEFT JOIN food_amount fa ON na.food_amount_id = fa.food_amount_id
-        LEFT JOIN patient_shape ps ON na.patient_shape_id = ps.patient_shape_id
-        LEFT JOIN weight_change_4_weeks w4 ON na.weight_change_4_weeks_id = w4.weight_change_4_weeks_id
-        LEFT JOIN weight_option wo ON na.weight_option_id = wo.weight_option_id
-        LEFT JOIN food_access fac ON na.food_access_id = fac.food_access_id
+            -- คำนวณคะแนนรวมจาก q1 - q4
+            (COALESCE(ns.q1_weight_loss, 0) + 
+             COALESCE(ns.q2_eat_less, 0) + 
+             COALESCE(ns.q3_bmi_abnormal, 0) + 
+             COALESCE(ns.q4_critical, 0)) AS total_score,
+            ns.screening_result,
+            ns.screening_status
+        FROM nutrition_screening ns
+        LEFT JOIN patients p ON ns.patients_hn = p.patients_hn
+        LEFT JOIN nutritionists n ON ns.nut_id = n.nut_id
         WHERE 1=1 ";
 
 $params = [];
 if (!empty($search)) {
-    // ปรับปรุงเงื่อนไข: ค้นหาเฉพาะ HN, AN, ชื่อ หรือ นามสกุล
-    $sql .= " AND (na.patients_hn LIKE ? 
-                OR na.admissions_an LIKE ? 
+    $sql .= " AND (ns.patients_hn LIKE ? 
+                OR ns.admissions_an LIKE ? 
                 OR p.patients_firstname LIKE ? 
                 OR p.patients_lastname LIKE ?)";
     $s_param = "%$search%";
@@ -50,19 +47,19 @@ if (!empty($search)) {
 }
 
 if (!empty($start_date)) {
-    $sql .= " AND DATE(na.created_at) >= ?";
+    $sql .= " AND DATE(ns.created_at) >= ?";
     $params[] = $start_date;
 }
 if (!empty($end_date)) {
-    $sql .= " AND DATE(na.created_at) <= ?";
+    $sql .= " AND DATE(ns.created_at) <= ?";
     $params[] = $end_date;
 }
 
-$sql .= " ORDER BY na.created_at DESC";
+$sql .= " ORDER BY ns.created_at DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
-$assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$screenings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +67,7 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <head>
     <meta charset="UTF-8">
-    <title>รายงานการประเมิน - Admin Panel</title>
+    <title>รายงานการคัดกรอง - Admin Panel</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -87,19 +84,17 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #444;
         }
 
-        /* Sidebar Flexbox Layout */
         .sidebar {
             height: 100vh;
             background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
             color: white;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
             width: 260px;
             position: fixed;
             top: 0;
             left: 0;
             display: flex;
             flex-direction: column;
-            /* จัดเรียงแนวตั้ง */
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .main-content {
@@ -124,11 +119,10 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .nav-link.active {
-            background: var(--primary-color);
+            background: var(--primary-color) !important;
             box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
         }
 
-        /* ดันเมนูออกจากระบบลงไปล่างสุด */
         .nav-bottom {
             margin-top: auto;
             margin-bottom: 20px;
@@ -160,14 +154,6 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: white;
         }
 
-        .bg-risk {
-            background-color: #e74c3c;
-        }
-
-        .bg-normal {
-            background-color: #27ae60;
-        }
-
         .breadcrumb {
             background: transparent;
             padding: 0;
@@ -185,52 +171,36 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h4 class="font-weight-bold">NAS ADMIN</h4>
                 <p class="small text-muted mb-0">โรงพยาบาลกำแพงเพชร</p>
             </div>
-
             <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a href="admin_dashboard.php" class="nav-link"><i class="fas fa-th-large mr-2"></i> แผงควบคุม</a>
-                </li>
-                <li class="nav-item"><a href="admin_screenings.php" class="nav-link"><i class="fas fa-search mr-2"></i> รายงานการคัดกรอง</a></li>
-                <li class="nav-item">
-                    <a href="admin_assessments.php" class="nav-link active"><i class="fas fa-user-check mr-2"></i> รายงานการประเมิน</a>
-                </li>
-                <li class="nav-item">
-                    <a href="admin_users.php" class="nav-link"><i class="fas fa-user-cog mr-2"></i> จัดการผู้ใช้</a>
-                </li>
-                <li class="nav-item">
-                    <a href="admin_master_data.php" class="nav-link"><i class="fas fa-layer-group mr-2"></i> ข้อมูลมาตรฐาน</a>
-                </li>
+                <li class="nav-item"><a href="admin_dashboard.php" class="nav-link"><i class="fas fa-th-large mr-2"></i> แผงควบคุม</a></li>
+                <li class="nav-item"><a href="admin_screenings.php" class="nav-link active"><i class="fas fa-search mr-2"></i> รายงานการคัดกรอง</a></li>
+                <li class="nav-item"><a href="admin_assessments.php" class="nav-link"><i class="fas fa-user-check mr-2"></i> รายงานการประเมิน</a></li>
+                <li class="nav-item"><a href="admin_users.php" class="nav-link"><i class="fas fa-user-cog mr-2"></i> จัดการผู้ใช้</a></li>
+                <li class="nav-item"><a href="admin_master_data.php" class="nav-link"><i class="fas fa-layer-group mr-2"></i> ข้อมูลมาตรฐาน</a></li>
             </ul>
-
             <ul class="nav flex-column nav-bottom">
-                <li class="nav-item">
-                    <a href="../logout.php" class="nav-link text-danger" onclick="return confirm('คุณต้องการออกจากระบบใช่หรือไม่?')">
-                        <i class="fas fa-power-off mr-2"></i> ออกจากระบบ
-                    </a>
-                </li>
+                <li class="nav-item"><a href="../logout.php" class="nav-link text-danger" onclick="return confirm('ออกจากระบบ?')"><i class="fas fa-power-off mr-2"></i> ออกจากระบบ</a></li>
             </ul>
         </div>
 
         <div class="main-content">
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="font-weight-bold mb-1 text-dark">
-                        รายงานการประเมิน (Nutrition Alert Form Reports)
-                    </h3>
+                    <h3 class="font-weight-bold mb-1">รายงานการคัดกรอง (SPENT Nutrition Screening Tool Reports)</h3>
                     <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb bg-transparent p-0 small">
+                        <ol class="breadcrumb small">
                             <li class="breadcrumb-item"><a href="admin_dashboard.php">Admin</a></li>
-                            <li class="breadcrumb-item active">Assessment Reports</li>
+                            <li class="breadcrumb-item active">Screening Reports</li>
                         </ol>
                     </nav>
                 </div>
-                <div>
+                <div class="text-right">
                     <span class="badge badge-light p-2 text-muted border">
                         <i class="far fa-calendar-alt mr-1"></i> <?php echo date('d/m/Y H:i'); ?>
                     </span>
-                    <a href="admin_assessments.php" class="btn btn-light border btn-sm">
+                    <button onclick="window.location.reload()" class="btn btn-light border btn-sm ml-2">
                         <i class="fas fa-sync-alt"></i> รีเฟรช
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -239,10 +209,10 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <form method="GET" class="row align-items-end">
                         <div class="col-md-4">
                             <label class="small font-weight-bold">ค้นหาข้อมูลผู้ป่วย</label>
-                            <input type="text" name="search" class="form-control" placeholder="ชื่อ, นามสกุล, HN หรือ AN..." value="<?= htmlspecialchars($search) ?>">
+                            <input type="text" name="search" class="form-control" placeholder="ชื่อ, HN, AN..." value="<?= htmlspecialchars($search) ?>">
                         </div>
                         <div class="col-md-3">
-                            <label class="small font-weight-bold">ตั้งแต่วันที่</label>
+                            <label class="small font-weight-bold">จากวันที่</label>
                             <input type="date" name="start_date" class="form-control" value="<?= $start_date ?>">
                         </div>
                         <div class="col-md-3">
@@ -250,7 +220,7 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <input type="date" name="end_date" class="form-control" value="<?= $end_date ?>">
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> กรองข้อมูล</button>
+                            <button type="submit" class="btn btn-info btn-block shadow-sm"><i class="fas fa-search"></i> กรองข้อมูล</button>
                         </div>
                     </form>
                 </div>
@@ -262,51 +232,50 @@ $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <table class="table table-hover mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0">วันที่ประเมิน</th>
+                                    <th class="border-0">วันที่คัดกรอง</th>
                                     <th class="border-0">HN / AN</th>
                                     <th class="border-0">ชื่อ-นามสกุล</th>
                                     <th class="border-0 text-center">คะแนน</th>
-                                    <th class="border-0 text-center">สถานะ</th>
+                                    <th class="border-0 text-center">ผลการคัดกรอง</th>
                                     <th class="border-0">ผู้ประเมิน</th>
                                     <th class="border-0 text-center">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($assessments): ?>
-                                    <?php foreach ($assessments as $row):
-                                        $is_risk = $row['total_score'] >= 6;
-                                    ?>
+                                <?php if ($screenings): foreach ($screenings as $row):
+                                        $is_risk = ($row['screening_result'] == 'มีความเสี่ยง');
+                                ?>
                                         <tr>
                                             <td>
-                                                <div class="font-weight-bold"><?= date('d/m/Y', strtotime($row['assessment_date'])) ?></div>
-                                                <div class="small text-muted"><?= date('H:i', strtotime($row['assessment_date'])) ?> น.</div>
+                                                <div class="font-weight-bold"><?= date('d/m/Y', strtotime($row['screening_date'])) ?></div>
+                                                <div class="small text-muted"><?= date('H:i', strtotime($row['screening_date'])) ?> น.</div>
                                             </td>
                                             <td>
-                                                <div><span class="badge badge-light border">HN: <?= $row['hn'] ?></span></div>
+                                                <span class="badge badge-light border">HN: <?= $row['hn'] ?></span>
                                                 <div class="small text-muted">AN: <?= $row['an'] ?></div>
                                             </td>
                                             <td class="font-weight-bold text-dark"><?= $row['patients_firstname'] . ' ' . $row['patients_lastname'] ?></td>
                                             <td class="text-center">
-                                                <div class="score-badge <?= $is_risk ? 'bg-risk' : 'bg-normal' ?>">
+                                                <div class="score-badge <?= $is_risk ? 'bg-danger' : 'bg-success' ?>">
                                                     <?= $row['total_score'] ?>
                                                 </div>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge badge-pill <?= $is_risk ? 'badge-danger' : 'badge-success' ?>">
-                                                    <?= $is_risk ? 'เสี่ยงทุพโภชนาการ' : 'ปกติ' ?>
+                                                <span class="badge badge-pill <?= $is_risk ? 'badge-danger' : 'badge-success' ?> px-3 py-2">
+                                                    <?= htmlspecialchars($row['screening_result']) ?>
                                                 </span>
                                             </td>
                                             <td class="small"><?= $row['assessor_name'] ?></td>
                                             <td class="text-center">
-                                                <a href="../nutrition_alert_form_report.php?doc_no=<?php echo htmlspecialchars($row['doc_no']); ?>" target="_blank" class="btn btn-sm btn-outline-primary shadow-sm">
+                                                <a href="../print_screening.php?id=<?= $row['nutrition_screening_id'] ?>" target="_blank" class="btn btn-sm btn-outline-info shadow-sm">
                                                     <i class="fas fa-print"></i> พิมพ์
                                                 </a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
+                                    <?php endforeach;
+                                else: ?>
                                     <tr>
-                                        <td colspan="7" class="text-center py-5 text-muted">ไม่พบข้อมูลรายงาน</td>
+                                        <td colspan="7" class="text-center py-5 text-muted">ไม่พบข้อมูลการคัดกรอง</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
