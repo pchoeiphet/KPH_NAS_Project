@@ -403,13 +403,23 @@ body {
   font-weight: bold;
 }
 
-.lab-choice-card.active {
-  border: 2px solid #007bff !important;
-  background-color: #f0f7ff !important;
-  opacity: 1 !important;
-}
-
 .lab-choice-card.inactive {
   opacity: 0.6;
-  pointer-events: none;
+  border: 2px solid #eee;
+  filter: grayscale(0.5);
+}
+
+/* การ์ดที่ถูกเลือก */
+.lab-choice-card.active {
+  opacity: 1;
+  border: 2px solid #007bff; /* สีน้ำเงิน primary */
+  background-color: #f8fbff;
+  filter: grayscale(0);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+/* สั่งให้ Cursor เป็นรูปมือเสมอเมื่อชี้ที่การ์ด */
+.lab-choice-card {
+  transition: all 0.3s ease;
+  user-select: none;
 }

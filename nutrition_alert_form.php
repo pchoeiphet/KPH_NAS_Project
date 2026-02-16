@@ -582,7 +582,7 @@ try {
                                             <div class="input-group">
                                                 <input type="number" step="0.1" class="form-control" id="valAlbumin"
                                                     name="albumin_val" placeholder="เช่น 3.2" disabled
-                                                    oninput="calculateLabScore()" style="background-color: #fff; pointer-events: none;">
+                                                    oninput="calculateLabScore()" style="background-color: #fff;">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text bg-white text-muted">g/dl</span>
                                                 </div>
@@ -635,7 +635,7 @@ try {
                                             <div class="input-group">
                                                 <input type="number" class="form-control" id="valTLC"
                                                     name="tlc_val" placeholder="เช่น 1200" disabled
-                                                    oninput="calculateLabScore()" style="background-color: #fff; pointer-events: none;">
+                                                    oninput="calculateLabScore()" style="background-color: #fff;">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text bg-white text-muted">cells</span>
                                                 </div>
@@ -1169,55 +1169,84 @@ try {
         }
 
         // เลือก Lab (Albumin / TLC)
-        function selectLab(type) {
-            // Reset Card Styles
-            document.querySelectorAll('.lab-choice-card').forEach(card => {
-                card.classList.remove('active', 'border-primary');
-                card.classList.add('inactive');
+        function selectLab(method) {
+            // เลือก Element ทั้งหมด
+            const cardAlb = document.getElementById('cardAlbumin');
+            const cardTLC = document.getElementById('cardTLC');
+            const inputAlb = document.getElementById('valAlbumin');
+            const inputTLC = document.getElementById('valTLC');
+            const radioAlb = document.getElementById('useAlbumin');
+            const radioTLC = document.getElementById('useTLC');
+
+            // รีเซ็ต UI ทุกอย่าง (Clear State)
+            [cardAlb, cardTLC].forEach(c => {
+                c.classList.remove('active');
+                c.classList.add('inactive');
             });
 
-            const selectedCard = (type === 'albumin') ? document.getElementById('cardAlbumin') : document.getElementById('cardTLC');
-            selectedCard.classList.remove('inactive');
-            selectedCard.classList.add('active', 'border-primary');
+            // ปิดการใช้งานทุก Input และล้างค่า (ถ้าต้องการให้ล้างค่าเมื่อสลับฝั่ง)
+            [inputAlb, inputTLC].forEach(i => {
+                i.disabled = true;
+                i.style.pointerEvents = 'none';
+                i.value = ''; // ล้างค่าทิ้งเพื่อป้องกันคะแนนปนกัน
+            });
 
-            // Check Radio Button
-            if (type === 'albumin') {
-                document.getElementById('useAlbumin').checked = true;
-            } else {
-                document.getElementById('useTLC').checked = true;
+            // เปิดใช้งานเฉพาะตัวที่เลือก (Active State)
+            if (method === 'albumin') {
+                cardAlb.classList.remove('inactive');
+                cardAlb.classList.add('active');
+                inputAlb.disabled = false;
+                inputAlb.style.pointerEvents = 'auto'; // เปิดให้คลิกได้
+                radioAlb.checked = true;
+                inputAlb.focus();
+            } else if (method === 'tlc') {
+                cardTLC.classList.remove('inactive');
+                cardTLC.classList.add('active');
+                inputTLC.disabled = false;
+                inputTLC.style.pointerEvents = 'auto'; // เปิดให้คลิกได้
+                radioTLC.checked = true;
+                inputTLC.focus();
             }
-            toggleLabInputs();
+
+            // อัปเดตคะแนนทันทีเมื่อมีการสลับ
+            calculateLabScore();
         }
 
-        function toggleLabInputs() {
+        // ฟังก์ชันคำนวณคงเดิม แต่ปรับ Logic การเช็คให้กระชับขึ้นได้
+        function calculateLabScore() {
+            let labScore = 0;
             const useAlb = document.getElementById('useAlbumin').checked;
             const useTLC = document.getElementById('useTLC').checked;
-            const inpAlb = document.getElementById('valAlbumin');
-            const inpTLC = document.getElementById('valTLC');
 
-            // จัดการ Albumin
             if (useAlb) {
-                inpAlb.disabled = false;
-                inpAlb.style.pointerEvents = 'auto'; // อนุญาตให้คลิกพิมพ์ได้
-                inpAlb.focus();
-            } else {
-                inpAlb.disabled = true;
-                inpAlb.style.pointerEvents = 'none'; // ปิดการคลิก
-                inpAlb.value = '';
+                const val = parseFloat(document.getElementById('valAlbumin').value);
+                if (!isNaN(val)) {
+                    if (val <= 2.5) labScore = 3;
+                    else if (val <= 2.9) labScore = 2;
+                    else if (val <= 3.5) labScore = 1;
+                    else labScore = 0;
+                }
+            } else if (useTLC) {
+                const val = parseFloat(document.getElementById('valTLC').value);
+                if (!isNaN(val)) {
+                    if (val <= 1000) labScore = 3;
+                    else if (val <= 1200) labScore = 2;
+                    else if (val <= 1500) labScore = 1;
+                    else labScore = 0;
+                }
             }
 
-            // จัดการ TLC
-            if (useTLC) {
-                inpTLC.disabled = false;
-                inpTLC.style.pointerEvents = 'auto'; // อนุญาตให้คลิกพิมพ์ได้
-                inpTLC.focus();
-            } else {
-                inpTLC.disabled = true;
-                inpTLC.style.pointerEvents = 'none'; // ปิดการคลิก
-                inpTLC.value = '';
-            }
+            // แสดงผล
+            const scoreDisplay = document.getElementById('labScoreText');
+            if (scoreDisplay) scoreDisplay.innerText = labScore;
 
-            calculateLabScore();
+            const hiddenInput = document.getElementById('hidden_lab_score');
+            if (hiddenInput) hiddenInput.value = labScore;
+
+            // เรียกฟังก์ชันคำนวณคะแนนรวมของทั้งฟอร์ม (ถ้ามี)
+            if (typeof calculateScore === "function") {
+                calculateScore();
+            }
         }
 
         function calculateLabScore() {
@@ -1267,11 +1296,11 @@ try {
             const isUnknownWeight = document.getElementById('unknownWeight').checked;
 
             if (isUnknownWeight) {
-                // กรณีใช้ Lab: บวกคะแนน Lab
+                // บวกคะแนน Lab
                 const labScore = parseInt(document.getElementById('hidden_lab_score').value) || 0;
                 total += labScore;
             } else {
-                // กรณีใช้น้ำหนัก: บวกคะแนน BMI
+                // บวกคะแนน BMI
                 const bmiScore = parseInt(document.getElementById('hidden_bmi_score').value) || 0;
                 total += bmiScore;
             }
