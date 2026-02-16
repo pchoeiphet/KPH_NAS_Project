@@ -81,30 +81,36 @@ try {
     // ดึงลายเซ็นถ้ามี
     $signature_html = '';
     try {
+        // ใช้ตาราง nutritionist_signature และดึงตาม ID ของคนทำรายการ ($data['nut_id'])
         $stmt_sig = $conn->prepare("
-            SELECT signature_type, signature_data FROM nutrition_signature 
-            WHERE nut_id = :nut_id LIMIT 1
+            SELECT signature_type, signature_data 
+            FROM nutritionist_signature 
+            WHERE nut_id = :nut_id 
+            LIMIT 1
         ");
-        $stmt_sig->execute([':nut_id' => $nut_id]);
+        $stmt_sig->execute([':nut_id' => $data['nut_id']]);
         $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
-        
-        if ($signature) {
+
+        if ($signature && !empty($signature['signature_data'])) {
             if ($signature['signature_type'] === 'canvas') {
                 // ลายเซ็นแบบวาด (base64 image)
                 $base64_image = $signature['signature_data'];
-                $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 60px; margin: 5px 0;">';
+                $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 40px; margin-bottom: -10px;">';
             } else {
                 // ลายเซ็นแบบพิมพ์
-                $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 20px;">' . 
-                                 htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
+                $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 10px;">' .
+                    htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
             }
+        } else {
+            // กรณีไม่มีลายเซ็น ให้เว้นว่างหรือจุดไข่ปลาไว้
+            $signature_html = '<div style="height: 40px;"></div>';
         }
     } catch (PDOException $e) {
         error_log("Error fetching signature: " . $e->getMessage());
     }
 } catch (PDOException $e) {
-    error_log("Database error in nutrition_screening_form_report.php: " . $e->getMessage());
-    die("ข้อผิดพลาด: ไม่สามารถดึงข้อมูลได้");
+    error_log("Database error: " . $e->getMessage());
+    die("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อฐานข้อมูล");
 }
 
 $assessor_show = !empty($data['nut_fullname']) ? $data['nut_fullname'] : '-';
@@ -387,20 +393,22 @@ $html = '
 
 <br>
 
-<table width="100%" style="margin-top: 20px;">
+<table width="100%" style="margin-top: 30px;">
     <tr>
-        <td width="50%">
-            <div style="border: 1px dashed #000; padding: 6px; font-size: 11pt; height: 70px; width: 90%;">
-                <b>บันทึกเพิ่มเติมจากฝ่ายโภชนาการ:</b>
+        <td width="40%"></td>
+        
+        <td width="60%" align="center" style="vertical-align: bottom;">
+            
+            <div style="height: 50px; display: flex; align-items: end; justify-content: center;">
+                ' . $signature_html . '
             </div>
+            
+            <div style="margin-top: 5px;">ลงชื่อ................................................................ ผู้คัดกรอง</div>
+            
+            <div style="margin-top: 5px;">( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )</div>
+            <div>ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</div>
+            <div style="margin-top: 5px; font-size: 12pt;">วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.</div>
         </td>
-        <td width="50%" class="text-center" style="vertical-align: bottom;">
-    ' . $signature_html . '
-    <br>ลงชื่อ................................................................ ผู้คัดกรอง<br>
-    ( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )<br>
-    <span>ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</span><br>
-    วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.
-</td>
     </tr>
 </table>
 
@@ -416,4 +424,4 @@ $html = '
 
 $mpdf->WriteHTML($html);
 $mpdf->Output($data['doc_no'] . '.pdf', 'I');
-?>
+?>  

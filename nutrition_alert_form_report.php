@@ -247,23 +247,25 @@ $position_show = !empty($assessment['nut_position'])
 // ดึงลายเซ็นถ้ามี
 $signature_html = '';
 try {
+    // ต้องดึงจากตาราง nutritionist_signature โดยใช้ nut_id ของใบงาน ($assessment['nut_id'])
     $stmt_sig = $conn->prepare("
-        SELECT signature_type, signature_data FROM nutrition_signature 
-        WHERE doc_no = :doc_no LIMIT 1
+        SELECT signature_type, signature_data 
+        FROM nutritionist_signature 
+        WHERE nut_id = :nut_id 
+        LIMIT 1
     ");
-    $stmt_sig->execute([':doc_no' => $doc_no]);
+    $stmt_sig->execute([':nut_id' => $assessment['nut_id']]);
     $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
 
-    if ($signature) {
-        if ($signature['signature_type'] === 'canvas') {
-            // ลายเซ็นแบบวาด (base64 image)
-            $base64_image = $signature['signature_data'];
-            $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 60px; margin: 5px 0;">';
-        } else {
-            // ลายเซ็นแบบพิมพ์
-            $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 20px;">' .
-                htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
-        }
+    if ($signature && !empty($signature['signature_data'])) {
+        // ต้องเติม prefix ให้ Base64 ถ้ามันไม่มี (ส่วนใหญ่ตอนเซฟคุณตัดทิ้งไป)
+        $img_src = 'data:image/png;base64,' . $signature['signature_data'];
+
+        // กำหนดขนาดรูปภาพ (ปรับ width/height ได้ตามใจชอบ)
+        $signature_html = '<img src="' . $img_src . '" style="height: 40px; width: auto; display: block; margin: 0 auto;">';
+    } else {
+        // กรณีไม่มีลายเซ็นในระบบ ให้เว้นว่างหรือใส่จุดไข่ปลา
+        $signature_html = '<br>.................................................................';
     }
 } catch (PDOException $e) {
     error_log("Error fetching signature: " . $e->getMessage());
@@ -462,16 +464,25 @@ $html = '
 
 <br/>
 
-<table width="100%" class="signature-section">
+<table width="100%" class="signature-section" style="margin-top: 20px;">
     <tr>
         <td width="40%"></td>
-        <td width="60%" align="center">
-            <div style="margin-bottom: 25px;">ลงชื่อ ................................................................. ผู้ประเมิน</div>
-            <div style="margin-bottom: 5px;">
-    ( ' . $assessor_show . ' )
-</div>
-<div>ตำแหน่ง ' . $position_show . '</div>
-        </td>
+        
+        <td width="60%" align="center" style="vertical-align: bottom;">
+            
+            <div style="height: 50px; display: flex; align-items: end; justify-content: center;">
+                ' . $signature_html . '
+            </div>
+            
+            <div style="margin-top: 5px;">ลงชื่อ ................................................................. ผู้ประเมิน</div>
+            
+            <div style="margin-top: 5px;">
+                ( ' . $assessor_show . ' )
+            </div>
+            
+            <div>ตำแหน่ง ' . $position_show . '</div>
+            
+            </td>
     </tr>
 </table>
 

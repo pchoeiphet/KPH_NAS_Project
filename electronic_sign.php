@@ -35,9 +35,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_msg = "ข้อผิดพลาด: โทเคนไม่ถูกต้อง";
     } else {
 
-        $sign_method = $_POST['sign_method'] ?? 'canvas'; // รับค่ารูปแบบการเซ็น (upload หรือ canvas)
+        $sign_method = $_POST['sign_method'] ?? 'canvas';
         $signature_data_to_save = '';
-        $signature_type_db = 'canvas'; // default type
+        $signature_type_db = 'canvas';
 
         if ($sign_method === 'upload') {
             // --- กรณีอัปโหลดไฟล์ ---
@@ -48,26 +48,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $file_size = $_FILES['signature_file']['size'];
                 $file_type = $_FILES['signature_file']['type'];
 
-                // 1. ตรวจสอบขนาดไฟล์ (ไม่เกิน 2MB)
                 if ($file_size > 2 * 1024 * 1024) {
                     $error_msg = "ข้อผิดพลาด: ขนาดไฟล์ต้องไม่เกิน 2 MB";
-                }
-                // 2. ตรวจสอบประเภทไฟล์ (PNG, JPG)
-                elseif (!in_array($file_type, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                } elseif (!in_array($file_type, ['image/jpeg', 'image/png', 'image/jpg'])) {
                     $error_msg = "ข้อผิดพลาด: รองรับเฉพาะไฟล์ PNG หรือ JPG เท่านั้น";
                 } else {
-                    // อ่านไฟล์และแปลงเป็น Base64
                     $data = file_get_contents($file_tmp);
                     $base64 = base64_encode($data);
-
-                    // หมายเหตุ: เราเก็บเฉพาะ Raw Base64 เพื่อให้เหมือนกับ Canvas (ที่ตัด Header ออก)
-                    // เพื่อให้ระบบ PDF Report เรียกใช้ได้เหมือนกัน
                     $signature_data_to_save = $base64;
                 }
             } else {
-                // กรณีไม่ได้เลือกไฟล์ แต่กด Submit ในโหมดอัปโหลด
-                // เช็คก่อนว่ามีลายเซ็นเดิมไหม ถ้ามีแล้วไม่เลือกใหม่ถือว่าไม่เปลี่ยน
-                // แต่ถ้านี่คือครั้งแรก ต้องแจ้งเตือน
                 if (empty($_FILES['signature_file']['name'])) {
                     $error_msg = "ข้อผิดพลาด: กรุณาเลือกไฟล์ภาพลายเซ็น";
                 } else {
@@ -82,11 +72,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (empty($signature_data_input)) {
                 $error_msg = "ข้อผิดพลาด: กรุณาวาดลายเซ็นก่อนบันทึก";
             } else {
-                // Sanitize signature data
                 if (!preg_match('/^data:image\/png;base64,/', $signature_data_input)) {
                     $error_msg = "ข้อผิดพลาด: รูปแบบลายเซ็นไม่ถูกต้อง";
                 } else {
-                    // ตัด Header ออก เก็บแค่เนื้อ Base64
+                    // ตัด Header ออก
                     $signature_data_to_save = str_replace('data:image/png;base64,', '', $signature_data_input);
 
                     if (!base64_decode($signature_data_to_save, true)) {
@@ -101,15 +90,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             try {
                 $conn->beginTransaction();
 
-                // Check if signature already exists for this nutritionist
-                $stmt_check_sig = $conn->prepare("SELECT signature_id FROM nutrition_signature WHERE nut_id = :nut_id");
+                // *** แก้ชื่อตารางตรงนี้เป็น nutritionist_signature ***
+                $stmt_check_sig = $conn->prepare("SELECT signature_id FROM nutritionist_signature WHERE nut_id = :nut_id");
                 $stmt_check_sig->execute([':nut_id' => $nut_id]);
                 $existing_sig = $stmt_check_sig->fetch(PDO::FETCH_ASSOC);
 
                 if ($existing_sig) {
-                    // Update existing signature
+                    // Update
                     $stmt_update = $conn->prepare("
-                        UPDATE nutrition_signature 
+                        UPDATE nutritionist_signature 
                         SET signature_type = :sig_type,
                             signature_data = :sig_data,
                             signed_datetime = NOW()
@@ -121,9 +110,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         ':nut_id' => $nut_id
                     ]);
                 } else {
-                    // Insert new signature
+                    // Insert
                     $stmt_insert = $conn->prepare("
-                        INSERT INTO nutrition_signature (nut_id, signature_type, signature_data, signed_datetime)
+                        INSERT INTO nutritionist_signature (nut_id, signature_type, signature_data, signed_datetime)
                         VALUES (:nut_id, :sig_type, :sig_data, NOW())
                     ");
                     $stmt_insert->execute([
@@ -133,27 +122,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ]);
                 }
 
-                // Log audit
-                error_log("User " . $_SESSION['user_id'] . " saved signature ($signature_type_db) at " . date('Y-m-d H:i:s'));
-
                 $conn->commit();
                 $success_msg = "บันทึกลายเซ็นสำเร็จ! ลายเซ็นของคุณจะปรากฏบน PDF รายงานทั้งหมด";
+
+                // เพื่อความชัวร์ ให้เคลียร์ค่า POST ทิ้งเพื่อป้องกันการ submit ซ้ำ
+                // header("Location: " . $_SERVER['PHP_SELF']); 
+                // exit;
+
             } catch (PDOException $e) {
                 $conn->rollBack();
                 error_log("Database error in e-sign: " . $e->getMessage());
-                $error_msg = "ข้อผิดพลาด: ไม่สามารถบันทึกลายเซ็นได้";
+                // แสดง Error จริงออกมาเพื่อ Debug (ลบออกเมื่อใช้งานจริง)
+                $error_msg = "ข้อผิดพลาด DB: " . $e->getMessage();
             }
         }
     }
 }
 
-// Get list of SPENT documents (Code เดิม ส่วนแสดงผลประวัติ)
-// ... (คงเดิมตามที่คุณส่งมา ผมละไว้เพื่อประหยัดพื้นที่) ...
-
 // Check if current user has signature
 $has_signature = false;
 try {
-    $stmt_sig = $conn->prepare("SELECT signature_id FROM nutrition_signature WHERE nut_id = :nut_id LIMIT 1");
+    // *** แก้ชื่อตารางตรงนี้ด้วย ***
+    $stmt_sig = $conn->prepare("SELECT signature_id FROM nutritionist_signature WHERE nut_id = :nut_id LIMIT 1");
     $stmt_sig->execute([':nut_id' => $_SESSION['user_id']]);
     $sig_data = $stmt_sig->fetch(PDO::FETCH_ASSOC);
     $has_signature = !empty($sig_data);
