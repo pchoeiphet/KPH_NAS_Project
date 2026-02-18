@@ -516,7 +516,7 @@ if ($latest_activity) {
                                         <th style="width: 130px" class="text-center">ผู้ประเมิน</th>
                                         <th style="width: 120px" class="text-center">วัน/เวลาที่บันทึก</th>
                                         <th style="width: 100px" class="text-center">สถานะเอกสาร</th>
-                                        <th style="width: 90px;" class="text-center">ไฟล์ PDF</th>
+                                        <th style="width: 90px;" class="text-center">รายงาน</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historyTableBody">
