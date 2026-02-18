@@ -37,7 +37,7 @@ try {
     $sql = "
         SELECT 
             nutrition_screening.*, 
-            nutritionists.nut_fullname,
+            nutritionist.nutritionist_fullname,
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -55,7 +55,7 @@ try {
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
-        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id
+        LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id
         
         WHERE nutrition_screening.doc_no = :doc_no
         LIMIT 1
@@ -303,7 +303,7 @@ try {
                                 <span class="input-group-text bg-white text-muted">ผู้คัดกรอง</span>
                             </div>
                             <input type="text" class="form-control text-center text-primary"
-                                value="<?php echo htmlspecialchars(!empty($data['nut_fullname']) ? $data['nut_fullname'] : ($data['assessor_name'] ?? '-')); ?>"
+                                value="<?php echo htmlspecialchars(!empty($data['nutritionist_fullname']) ? $data['nutritionist_fullname'] : ($data['assessor_name'] ?? '-')); ?>"
                                 disabled>
                         </div>
                     </div>

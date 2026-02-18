@@ -52,7 +52,7 @@ try {
             patients.patients_lastname
         FROM nutrition_screening
         JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
-        WHERE nutrition_screening.nut_id = :uid 
+        WHERE nutrition_screening.nutritionist_id = :uid 
         ORDER BY nutrition_screening.screening_datetime DESC
     ";
     $stmt = $conn->prepare($sql_spent);
@@ -66,7 +66,7 @@ try {
             patients.patients_lastname
         FROM nutrition_assessment
         JOIN patients ON nutrition_assessment.patients_hn = patients.patients_hn
-        WHERE nutrition_assessment.nut_id = :uid 
+        WHERE nutrition_assessment.nutritionist_id = :uid 
         ORDER BY nutrition_assessment.assessment_datetime DESC
     ";
     $stmt = $conn->prepare($sql_naf);

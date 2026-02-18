@@ -29,8 +29,8 @@ try {
     $sql = "
         SELECT 
             nutrition_screening.*, 
-            nutritionists.nut_fullname,
-            nutritionists.nut_position,
+            nutritionist.nutritionist_fullname,
+            nutritionist.nutritionist_position,
             patients.patients_firstname, 
             patients.patients_lastname, 
             patients.patients_hn, 
@@ -47,7 +47,7 @@ try {
         LEFT JOIN wards ON admissions.ward_id = wards.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
-        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id
+        LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id
         
         WHERE nutrition_screening.doc_no = :doc_no
         LIMIT 1
@@ -81,14 +81,14 @@ try {
     // ดึงลายเซ็นถ้ามี
     $signature_html = '';
     try {
-        // ใช้ตาราง nutritionist_signature และดึงตาม ID ของคนทำรายการ ($data['nut_id'])
+        // ใช้ตาราง nutritionist_signature และดึงตาม ID ของคนทำรายการ ($data['nutritionist_id'])
         $stmt_sig = $conn->prepare("
             SELECT signature_type, signature_data 
             FROM nutritionist_signature 
-            WHERE nut_id = :nut_id 
+            WHERE nutritionist_id = :nutritionist_id 
             LIMIT 1
         ");
-        $stmt_sig->execute([':nut_id' => $data['nut_id']]);
+        $stmt_sig->execute([':nutritionist_id' => $data['nutritionist_id']]);
         $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
 
         if ($signature && !empty($signature['signature_data'])) {
@@ -113,8 +113,8 @@ try {
     die("ข้อผิดพลาด: ไม่สามารถเชื่อมต่อฐานข้อมูล");
 }
 
-$assessor_show = !empty($data['nut_fullname']) ? $data['nut_fullname'] : '-';
-$position_show = !empty($data['nut_position']) ? $data['nut_position'] : 'นักโภชนาการ';
+$assessor_show = !empty($data['nutritionist_fullname']) ? $data['nutritionist_fullname'] : '-';
+$position_show = !empty($data['nutritionist_position']) ? $data['nutritionist_position'] : 'นักโภชนาการ';
 
 $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();
 $fontDirs = $defaultConfig['fontDir'];

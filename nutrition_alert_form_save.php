@@ -166,7 +166,7 @@ try {
             lab_method, albumin_val, tlc_val, lab_score,
             weight_option_id, patient_shape_id, weight_change_4_weeks_id, 
             food_type_id, food_amount_id, food_access_id,
-            total_score, naf_level, nut_id,
+            total_score, naf_level, nutritionist_id,
             ref_screening_doc_no, nutrition_screening_id
         ) VALUES (
             :doc_no, :naf_seq, :an, :hn, :assessment_datetime,
@@ -176,7 +176,7 @@ try {
             :lab_m, :alb, :tlc, :lab_s,
             :w_opt, :p_shp, :w_chg, 
             :f_typ, :f_amt, :f_acc,
-            :total, :level, :nut_id,
+            :total, :level, :nutritionist_id,
             :ref_doc, :screen_id
         )
     ";
@@ -213,7 +213,7 @@ try {
         ':f_acc'    => $food_access_id,
         ':total'    => $total_score,
         ':level'    => $naf_level,
-        ':nut_id'   => $current_user_id,
+        ':nutritionist_id'   => $current_user_id,
         ':ref_doc'  => $ref_screening_doc,
         ':screen_id' => $screening_id
     ]);

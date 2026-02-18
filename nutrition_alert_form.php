@@ -159,7 +159,7 @@ try {
         $diseases_grouped[$type][] = $d;
     }
 
-    $stmt_user = $conn->prepare("SELECT nut_fullname FROM nutritionists WHERE nut_id = :uid");
+    $stmt_user = $conn->prepare("SELECT nutritionist_fullname FROM nutritionist WHERE nutritionist_id = :uid");
     $stmt_user->execute([':uid' => $_SESSION['user_id']]);
     $current_user_name = $stmt_user->fetchColumn();
 

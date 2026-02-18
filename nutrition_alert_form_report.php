@@ -30,8 +30,8 @@ if (empty($doc_no) || !preg_match('/^[A-Z]+-[A-Za-z0-9\-]+$/', $doc_no)) {
 $sql = "
 SELECT 
     nutrition_assessment.*,
-    nutritionists.nut_fullname, 
-    nutritionists.nut_position, 
+    nutritionist.nutritionist_fullname, 
+    nutritionist.nutritionist_position, 
     patients.patients_firstname, 
     patients.patients_lastname, 
     patients.patients_gender, 
@@ -59,7 +59,7 @@ FROM nutrition_assessment
 JOIN patients ON patients.patients_hn = nutrition_assessment.patients_hn
 JOIN admissions ON admissions.admissions_an = nutrition_assessment.admissions_an
 LEFT JOIN wards ON wards.ward_id = admissions.ward_id 
-LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id
+LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id
 
 LEFT JOIN weight_option ON weight_option.weight_option_id = nutrition_assessment.weight_option_id
 LEFT JOIN patient_shape ON patient_shape.patient_shape_id = nutrition_assessment.patient_shape_id
@@ -235,26 +235,26 @@ $admit_date_th = date('d/m/', strtotime($assessment['admit_datetime'])) . (date(
 
 
 // ตรวจสอบว่ามีชื่อใหม่ไหม ถ้าไม่มีใช้ชื่อเก่า ถ้าไม่มีอีกให้เป็นขีด
-$assessor_show = !empty($assessment['nut_fullname'])
-    ? htmlspecialchars($assessment['nut_fullname'])
+$assessor_show = !empty($assessment['nutritionist_fullname'])
+    ? htmlspecialchars($assessment['nutritionist_fullname'])
     : htmlspecialchars($assessment['assessor_name'] ?? '.................................................................');
 
 // ตรวจสอบตำแหน่ง
-$position_show = !empty($assessment['nut_position'])
-    ? htmlspecialchars($assessment['nut_position'])
+$position_show = !empty($assessment['nutritionist_position'])
+    ? htmlspecialchars($assessment['nutritionist_position'])
     : 'นักโภชนาการ';
 
 // ดึงลายเซ็นถ้ามี
 $signature_html = '';
 try {
-    // ต้องดึงจากตาราง nutritionist_signature โดยใช้ nut_id ของใบงาน ($assessment['nut_id'])
+    // ต้องดึงจากตาราง nutritionist_signature โดยใช้ nutritionist_id ของใบงาน ($assessment['nutritionist_id'])
     $stmt_sig = $conn->prepare("
         SELECT signature_type, signature_data 
         FROM nutritionist_signature 
-        WHERE nut_id = :nut_id 
+        WHERE nutritionist_id = :nutritionist_id 
         LIMIT 1
     ");
-    $stmt_sig->execute([':nut_id' => $assessment['nut_id']]);
+    $stmt_sig->execute([':nutritionist_id' => $assessment['nutritionist_id']]);
     $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
 
     if ($signature && !empty($signature['signature_data'])) {

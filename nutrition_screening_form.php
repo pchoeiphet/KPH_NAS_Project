@@ -89,7 +89,7 @@ try {
     $doc_no_show = 'SPENT-' . $patient['patients_hn'] . '-' . str_pad($next_seq, 3, '0', STR_PAD_LEFT);
 
     // ดึงชื่อผู้คัดกรอง
-    $stmt_user = $conn->prepare("SELECT nut_fullname FROM nutritionists WHERE nut_id = :uid");
+    $stmt_user = $conn->prepare("SELECT nutritionist_fullname FROM nutritionist WHERE nutritionist_id = :uid");
     $stmt_user->execute([':uid' => $_SESSION['user_id']]);
     $current_user_name = $stmt_user->fetchColumn();
 

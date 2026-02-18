@@ -88,11 +88,11 @@ try {
     $sql_spent = "
         SELECT 
             nutrition_screening.*, 
-            nutritionists.nut_fullname,
+            nutritionist.nutritionist_fullname,
             'SPENT' as form_type, 
             nutrition_screening.created_at as action_datetime  -- เปลี่ยนจาก screening_datetime เป็น created_at
         FROM nutrition_screening 
-        LEFT JOIN nutritionists ON nutrition_screening.nut_id = nutritionists.nut_id 
+        LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id 
         WHERE nutrition_screening.patients_hn = :hn 
         ORDER BY nutrition_screening.created_at DESC           -- เรียงตาม created_at
     ";
@@ -106,11 +106,11 @@ try {
     $sql_naf = "
         SELECT 
             nutrition_assessment.*, 
-            nutritionists.nut_fullname,
+            nutritionist.nutritionist_fullname,
             'NAF' as form_type, 
             nutrition_assessment.created_at as action_datetime -- เปลี่ยนจาก assessment_datetime เป็น created_at
         FROM nutrition_assessment 
-        LEFT JOIN nutritionists ON nutrition_assessment.nut_id = nutritionists.nut_id 
+        LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id 
         WHERE patients_hn = :hn 
         ORDER BY nutrition_assessment.created_at DESC          -- เรียงตาม created_at
     ";
@@ -197,8 +197,8 @@ $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" sty
 
 if ($latest_activity) {
     $cur_date = thaiDate($latest_activity['action_datetime']);
-    $cur_assessor = !empty($latest_activity['nut_fullname'])
-        ? $latest_activity['nut_fullname']
+    $cur_assessor = !empty($latest_activity['nutritionist_fullname'])
+        ? $latest_activity['nutritionist_fullname']
         : ($latest_activity['assessor_name'] ?? '-');
 
     // กรณีล่าสุดเป็น SPENT
@@ -558,7 +558,7 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
                                                     <td class="text-center align-middle <?php echo htmlspecialchars($res_class); ?>"><?php echo htmlspecialchars($row['screening_result']); ?></td>
                                                     <td class="text-center align-middle text-muted">-</td>
-                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nut_fullname']); ?></td>
+                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nutritionist_fullname']); ?></td>
                                                     <td class="align-middle"><small><?php echo htmlspecialchars(thaiDate($row['action_datetime'])); ?></small></td>
                                                     <td class="text-center align-middle">
                                                         <span class="badge <?php echo htmlspecialchars($status_badge); ?> font-weight-normal px-2"><?php echo htmlspecialchars($row['screening_status']); ?></span>
@@ -604,7 +604,7 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
                                                     <td class="text-center align-middle text-muted"><small>-</small></td>
                                                     <td class="text-center align-middle"><?php echo $naf_res_html; ?></td>
-                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nut_fullname']); ?></td>
+                                                    <td class="align-middle"><?php echo htmlspecialchars($row['nutritionist_fullname']); ?></td>
                                                     <td class="align-middle"><small><?php echo htmlspecialchars(thaiDate($row['action_datetime'])); ?></small></td>
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-success font-weight-normal px-2">ประเมินเสร็จสิ้น</span>

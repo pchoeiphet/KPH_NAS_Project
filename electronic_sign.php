@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$nut_id = $_SESSION['user_id'];
+$nutritionist_id = $_SESSION['user_id'];
 
 // Session timeout check (30 minutes)
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
@@ -91,8 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $conn->beginTransaction();
 
                 // *** แก้ชื่อตารางตรงนี้เป็น nutritionist_signature ***
-                $stmt_check_sig = $conn->prepare("SELECT signature_id FROM nutritionist_signature WHERE nut_id = :nut_id");
-                $stmt_check_sig->execute([':nut_id' => $nut_id]);
+                $stmt_check_sig = $conn->prepare("SELECT nutritionist_signature_id FROM nutritionist_signature WHERE nutritionist_id = :nutritionist_id");
+                $stmt_check_sig->execute([':nutritionist_id' => $nutritionist_id]);
                 $existing_sig = $stmt_check_sig->fetch(PDO::FETCH_ASSOC);
 
                 if ($existing_sig) {
@@ -102,21 +102,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         SET signature_type = :sig_type,
                             signature_data = :sig_data,
                             signed_datetime = NOW()
-                        WHERE nut_id = :nut_id
+                        WHERE nutritionist_id = :nutritionist_id
                     ");
                     $stmt_update->execute([
                         ':sig_type' => $signature_type_db,
                         ':sig_data' => $signature_data_to_save,
-                        ':nut_id' => $nut_id
+                        ':nutritionist_id' => $nutritionist_id
                     ]);
                 } else {
                     // Insert
                     $stmt_insert = $conn->prepare("
-                        INSERT INTO nutritionist_signature (nut_id, signature_type, signature_data, signed_datetime)
-                        VALUES (:nut_id, :sig_type, :sig_data, NOW())
+                        INSERT INTO nutritionist_signature (nutritionist_id, signature_type, signature_data, signed_datetime)
+                        VALUES (:nutritionist_id, :sig_type, :sig_data, NOW())
                     ");
                     $stmt_insert->execute([
-                        ':nut_id' => $nut_id,
+                        ':nutritionist_id' => $nutritionist_id,
                         ':sig_type' => $signature_type_db,
                         ':sig_data' => $signature_data_to_save
                     ]);
@@ -143,8 +143,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $has_signature = false;
 try {
     // *** แก้ชื่อตารางตรงนี้ด้วย ***
-    $stmt_sig = $conn->prepare("SELECT signature_id FROM nutritionist_signature WHERE nut_id = :nut_id LIMIT 1");
-    $stmt_sig->execute([':nut_id' => $_SESSION['user_id']]);
+    $stmt_sig = $conn->prepare("SELECT nutritionist_signature_id FROM nutritionist_signature WHERE nutritionist_id = :nutritionist_id LIMIT 1");
+    $stmt_sig->execute([':nutritionist_id' => $_SESSION['user_id']]);
     $sig_data = $stmt_sig->fetch(PDO::FETCH_ASSOC);
     $has_signature = !empty($sig_data);
 } catch (PDOException $e) {
