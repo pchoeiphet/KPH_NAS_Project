@@ -310,7 +310,6 @@ function isSymChecked($id, $saved_array)
         </div>
     </nav>
 
-
     <div class="container-fluid px-lg-5 mt-4">
 
         <div class="card border-0 shadow-sm mb-4">
