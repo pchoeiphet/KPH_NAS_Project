@@ -46,11 +46,11 @@ $doctor_options = [];
 try {
     // ดึงรายชื่อหอผู้ป่วย (เฉพาะที่มีใน Admissions และยังไม่จำหน่าย)
     $sql_ward_options = "
-        SELECT DISTINCT wards.ward_name 
+        SELECT DISTINCT ward.ward_name 
         FROM admissions 
-        JOIN wards ON admissions.ward_id = wards.ward_id 
+        JOIN ward ON admissions.ward_id = ward.ward_id 
         WHERE admissions.discharge_datetime IS NULL 
-        ORDER BY wards.ward_name ASC
+        ORDER BY ward.ward_name ASC
     ";
     $stmt_w = $conn->prepare($sql_ward_options);
     $stmt_w->execute();
@@ -81,11 +81,11 @@ try {
             patients.patients_id, patients.patients_hn, patients.patients_firstname, patients.patients_lastname, 
             patients.patients_dob, patients.patients_congenital_disease,
             admissions.admissions_an, admissions.admit_datetime, admissions.bed_number,
-            wards.ward_name,
+            ward.ward_name,
             doctor.doctor_name
         FROM admissions
         JOIN patients ON admissions.patients_id = patients.patients_id
-        LEFT JOIN wards ON admissions.ward_id = wards.ward_id
+        LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         WHERE admissions.discharge_datetime IS NULL
         ORDER BY admissions.ward_id, admissions.bed_number ASC

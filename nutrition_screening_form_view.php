@@ -46,13 +46,13 @@ try {
             patients.patients_congenital_disease,
             admissions.bed_number, 
             admissions.admit_datetime,
-            wards.ward_name, 
+            ward.ward_name, 
             doctor.doctor_name, 
             health_insurance.health_insurance_name
         FROM nutrition_screening
         JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
         JOIN admissions ON nutrition_screening.admissions_an = admissions.admissions_an
-        LEFT JOIN wards ON admissions.ward_id = wards.ward_id
+        LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
         LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id

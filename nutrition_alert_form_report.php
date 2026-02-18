@@ -41,7 +41,7 @@ SELECT
     admissions.admit_datetime,
     admissions.bed_number,
     
-    wards.ward_name,
+    ward.ward_name,
     
     weight_option.weight_option_label, 
     weight_option.weight_option_score,
@@ -58,7 +58,7 @@ SELECT
 FROM nutrition_assessment
 JOIN patients ON patients.patients_hn = nutrition_assessment.patients_hn
 JOIN admissions ON admissions.admissions_an = nutrition_assessment.admissions_an
-LEFT JOIN wards ON wards.ward_id = admissions.ward_id 
+LEFT JOIN ward ON ward.ward_id = admissions.ward_id 
 LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id
 
 LEFT JOIN weight_option ON weight_option.weight_option_id = nutrition_assessment.weight_option_id

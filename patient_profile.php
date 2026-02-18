@@ -47,12 +47,12 @@ try {
             admissions.admissions_an, 
             admissions.admit_datetime, 
             admissions.bed_number, 
-            wards.ward_name, 
+            ward.ward_name, 
             doctor.doctor_name,
             health_insurance.health_insurance_name
         FROM patients
         JOIN admissions ON patients.patients_id = admissions.patients_id
-        LEFT JOIN wards ON admissions.ward_id = wards.ward_id
+        LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
         WHERE patients.patients_hn = :hn
