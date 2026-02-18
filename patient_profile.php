@@ -530,8 +530,8 @@ if ($latest_activity) {
 
                                                 // สีผลลัพธ์
                                                 $res_class = 'text-muted';
-                                                if ($row['screening_result'] == 'มีความเสี่ยง') $res_class = 'text-danger font-weight-bold';
-                                                elseif ($row['screening_result'] == 'ปกติ') $res_class = 'text-success font-weight-bold';
+                                                if ($row['nutrition_screening_result'] == 'มีความเสี่ยง') $res_class = 'text-danger font-weight-bold';
+                                                elseif ($row['nutrition_screening_result'] == 'ปกติ') $res_class = 'text-success font-weight-bold';
 
                                                 // สถานะ Badge
                                                 $status_badge = 'badge-secondary';
@@ -556,7 +556,7 @@ if ($latest_activity) {
                                                     </td>
                                                     <td class="text-center align-middle text-muted"><?php echo htmlspecialchars($row['nutrition_screening_seq']); ?></td>
                                                     <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
-                                                    <td class="text-center align-middle <?php echo htmlspecialchars($res_class); ?>"><?php echo htmlspecialchars($row['screening_result']); ?></td>
+                                                    <td class="text-center align-middle <?php echo htmlspecialchars($res_class); ?>"><?php echo htmlspecialchars($row['nutrition_screening_result']); ?></td>
                                                     <td class="text-center align-middle text-muted">-</td>
                                                     <td class="align-middle"><?php echo htmlspecialchars($row['nutritionist_fullname']); ?></td>
                                                     <td class="align-middle"><small><?php echo htmlspecialchars(thaiDate($row['action_datetime'])); ?></small></td>

@@ -64,14 +64,14 @@ $total_score = $q1 + $q2 + $q3 + $q4;
 
 $screening_status = '';
 $has_assessment = 0;
-$screening_result = '';
+$nutrition_screening_result = '';
 
 if ($total_score < 2) {
     $screening_status = 'ปกติ';
-    $screening_result = 'ปกติ';
+    $nutrition_screening_result = 'ปกติ';
     $has_assessment = 0;
 } else {
-    $screening_result = 'มีความเสี่ยง';
+    $nutrition_screening_result = 'มีความเสี่ยง';
     if ($redirect_to_naf === 'true') {
         $screening_status = 'กำลังประเมิน';
         $has_assessment = 1;
@@ -95,7 +95,7 @@ try {
                 doc_no, admissions_an, patients_hn, nutrition_screening_datetime, nutrition_screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
-                screening_result, notes, nutritionist_id, 
+                nutrition_screening_result, notes, nutritionist_id, 
                 screening_status, has_assessment
             ) VALUES (
                 :doc_no, :an, :hn, :nutrition_screening_datetime, :seq,
@@ -123,7 +123,7 @@ try {
         ':q2' => $q2,
         ':q3' => $q3,
         ':q4' => $q4,
-        ':result' => $screening_result,
+        ':result' => $nutrition_screening_result,
         ':notes' => trim($_POST['notes'] ?? ''),
         ':nut_id' => $_SESSION['user_id'],
         ':status' => $screening_status,
