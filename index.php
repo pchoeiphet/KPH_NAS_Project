@@ -100,7 +100,7 @@ try {
         $an = $row['admissions_an'];
 
         // หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
-        $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patients_hn = :hn ORDER BY nutrition_screening_datetime DESC LIMIT 1");
+        $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patients_hn = :hn ORDER BY screening_datetime DESC LIMIT 1");
         $stmt_spent->execute([':hn' => $hn]);
         $spent = $stmt_spent->fetch(PDO::FETCH_ASSOC);
 
@@ -123,7 +123,7 @@ try {
         $spentScore = 0;
         if ($spent) {
             $spentScore = (intval($spent['q1_weight_loss']) + intval($spent['q2_eat_less']) + intval($spent['q3_bmi_abnormal']) + intval($spent['q4_critical']));
-            $screenDate = thaiDate($spent['nutrition_screening_datetime']);
+            $screenDate = thaiDate($spent['screening_datetime']);
 
             // เก็บเลขที่เอกสาร (doc_no) จากใบ SPENT ล่าสุด
             $target_ref_doc = $spent['doc_no'];
@@ -135,7 +135,7 @@ try {
             $assessDate = thaiDate($naf['assessment_datetime']);
             $scoreVal = $naf['total_score'];
             $nafScore = $naf['total_score'];
-            if ($spent) $screenDate = thaiDate($spent['nutrition_screening_datetime']);
+            if ($spent) $screenDate = thaiDate($spent['screening_datetime']);
         } elseif ($spent) {
             $scoreVal = $spentScore;
             if ($spentScore >= 2) {

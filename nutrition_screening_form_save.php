@@ -64,14 +64,14 @@ $total_score = $q1 + $q2 + $q3 + $q4;
 
 $screening_status = '';
 $has_assessment = 0;
-$nutrition_screening_result = '';
+$screening_result = '';
 
 if ($total_score < 2) {
     $screening_status = 'ปกติ';
-    $nutrition_screening_result = 'ปกติ';
+    $screening_result = 'ปกติ';
     $has_assessment = 0;
 } else {
-    $nutrition_screening_result = 'มีความเสี่ยง';
+    $screening_result = 'มีความเสี่ยง';
     if ($redirect_to_naf === 'true') {
         $screening_status = 'กำลังประเมิน';
         $has_assessment = 1;
@@ -83,7 +83,7 @@ if ($total_score < 2) {
 
 try {
     // สร้างเลขที่เอกสาร
-    $stmt_seq = $conn->prepare("SELECT MAX(nutrition_screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
+    $stmt_seq = $conn->prepare("SELECT MAX(screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
     $stmt_seq->execute([':an' => $an]);
     $row_seq = $stmt_seq->fetch(PDO::FETCH_ASSOC);
     $next_seq = ($row_seq['max_seq'] ?? 0) + 1;
@@ -92,13 +92,13 @@ try {
 
     // บันทึกข้อมูลลงฐานข้อมูล
     $sql = "INSERT INTO nutrition_screening (
-                doc_no, admissions_an, patients_hn, nutrition_screening_datetime, nutrition_screening_seq,
+                doc_no, admissions_an, patients_hn, screening_datetime, screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
-                nutrition_nutrition_screening_result, notes, nut_id, 
+                screening_result, notes, nutritionist_id, 
                 screening_status, has_assessment
             ) VALUES (
-                :doc_no, :an, :hn, :nutrition_screening_datetime, :seq,
+                :doc_no, :an, :hn, :screening_datetime, :seq,
                 :diagnosis, :weight, :normal_weight, :height, :bmi, :method,
                 :q1, :q2, :q3, :q4,
                 :result, :notes, :nut_id,     
@@ -111,7 +111,7 @@ try {
         ':doc_no' => $doc_no,
         ':an' => $an,
         ':hn' => $hn,
-        ':nutrition_screening_datetime' => $save_datetime,
+        ':screening_datetime' => $save_datetime,
         ':seq' => $next_seq,
         ':diagnosis' => trim($_POST['initial_diagnosis'] ?? ''),
         ':weight' => floatval($_POST['present_weight'] ?? 0),
@@ -123,7 +123,7 @@ try {
         ':q2' => $q2,
         ':q3' => $q3,
         ':q4' => $q4,
-        ':result' => $nutrition_screening_result,
+        ':result' => $screening_result,
         ':notes' => trim($_POST['notes'] ?? ''),
         ':nut_id' => $_SESSION['user_id'],
         ':status' => $screening_status,

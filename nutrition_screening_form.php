@@ -82,7 +82,7 @@ try {
         $admit_date = $dt->format('d/m/') . $thai_year . ' ' . $dt->format('H:i') . ' น.';
     }
 
-    $stmt_seq = $conn->prepare("SELECT MAX(nutrition_screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
+    $stmt_seq = $conn->prepare("SELECT MAX(screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
     $stmt_seq->execute([':an' => $an]);
     $next_seq = ($stmt_seq->fetch(PDO::FETCH_ASSOC)['max_seq'] ?? 0) + 1;
 

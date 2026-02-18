@@ -65,8 +65,8 @@ if (!empty($screening_data)) {
     $val_bmi = $screening_data['bmi'] ?? '';
 
     // ถ้ามีข้อมูลการคัดกรอง ให้ใช้วันที่คัดกรองเป็นค่าเริ่มต้น
-    if (!empty($screening_data['nutrition_screening_datetime'])) {
-        $sc_timestamp = strtotime($screening_data['nutrition_screening_datetime']);
+    if (!empty($screening_data['screening_datetime'])) {
+        $sc_timestamp = strtotime($screening_data['screening_datetime']);
         $default_date = date('Y-m-d', $sc_timestamp);
         $default_time = date('H:i', $sc_timestamp);
     }

@@ -280,21 +280,21 @@ try {
                     <div class="col-md-2 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div>
-                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($data['nutrition_screening_seq'] ?? '-'); ?>" disabled>
+                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($data['screening_seq'] ?? '-'); ?>" disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
                             <input type="text" class="form-control text-center"
-                                value="<?php echo isset($data['nutrition_screening_datetime']) ? date('d/m/', strtotime($data['nutrition_screening_datetime'])) . (date('Y', strtotime($data['nutrition_screening_datetime'])) + 543) : '-'; ?>"
+                                value="<?php echo isset($data['screening_datetime']) ? date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) : '-'; ?>"
                                 disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div>
-                            <input type="text" class="form-control text-center" value="<?php echo isset($data['nutrition_screening_datetime']) ? date('H:i', strtotime($data['nutrition_screening_datetime'])) : '-'; ?>" disabled>
+                            <input type="text" class="form-control text-center" value="<?php echo isset($data['screening_datetime']) ? date('H:i', strtotime($data['screening_datetime'])) : '-'; ?>" disabled>
                         </div>
                     </div>
                     <div class="col-md-4">
