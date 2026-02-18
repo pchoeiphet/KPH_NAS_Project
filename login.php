@@ -45,20 +45,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
             $_SESSION['last_attempt_time'] = time();
         } else {
             try {
-                $sql = "SELECT * FROM nutritionists WHERE nut_username = ? AND is_active = 1";
+                $sql = "SELECT * FROM nutritionist WHERE nutritionist_username = ? AND is_active = 1";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([$username]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($row && (password_verify($password, $row['nut_password']) || $password == $row['nut_password'])) {
+                if ($row && (password_verify($password, $row['nutritionist_password']) || $password == $row['nutritionist_password'])) {
                     // ล็อกอินสำเร็จ
                     $_SESSION['login_attempts'] = 0;
                     session_regenerate_id(true); // Regenerate session ID
 
-                    $_SESSION['user_id'] = $row['nut_id'];
-                    $_SESSION['user_name'] = $row['nut_fullname'];
-                    $_SESSION['user_position'] = !empty($row['nut_position']) ? $row['nut_position'] : 'นักโภชนาการ';
-                    $_SESSION['user_code'] = $row['nut_code'];
+                    $_SESSION['user_id'] = $row['nutritionist_id'];
+                    $_SESSION['user_name'] = $row['nutritionist_fullname'];
+                    $_SESSION['user_position'] = !empty($row['nutritionist_position']) ? $row['nutritionist_position'] : 'นักโภชนาการ';
+                    $_SESSION['user_code'] = $row['nutritionist_code'];
                     $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
                     $_SESSION['login_time'] = time();
 
