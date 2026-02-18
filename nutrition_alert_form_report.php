@@ -315,57 +315,60 @@ $html = '
                         <img src="' . $logo_path . '" style="width: 70px; height: auto;">
                     </td>
                     <td align="left" style="padding-left: 10px; vertical-align: middle;">
-                        <div style="font-size: 16pt; font-weight: bold; line-height: 1.2;">แบบประเมินภาวะโภชนาการ</div>
-                        <div style="font-size: 16pt; line-height: 1.2;">Nutrition Alert Form : โรงพยาบาลกำแพงเพชร</div>
-                        <div style="font-size: 16t; line-height: 1.2;">(การประเมินครั้งที่ ' . $assessment_no . ')</div>
+                        <div style="font-size:16pt; line-height:1.1;">โรงพยาบาลกำแพงเพชร</div>
+                        <div style="font-size: 16pt; line-height: 1.1;">แบบประเมินภาวะโภชนาการ</div>
+                        <div style="font-size: 16pt; line-height: 1.1;">Nutrition Alert Form</div>
+                        <div style="font-size: 16pt; line-height: 1.1;">(การประเมินครั้งที่ ' . $assessment_no . ')</div>
                     </td>
                 </tr>
             </table>
         </td>
 
         <td width="48%" align="right" style="vertical-align: top;">
-            <div style="border: 1px solid #000; padding: 8px 12px; border-radius: 5px; background-color: #fafafa; width: 260px; display: inline-block;">
-                <table width="100%" style="font-size: 12pt; line-height: 1.2;">
-                    <tr>
-                        <td colspan="2" align="left"><b>ชื่อ-สกุล:</b> ' . htmlspecialchars($patient_full_name) . '</td>
-                    </tr>
-                    <tr>
-                        <td width="55%" align="left"><b>HN:</b> ' . htmlspecialchars($assessment['patients_hn'] ?? '-') . '</td>
-                        <td width="45%" align="left"><b>AN:</b> ' . htmlspecialchars($assessment['admissions_an'] ?? '-') . '</td>
-                    </tr>
-                    <tr>
-                        <td align="left"><b>หอผู้ป่วย:</b> ' . htmlspecialchars($assessment['ward_name'] ?? '-') . '</td>
-                        <td align="left"><b>เตียง:</b> ' . htmlspecialchars($assessment['bed_number'] ?? '-') . '</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" align="left" style="font-size: 12pt; line-height: 1.2;">
-                            <b>วันที่ประเมิน:</b> ' . htmlspecialchars($assess_datetime_th) . '
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </td>
+    <div style="border: 1px solid #000; padding: 8px 12px; border-radius: 5px; background-color: #fafafa; width: 260px; display: inline-block;">
+        <table width="100%" style="font-size: 14pt; line-height: 1.2;">
+            <tr>
+                <td colspan="2" align="left"><b>ชื่อ-สกุล:</b> ' . htmlspecialchars($patient_full_name) . '</td>
+            </tr>
+            <tr>
+                <td width="55%" align="left"><b>HN:</b> ' . htmlspecialchars($assessment['patients_hn'] ?? '-') . '</td>
+                <td width="45%" align="left"><b>AN:</b> ' . htmlspecialchars($assessment['admissions_an'] ?? '-') . '</td>
+            </tr>
+            <tr>
+                <td align="left"><b>อายุ:</b> ' . htmlspecialchars($age ?? '-') . '</td>
+                <td align="left"><b>เพศ:</b> ' . htmlspecialchars($gender_th ?? '-') . '</td>
+            </tr>
+            <tr>
+                <td align="left"><b>หอผู้ป่วย:</b> ' . htmlspecialchars($assessment['ward_name'] ?? '-') . '</td>
+                <td align="left"><b>เตียง:</b> ' . htmlspecialchars($assessment['bed_number'] ?? '-') . '</td>
+            </tr>
+        </table>
+    </div>
+</td>
     </tr>
 </table>
 
 <div class="info-box" style="padding: 0;">
-    <div style="background-color: #f2f2f2; border-bottom: 1px solid #000; padding: 3px 10px; font-weight: bold; font-size: 16pt;">
+    <div style="background-color: #f2f2f2; border-bottom: 1px solid #000; padding: 3px 10px; font-weight: bold; font-size: 14pt;">
         ส่วนที่ 1: ข้อมูลการเข้ารับบริการ (Admission Information)
     </div>
     
     <div style="padding: 8px;">
         <table width="100%" style="border-collapse: collapse; line-height: 1.2;">
             <tr>
-                <td width="50%" style="padding: 2px 4px;">
+                <td width="33%" style="padding: 2px 4px;">
                     <b>ข้อมูลจาก:</b> ' . htmlspecialchars($infoSourceText ?? '-') . '
                 </td>
-                <td width="50%" style="padding: 2px 4px;">
-                    <b>วันที่รับเข้ารักษา (Admit):</b> ' . htmlspecialchars($admit_date_th ?? '-') . '
+                <td width="33%" style="padding: 2px 4px;">
+                    <b>วันที่ Admit:</b> ' . htmlspecialchars($admit_date_th ?? '-') . '
+                </td>
+                <td width="34%" style="padding: 2px 4px;">
+                    <b>วันที่ประเมิน:</b> ' . htmlspecialchars($assess_datetime_th ?? '-') . '
                 </td>
             </tr>
             
             <tr>
-                <td colspan="2" style="padding: 6px 4px; vertical-align: top;">
+                <td colspan="3" style="padding: 6px 4px; vertical-align: top;">
                     <div style="border-top: 1px dotted #ccc; margin-top: 5px; padding-top: 5px;">
                         <b>การวินิจฉัยเบื้องต้น (Initial Diagnosis):</b>
                         <div style="margin-top: 3px; font-size: 13pt;">

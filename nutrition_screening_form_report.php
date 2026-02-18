@@ -187,64 +187,55 @@ $html = '
     }
 </style>
 
-<table width="100%" cellpadding="0" cellspacing="0">
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
     <tr>
-        <td width="15%" style="text-align:left; vertical-align:middle;">
-            <img src="img/logo_kph.jpg" style="height:75px;">
+        <td width="65%" style="text-align:left; vertical-align:middle;">
+            <table width="100%">
+                <tr>
+                    <td width="75px" style="vertical-align:middle;">
+                        <img src="img/logo_kph.jpg" style="height:70px;">
+                    </td>
+                    <td style="vertical-align:middle; padding-left:10px;">
+                        <div style="font-size:16pt; line-height:1.1;">โรงพยาบาลกำแพงเพชร</div>
+                        <div style="font-size:16pt; line-height:1.1;">แบบคัดกรองภาวะโภชนาการ</div>
+                        <div style="font-size:16pt; font-style:italic; color:#333;">(Nutrition Screening Tool : SPENT)</div>
+                        <div style="margin-top:4px; font-size:16pt;">
+                            (การคัดกรองครั้งที่ <span style="font-size:15pt;">' . ($data['screening_seq'] ?? '1') . '</span>)
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </td>
 
-        <td width="55%" style="vertical-align:middle; padding-left:10px;">
-         <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
-                โรงพยาบาลกำแพงเพชร
-            </div>
-            <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
-                แบบคัดกรองภาวะโภชนาการ
-            </div>
-            <div style="font-size:16pt; font-style:italic; margin-top:2px;">
-                (Nutrition Screening Tool : SPENT)
-            </div>
-            <div style="margin-top:6px; font-size:14pt;">
-                <b>คัดกรองครั้งที่:</b>
-                <span style="font-size:16pt;">
-                    ' . ($data['screening_seq'] ?? '1') . '
-                </span>
-            </div>
-        </td>
-
-        <td width="50%" style="vertical-align:top;">
-    <table width="100%" style="border:2px solid #000; font-size:12.5pt; line-height:1.3;">
-        <tr>
-            <td colspan="2" class="bold"
-                style="font-size:15pt; border-bottom:1px solid #000; padding:4px;">
-                ' . htmlspecialchars($fullname, ENT_QUOTES, 'UTF-8') . '
-            </td>
-        </tr>
-        <tr>
-            <td width="50%"><b>HN:</b> ' . htmlspecialchars($data['patients_hn'], ENT_QUOTES, 'UTF-8') . '</td>
-            <td width="50%"><b>AN:</b> ' . htmlspecialchars($data['admissions_an'], ENT_QUOTES, 'UTF-8') . '</td>
-        </tr>
-        <tr>
-            <td><b>อายุ:</b> ' . htmlspecialchars($age, ENT_QUOTES, 'UTF-8') . '</td>
-            <td><b>เพศ:</b> ' . htmlspecialchars($gender, ENT_QUOTES, 'UTF-8') . '</td>
-        </tr>
-        <tr>
-            <td><b>หอผู้ป่วย:</b> ' . htmlspecialchars($data['ward_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
-            <td><b>เตียง:</b> ' . htmlspecialchars($data['bed_number'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
-        </tr>
-        <tr>
-            <td colspan="2"><b>สิทธิการรักษา:</b> ' . htmlspecialchars($data['health_insurance_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <b>แพทย์เจ้าของไข้:</b> ' . htmlspecialchars($data['doctor_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '
-            </td>
-        </tr>
-    </table>
+        <td width="48%" align="right" style="vertical-align: top;">
+    <div style="border: 1px solid #000; padding: 8px 12px; border-radius: 5px; background-color: #fafafa; width: 270px; display: inline-block;">
+        <table width="100%" style="font-size: 14pt; border-collapse: collapse; line-height: 1.2;">
+            <tr>
+                <td colspan="2" align="left">
+                    <b>ชื่อ-สกุล:</b> ' . htmlspecialchars($fullname, ENT_QUOTES, 'UTF-8') . '
+                </td>
+            </tr>
+            <tr>
+                <td width="55%" align="left">
+                    <b>HN:</b> ' . htmlspecialchars($data['patients_hn'] ?? '-', ENT_QUOTES, 'UTF-8') . '
+                </td>
+                <td width="45%" align="left">
+                    <b>AN:</b> ' . htmlspecialchars($data['admissions_an'] ?? '-', ENT_QUOTES, 'UTF-8') . '
+                </td>
+            </tr>
+            <tr>
+                <td align="left"><b>อายุ:</b> ' . htmlspecialchars($age, ENT_QUOTES, 'UTF-8') . '</td>
+                <td align="left"><b>เพศ:</b> ' . htmlspecialchars($gender, ENT_QUOTES, 'UTF-8') . '</td>
+            </tr>
+            <tr>
+                <td align="left"><b>หอผู้ป่วย:</b> ' . htmlspecialchars($data['ward_name'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+                <td align="left"><b>เตียง:</b> ' . htmlspecialchars($data['bed_number'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>
+            </tr>
+        </table>
+    </div>
 </td>
-
     </tr>
 </table>
-
 
 <div class="section-header">ส่วนที่ 1: ข้อมูลแรกรับและการวินิจฉัย (Admission & Clinical Data)</div>
 <table class="table-content">
@@ -423,4 +414,3 @@ $html = '
 
 $mpdf->WriteHTML($html);
 $mpdf->Output($data['doc_no'] . '.pdf', 'I');
-?>  
