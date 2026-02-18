@@ -81,7 +81,6 @@ try {
     // ดึงลายเซ็นถ้ามี
     $signature_html = '';
     try {
-        // ใช้ตาราง nutritionist_signature และดึงตาม ID ของคนทำรายการ ($data['nutritionist_id'])
         $stmt_sig = $conn->prepare("
             SELECT nutritionist_signature_type, nutritionist_signature_data 
             FROM nutritionist_signature 
@@ -93,7 +92,7 @@ try {
 
         if ($signature && !empty($signature['nutritionist_signature_data'])) {
             if ($signature['nutritionist_signature_type'] === 'canvas') {
-                // ลายเซ็นแบบวาด (base64 image)
+                // ลายเซ็นแบบวาด
                 $base64_image = $signature['nutritionist_signature_data'];
                 $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 40px; margin-bottom: -10px;">';
             } else {
@@ -102,8 +101,8 @@ try {
                     htmlspecialchars($signature['nutritionist_signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
             }
         } else {
-            // กรณีไม่มีลายเซ็น ให้เว้นว่างหรือจุดไข่ปลาไว้
-            $signature_html = '<div style="height: 40px;"></div>';
+            // กรณีไม่มีลายเซ็น ให้เว้นว่าง
+            $signature_html = '';
         }
     } catch (PDOException $e) {
         error_log("Error fetching signature: " . $e->getMessage());
@@ -195,13 +194,13 @@ $html = '
         </td>
 
         <td width="55%" style="vertical-align:middle; padding-left:10px;">
-            <div style="font-size:20pt; font-weight:bold; line-height:1.1;">
-                แบบคัดกรองภาวะโภชนาการ
-            </div>
-            <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
+         <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
                 โรงพยาบาลกำแพงเพชร
             </div>
-            <div style="font-size:12pt; font-style:italic; margin-top:2px;">
+            <div style="font-size:16pt; font-weight:bold; line-height:1.1;">
+                แบบคัดกรองภาวะโภชนาการ
+            </div>
+            <div style="font-size:16pt; font-style:italic; margin-top:2px;">
                 (Nutrition Screening Tool : SPENT)
             </div>
             <div style="margin-top:6px; font-size:14pt;">
