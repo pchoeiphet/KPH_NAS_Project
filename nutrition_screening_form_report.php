@@ -200,7 +200,7 @@ $html = '
                         <div style="font-size:16pt; line-height:1.1;">แบบคัดกรองภาวะโภชนาการ</div>
                         <div style="font-size:16pt; font-style:italic; color:#333;">(Nutrition Screening Tool : SPENT)</div>
                         <div style="margin-top:4px; font-size:16pt;">
-                            (การคัดกรองครั้งที่ <span style="font-size:15pt;">' . ($data['screening_seq'] ?? '1') . '</span>)
+                            (การคัดกรองครั้งที่ <span style="font-size:15pt;">' . ($data['nutrition_screening_seq'] ?? '1') . '</span>)
                         </div>
                     </td>
                 </tr>
@@ -246,11 +246,11 @@ $html = '
         </td>
         <td width="33%">
             <b>วันที่คัดกรอง:</b><br>
-            ' . date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) . '
+            ' . date('d/m/', strtotime($data['nutrition_screening_datetime'])) . (date('Y', strtotime($data['nutrition_screening_datetime'])) + 543) . '
         </td>
         <td width="30%">
             <b>เวลาคัดกรอง:</b><br>
-            ' . date('H:i', strtotime($data['screening_datetime'])) . ' น.
+            ' . date('H:i', strtotime($data['nutrition_screening_datetime'])) . ' น.
         </td>
     </tr>
     <tr>
