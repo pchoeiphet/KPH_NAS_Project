@@ -249,7 +249,7 @@ $signature_html = '';
 try {
     // ต้องดึงจากตาราง nutritionist_signature โดยใช้ nutritionist_id ของใบงาน ($assessment['nutritionist_id'])
     $stmt_sig = $conn->prepare("
-        SELECT signature_type, signature_data 
+        SELECT nutritionist_signature_type, nutritionist_signature_data 
         FROM nutritionist_signature 
         WHERE nutritionist_id = :nutritionist_id 
         LIMIT 1
@@ -257,9 +257,9 @@ try {
     $stmt_sig->execute([':nutritionist_id' => $assessment['nutritionist_id']]);
     $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
 
-    if ($signature && !empty($signature['signature_data'])) {
+    if ($signature && !empty($signature['nutritionist_signature_data'])) {
         // ต้องเติม prefix ให้ Base64 ถ้ามันไม่มี (ส่วนใหญ่ตอนเซฟคุณตัดทิ้งไป)
-        $img_src = 'data:image/png;base64,' . $signature['signature_data'];
+        $img_src = 'data:image/png;base64,' . $signature['nutritionist_signature_data'];
 
         // กำหนดขนาดรูปภาพ (ปรับ width/height ได้ตามใจชอบ)
         $signature_html = '<img src="' . $img_src . '" style="height: 40px; width: auto; display: block; margin: 0 auto;">';

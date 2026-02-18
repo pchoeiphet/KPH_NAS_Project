@@ -83,7 +83,7 @@ try {
     try {
         // ใช้ตาราง nutritionist_signature และดึงตาม ID ของคนทำรายการ ($data['nutritionist_id'])
         $stmt_sig = $conn->prepare("
-            SELECT signature_type, signature_data 
+            SELECT nutritionist_signature_type, nutritionist_signature_data 
             FROM nutritionist_signature 
             WHERE nutritionist_id = :nutritionist_id 
             LIMIT 1
@@ -91,15 +91,15 @@ try {
         $stmt_sig->execute([':nutritionist_id' => $data['nutritionist_id']]);
         $signature = $stmt_sig->fetch(PDO::FETCH_ASSOC);
 
-        if ($signature && !empty($signature['signature_data'])) {
-            if ($signature['signature_type'] === 'canvas') {
+        if ($signature && !empty($signature['nutritionist_signature_data'])) {
+            if ($signature['nutritionist_signature_type'] === 'canvas') {
                 // ลายเซ็นแบบวาด (base64 image)
-                $base64_image = $signature['signature_data'];
+                $base64_image = $signature['nutritionist_signature_data'];
                 $signature_html = '<img src="data:image/png;base64,' . $base64_image . '" style="height: 40px; margin-bottom: -10px;">';
             } else {
                 // ลายเซ็นแบบพิมพ์
                 $signature_html = '<div style="font-size: 14pt; font-weight: bold; margin-top: 10px;">' .
-                    htmlspecialchars($signature['signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
+                    htmlspecialchars($signature['nutritionist_signature_data'], ENT_QUOTES, 'UTF-8') . '</div>';
             }
         } else {
             // กรณีไม่มีลายเซ็น ให้เว้นว่างหรือจุดไข่ปลาไว้
