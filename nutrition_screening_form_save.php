@@ -92,13 +92,13 @@ try {
 
     // บันทึกข้อมูลลงฐานข้อมูล
     $sql = "INSERT INTO nutrition_screening (
-                doc_no, admissions_an, patients_hn, screening_datetime, screening_seq,
+                doc_no, admissions_an, patients_hn, nutrition_screening_datetime, screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
                 screening_result, notes, nutritionist_id, 
                 screening_status, has_assessment
             ) VALUES (
-                :doc_no, :an, :hn, :screening_datetime, :seq,
+                :doc_no, :an, :hn, :nutrition_screening_datetime, :seq,
                 :diagnosis, :weight, :normal_weight, :height, :bmi, :method,
                 :q1, :q2, :q3, :q4,
                 :result, :notes, :nut_id,     
@@ -111,7 +111,7 @@ try {
         ':doc_no' => $doc_no,
         ':an' => $an,
         ':hn' => $hn,
-        ':screening_datetime' => $save_datetime,
+        ':nutrition_screening_datetime' => $save_datetime,
         ':seq' => $next_seq,
         ':diagnosis' => trim($_POST['initial_diagnosis'] ?? ''),
         ':weight' => floatval($_POST['present_weight'] ?? 0),

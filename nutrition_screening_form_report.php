@@ -246,11 +246,11 @@ $html = '
         </td>
         <td width="33%">
             <b>วันที่คัดกรอง:</b><br>
-            ' . date('d/m/', strtotime($data['screening_datetime'])) . (date('Y', strtotime($data['screening_datetime'])) + 543) . '
+            ' . date('d/m/', strtotime($data['nutrition_screening_datetime'])) . (date('Y', strtotime($data['nutrition_screening_datetime'])) + 543) . '
         </td>
         <td width="30%">
             <b>เวลาคัดกรอง:</b><br>
-            ' . date('H:i', strtotime($data['screening_datetime'])) . ' น.
+            ' . date('H:i', strtotime($data['nutrition_screening_datetime'])) . ' น.
         </td>
     </tr>
     <tr>

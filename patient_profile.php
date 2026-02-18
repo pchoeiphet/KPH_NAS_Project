@@ -90,11 +90,11 @@ try {
             nutrition_screening.*, 
             nutritionist.nutritionist_fullname,
             'SPENT' as form_type, 
-            nutrition_screening.created_at as action_datetime  -- เปลี่ยนจาก screening_datetime เป็น created_at
+            nutrition_screening.created_at as action_datetime 
         FROM nutrition_screening 
         LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id 
         WHERE nutrition_screening.patients_hn = :hn 
-        ORDER BY nutrition_screening.created_at DESC           -- เรียงตาม created_at
+        ORDER BY nutrition_screening.created_at DESC       
     ";
 
     $stmt_spent = $conn->prepare($sql_spent);
