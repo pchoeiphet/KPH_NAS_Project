@@ -280,7 +280,7 @@ try {
                     <div class="col-md-2 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">ครั้งที่</span></div>
-                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($data['screening_seq'] ?? '-'); ?>" disabled>
+                            <input type="text" class="form-control text-center font-weight-bold text-primary" value="<?php echo htmlspecialchars($data['nutrition_screening_seq'] ?? '-'); ?>" disabled>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">

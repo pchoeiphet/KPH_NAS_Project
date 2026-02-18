@@ -200,7 +200,7 @@ $html = '
                         <div style="font-size:16pt; line-height:1.1;">แบบคัดกรองภาวะโภชนาการ</div>
                         <div style="font-size:16pt; font-style:italic; color:#333;">(Nutrition Screening Tool : SPENT)</div>
                         <div style="margin-top:4px; font-size:16pt;">
-                            (การคัดกรองครั้งที่ <span style="font-size:15pt;">' . ($data['screening_seq'] ?? '1') . '</span>)
+                            (การคัดกรองครั้งที่ <span style="font-size:15pt;">' . ($data['nutrition_screening_seq'] ?? '1') . '</span>)
                         </div>
                     </td>
                 </tr>

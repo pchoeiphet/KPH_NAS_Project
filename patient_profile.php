@@ -554,7 +554,7 @@ if ($latest_activity) {
                                                     <td class="text-center align-middle">
                                                         <span class="badge badge-pill badge-spent px-3 py-1">SPENT</span>
                                                     </td>
-                                                    <td class="text-center align-middle text-muted"><?php echo htmlspecialchars($row['screening_seq']); ?></td>
+                                                    <td class="text-center align-middle text-muted"><?php echo htmlspecialchars($row['nutrition_screening_seq']); ?></td>
                                                     <td class="text-center align-middle font-weight-bold"><?php echo htmlspecialchars($score); ?></td>
                                                     <td class="text-center align-middle <?php echo htmlspecialchars($res_class); ?>"><?php echo htmlspecialchars($row['screening_result']); ?></td>
                                                     <td class="text-center align-middle text-muted">-</td>

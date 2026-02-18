@@ -83,7 +83,7 @@ if ($total_score < 2) {
 
 try {
     // สร้างเลขที่เอกสาร
-    $stmt_seq = $conn->prepare("SELECT MAX(screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
+    $stmt_seq = $conn->prepare("SELECT MAX(nutrition_screening_seq) as max_seq FROM nutrition_screening WHERE admissions_an = :an");
     $stmt_seq->execute([':an' => $an]);
     $row_seq = $stmt_seq->fetch(PDO::FETCH_ASSOC);
     $next_seq = ($row_seq['max_seq'] ?? 0) + 1;
@@ -92,7 +92,7 @@ try {
 
     // บันทึกข้อมูลลงฐานข้อมูล
     $sql = "INSERT INTO nutrition_screening (
-                doc_no, admissions_an, patients_hn, nutrition_screening_datetime, screening_seq,
+                doc_no, admissions_an, patients_hn, nutrition_screening_datetime, nutrition_screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
                 screening_result, notes, nutritionist_id, 
