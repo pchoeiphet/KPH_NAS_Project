@@ -33,7 +33,7 @@ if (empty($hn) || empty($an) || !preg_match('/^[A-Za-z0-9\-]+$/', $hn) || !preg_
 $ass_date = $_POST['assessment_date'] ?? date('Y-m-d'); // รับวันที่
 $ass_time = $_POST['assessment_time'] ?? date('H:i');   // รับเวลา
 
-$assessment_datetime_db = $ass_date . ' ' . $ass_time . ':00';
+$nutrition_assessment_datetime_db = $ass_date . ' ' . $ass_time . ':00';
 
 $doc_no = trim($_POST['doc_no'] ?? '');
 $naf_seq = intval($_POST['naf_seq'] ?? 1);
@@ -159,7 +159,7 @@ try {
     // บันทึกข้อมูลหลัก
     $sql_main = "
         INSERT INTO nutrition_assessment (
-            doc_no, naf_seq, admissions_an, patients_hn, assessment_datetime,
+            doc_no, naf_seq, admissions_an, patients_hn, nutrition_assessment_datetime,
             initial_diagnosis, info_source, other_source,
             height_measure, body_length, arm_span, height_relative, 
             weight, bmi, bmi_score, is_no_weight,
@@ -169,7 +169,7 @@ try {
             total_score, naf_level, nutritionist_id,
             ref_screening_doc_no, nutrition_screening_id
         ) VALUES (
-            :doc_no, :naf_seq, :an, :hn, :assessment_datetime,
+            :doc_no, :naf_seq, :an, :hn, :nutrition_assessment_datetime,
             :diagnosis, :src, :oth_src,
             :h, :body_l, :arm, :h_rel, 
             :w, :bmi, :bmi_s, :no_w,
@@ -189,7 +189,7 @@ try {
         ':naf_seq'  => $naf_seq,
         ':an'       => $an,
         ':hn'       => $hn,
-        ':assessment_datetime' => $assessment_datetime_db,
+        ':nutrition_assessment_datetime' => $nutrition_assessment_datetime_db,
         ':diagnosis' => $initial_diagnosis,
         ':src'      => $info_source,
         ':oth_src'  => $other_source,

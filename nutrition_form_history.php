@@ -67,7 +67,7 @@ try {
         FROM nutrition_assessment
         JOIN patients ON nutrition_assessment.patients_hn = patients.patients_hn
         WHERE nutrition_assessment.nutritionist_id = :uid 
-        ORDER BY nutrition_assessment.assessment_datetime DESC
+        ORDER BY nutrition_assessment.nutrition_assessment_datetime DESC
     ";
     $stmt = $conn->prepare($sql_naf);
     $stmt->execute([':uid' => $my_id]);
@@ -304,7 +304,7 @@ try {
                                                 <td class="text-center">
                                                     <span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span>
                                                 </td>
-                                                <td><?php echo thaiDateOfficial($row['assessment_datetime']); ?></td>
+                                                <td><?php echo thaiDateOfficial($row['nutrition_assessment_datetime']); ?></td>
                                                 <td>
                                                     <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
                                                     <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>

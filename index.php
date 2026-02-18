@@ -105,7 +105,7 @@ try {
         $spent = $stmt_spent->fetch(PDO::FETCH_ASSOC);
 
         // หาข้อมูลการประเมิน (NAF) ล่าสุด
-        $stmt_naf = $conn->prepare("SELECT * FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY assessment_datetime DESC LIMIT 1");
+        $stmt_naf = $conn->prepare("SELECT * FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY nutrition_assessment_datetime DESC LIMIT 1");
         $stmt_naf->execute([':hn' => $hn]);
         $naf = $stmt_naf->fetch(PDO::FETCH_ASSOC);
 
@@ -132,7 +132,7 @@ try {
         // Determine Status logic
         if ($naf) {
             $status = 'assessed';
-            $assessDate = thaiDate($naf['assessment_datetime']);
+            $assessDate = thaiDate($naf['nutrition_assessment_datetime']);
             $scoreVal = $naf['total_score'];
             $nafScore = $naf['total_score'];
             if ($spent) $screenDate = thaiDate($spent['nutrition_screening_datetime']);

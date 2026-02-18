@@ -400,13 +400,13 @@ function isSymChecked($id, $saved_array)
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">วันที่</span></div>
-                            <input type="text" class="form-control text-center" value="<?= date('d/m/', strtotime($data['assessment_datetime'])) . (date('Y', strtotime($data['assessment_datetime'])) + 543) ?>" readonly>
+                            <input type="text" class="form-control text-center" value="<?= date('d/m/', strtotime($data['	nutrition_assessment_datetime'])) . (date('Y', strtotime($data['nutrition_assessment_datetime'])) + 543) ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend"><span class="input-group-text bg-white text-muted">เวลา</span></div>
-                            <input type="text" class="form-control text-center" value="<?= date('H:i', strtotime($data['assessment_datetime'])) ?>" readonly>
+                            <input type="text" class="form-control text-center" value="<?= date('H:i', strtotime($data['	nutrition_assessment_datetime'])) ?>" readonly>
                         </div>
                     </div>
                     <div class="col-md-4">

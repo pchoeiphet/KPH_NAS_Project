@@ -223,7 +223,7 @@ if (!empty($assessment['other_source'])) {
 
 // ครั้งที่ประเมิน
 $hn = $assessment['patients_hn'];
-$sql_seq = "SELECT doc_no FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY assessment_datetime ASC";
+$sql_seq = "SELECT doc_no FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY nutrition_assessment_datetime ASC";
 $stmt_seq = $conn->prepare($sql_seq);
 $stmt_seq->execute([':hn' => $hn]);
 $all_docs = $stmt_seq->fetchAll(PDO::FETCH_COLUMN);
@@ -269,7 +269,7 @@ try {
     error_log("Error fetching signature: " . $e->getMessage());
 }
 
-$assess_timestamp = strtotime($assessment['assessment_datetime']);
+$assess_timestamp = strtotime($assessment['nutrition_assessment_datetime']);
 // แบบสั้น
 $assess_date_th = date('d/m/', $assess_timestamp) . (date('Y', $assess_timestamp) + 543);
 // แบบยาวมีเวลา

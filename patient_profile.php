@@ -108,11 +108,11 @@ try {
             nutrition_assessment.*, 
             nutritionist.nutritionist_fullname,
             'NAF' as form_type, 
-            nutrition_assessment.created_at as action_datetime -- เปลี่ยนจาก assessment_datetime เป็น created_at
+            nutrition_assessment.created_at as action_datetime 
         FROM nutrition_assessment 
         LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id 
         WHERE patients_hn = :hn 
-        ORDER BY nutrition_assessment.created_at DESC          -- เรียงตาม created_at
+        ORDER BY nutrition_assessment.created_at DESC        
     ";
 
     $stmt_naf = $conn->prepare($sql_naf);
