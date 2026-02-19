@@ -48,10 +48,10 @@ try {
     $sql_spent = "
         SELECT 
             nutrition_screening.*, 
-            patients.patients_firstname, 
-            patients.patients_lastname
+            patient.patient_firstname, 
+            patient.patient_lastname
         FROM nutrition_screening
-        JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
+        JOIN patient ON nutrition_screening.patient_hn = patient.patient_hn
         WHERE nutrition_screening.nutritionist_id = :uid 
         ORDER BY nutrition_screening.nutrition_screening_datetime DESC
     ";
@@ -62,10 +62,10 @@ try {
     $sql_naf = "
         SELECT 
             nutrition_assessment.*, 
-            patients.patients_firstname, 
-            patients.patients_lastname
+            patient.patient_firstname, 
+            patient.patient_lastname
         FROM nutrition_assessment
-        JOIN patients ON nutrition_assessment.patients_hn = patients.patients_hn
+        JOIN patient ON nutrition_assessment.patient_hn = patient.patient_hn
         WHERE nutrition_assessment.nutritionist_id = :uid 
         ORDER BY nutrition_assessment.nutrition_assessment_datetime DESC
     ";
@@ -240,8 +240,8 @@ try {
                                                 <td><span class="doc-badge"><?php echo htmlspecialchars($row['doc_no']); ?></span></td>
                                                 <td><?php echo thaiDateOfficial($row['nutrition_screening_datetime']); ?></td>
                                                 <td>
-                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
-                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
+                                                    <strong><?php echo htmlspecialchars($row['patient_firstname']) . ' ' . htmlspecialchars($row['patient_lastname']); ?></strong><br>
+                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patient_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="status-label <?php echo $statusClass; ?>">
@@ -306,8 +306,8 @@ try {
                                                 </td>
                                                 <td><?php echo thaiDateOfficial($row['nutrition_assessment_datetime']); ?></td>
                                                 <td>
-                                                    <strong><?php echo htmlspecialchars($row['patients_firstname']) . ' ' . htmlspecialchars($row['patients_lastname']); ?></strong><br>
-                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patients_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
+                                                    <strong><?php echo htmlspecialchars($row['patient_firstname']) . ' ' . htmlspecialchars($row['patient_lastname']); ?></strong><br>
+                                                    <span class="text-muted small">HN: <?php echo htmlspecialchars($row['patient_hn']); ?> | AN: <?php echo htmlspecialchars($row['admissions_an'] ?: '-'); ?></span>
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="status-label <?php echo $bgClass; ?>" style="display:inline-block; min-width:180px; padding: 5px 10px; border-radius: 20px;">

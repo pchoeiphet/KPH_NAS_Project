@@ -32,11 +32,11 @@ SELECT
     nutrition_assessment.*,
     nutritionist.nutritionist_fullname, 
     nutritionist.nutritionist_position, 
-    patients.patients_firstname, 
-    patients.patients_lastname, 
-    patients.patients_gender, 
-    patients.patients_dob, 
-    patients.patients_hn,
+    patient.patient_firstname, 
+    patient.patient_lastname, 
+    patient.patient_gender, 
+    patient.patient_dob, 
+    patient.patient_hn,
     
     admissions.admit_datetime,
     admissions.bed_number,
@@ -56,7 +56,7 @@ SELECT
     food_access.food_access_label, 
     food_access.food_access_score
 FROM nutrition_assessment
-JOIN patients ON patients.patients_hn = nutrition_assessment.patients_hn
+JOIN patient ON patient.patient_hn = nutrition_assessment.patient_hn
 JOIN admissions ON admissions.admissions_an = nutrition_assessment.admissions_an
 LEFT JOIN ward ON ward.ward_id = admissions.ward_id 
 LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id
@@ -89,13 +89,13 @@ $logo_path = 'img/logo_kph.jpg';
 
 // เพศ
 $gender_th = '-';
-$g_code = strtoupper($assessment['patients_gender'] ?? '');
+$g_code = strtoupper($assessment['patient_gender'] ?? '');
 if ($g_code == 'M' || $g_code == '1' || $g_code == 'CHAI') {
     $gender_th = 'ชาย';
 } elseif ($g_code == 'F' || $g_code == '2' || $g_code == 'YING') {
     $gender_th = 'หญิง';
 } else {
-    $gender_th = htmlspecialchars($assessment['patients_gender'] ?? '-');
+    $gender_th = htmlspecialchars($assessment['patient_gender'] ?? '-');
 }
 
 // ข้อมูลส่วนสูง
@@ -207,8 +207,8 @@ $disease_detail = !empty($disease_list) ? implode("<br/>", $disease_list) : "- �
 
 // อายุ
 $age = '-';
-if (!empty($assessment['patients_dob'])) {
-    $diff = date_diff(date_create($assessment['patients_dob']), date_create('today'));
+if (!empty($assessment['patient_dob'])) {
+    $diff = date_diff(date_create($assessment['patient_dob']), date_create('today'));
     $age = "{$diff->y} ปี {$diff->m} เดือน {$diff->d} วัน";
 }
 
@@ -222,15 +222,15 @@ if (!empty($assessment['other_source'])) {
 }
 
 // ครั้งที่ประเมิน
-$hn = $assessment['patients_hn'];
-$sql_seq = "SELECT doc_no FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY nutrition_assessment_datetime ASC";
+$hn = $assessment['patient_hn'];
+$sql_seq = "SELECT doc_no FROM nutrition_assessment WHERE patient_hn = :hn ORDER BY nutrition_assessment_datetime ASC";
 $stmt_seq = $conn->prepare($sql_seq);
 $stmt_seq->execute([':hn' => $hn]);
 $all_docs = $stmt_seq->fetchAll(PDO::FETCH_COLUMN);
 $key = array_search($doc_no, $all_docs);
 $assessment_no = ($key !== false) ? $key + 1 : 1;
 
-$patient_full_name = htmlspecialchars($assessment['patients_firstname'] . ' ' . $assessment['patients_lastname']);
+$patient_full_name = htmlspecialchars($assessment['patient_firstname'] . ' ' . $assessment['patient_lastname']);
 $admit_date_th = date('d/m/', strtotime($assessment['admit_datetime'])) . (date('Y', strtotime($assessment['admit_datetime'])) + 543);
 
 
@@ -331,7 +331,7 @@ $html = '
                 <td colspan="2" align="left"><b>ชื่อ-สกุล:</b> ' . htmlspecialchars($patient_full_name) . '</td>
             </tr>
             <tr>
-                <td width="55%" align="left"><b>HN:</b> ' . htmlspecialchars($assessment['patients_hn'] ?? '-') . '</td>
+                <td width="55%" align="left"><b>HN:</b> ' . htmlspecialchars($assessment['patient_hn'] ?? '-') . '</td>
                 <td width="45%" align="left"><b>AN:</b> ' . htmlspecialchars($assessment['admissions_an'] ?? '-') . '</td>
             </tr>
             <tr>

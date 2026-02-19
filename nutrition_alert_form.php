@@ -76,16 +76,16 @@ try {
     // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
-            patients.patients_hn, patients.patients_firstname, patients.patients_lastname, 
-            patients.patients_dob, patients.patients_congenital_disease, patients.patients_phone,
+            patient.patient_hn, patient.patient_firstname, patient.patient_lastname, 
+            patient.patient_dob, patient.patient_congenital_disease, patient.patient_phone,
             admissions.admissions_an, admissions.admit_datetime, admissions.bed_number,
             ward.ward_name, doctor.doctor_name, health_insurance.health_insurance_name
-        FROM patients
-        JOIN admissions ON patients.patients_id = admissions.patients_id
+        FROM patient
+        JOIN admissions ON patient.patient_id = admissions.patient_id
         LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
-        WHERE patients.patients_hn = :hn AND admissions.admissions_an = :an
+        WHERE patient.patient_hn = :hn AND admissions.admissions_an = :an
         LIMIT 1
     ";
     $stmt = $conn->prepare($sql_patient);
@@ -99,8 +99,8 @@ try {
 
     // คำนวณอายุ
     $age = '-';
-    if (!empty($patient['patients_dob'])) {
-        $dob = new DateTime($patient['patients_dob']);
+    if (!empty($patient['patient_dob'])) {
+        $dob = new DateTime($patient['patient_dob']);
         $now = new DateTime();
         $diff = $now->diff($dob);
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน' . ' ' . $diff->d . ' วัน';
@@ -115,11 +115,11 @@ try {
     }
 
     // สร้างเลขที่เอกสาร NAF
-    $stmt_seq = $conn->prepare("SELECT COUNT(*) as count FROM nutrition_assessment WHERE patients_hn = :hn");
+    $stmt_seq = $conn->prepare("SELECT COUNT(*) as count FROM nutrition_assessment WHERE patient_hn = :hn");
     $stmt_seq->execute([':hn' => $hn]);
     $count = $stmt_seq->fetch(PDO::FETCH_ASSOC)['count'];
     $naf_seq = $count + 1;
-    $doc_no_show = 'NAF-' . $patient['patients_hn'] . '-' . str_pad($naf_seq, 3, '0', STR_PAD_LEFT);
+    $doc_no_show = 'NAF-' . $patient['patient_hn'] . '-' . str_pad($naf_seq, 3, '0', STR_PAD_LEFT);
 
     // ดึง Master Data 
     function fetchMasterData($conn, $table, $id_col)
@@ -299,20 +299,20 @@ try {
                                 <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                             </h5>
                             <div class="row">
-                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_hn']) ?></span></div>
+                                <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patient_hn']) ?></span></div>
                                 <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['admissions_an']) ?></span></div>
-                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_firstname'] . ' ' . $patient['patients_lastname']) ?></span></div>
+                                <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patient_firstname'] . ' ' . $patient['patient_lastname']) ?></span></div>
                                 <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($age) ?></span></div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['ward_name'] ?? '-') ?></span></div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['bed_number'] ?? '-') ?></span></div>
 
                                 <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['doctor_name'] ?? '-') ?></span></div>
                                 <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($admit_date) ?></span></div>
-                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patients_phone'] ?? '-') ?></span></div>
+                                <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($patient['patient_phone'] ?? '-') ?></span></div>
 
                                 <div class="col-12 col-md-6 col-lg-2 mb-3">
                                     <small class="text-muted d-block">โรคประจำตัว</small>
-                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patients_congenital_disease'] ?: '-' ?></span>
+                                    <span class="font-weight-bold" style="font-size: 0.95rem;"><?= $patient['patient_congenital_disease'] ?: '-' ?></span>
                                 </div>
 
                                 <div class="col-12 col-md-6 col-lg-4 mb-3">

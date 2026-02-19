@@ -92,7 +92,7 @@ try {
 
     // บันทึกข้อมูลลงฐานข้อมูล
     $sql = "INSERT INTO nutrition_screening (
-                doc_no, admissions_an, patients_hn, nutrition_screening_datetime, nutrition_screening_seq,
+                doc_no, admissions_an, patient_hn, nutrition_screening_datetime, nutrition_screening_seq,
                 initial_diagnosis, present_weight, normal_weight, height, bmi, weight_method,
                 q1_weight_loss, q2_eat_less, q3_bmi_abnormal, q4_critical,
                 nutrition_screening_result, notes, nutritionist_id, 

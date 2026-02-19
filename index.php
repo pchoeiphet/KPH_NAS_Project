@@ -69,7 +69,7 @@ try {
     $doctor_options = $stmt_d->fetchAll(PDO::FETCH_ASSOC);
 
     // ตัวแปรเก็บข้อมูลผู้ป่วยเพื่อส่งให้ JS
-    $patients_data = [];
+    $patient_data = [];
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -78,13 +78,13 @@ try {
     // 1. ดึงข้อมูลผู้ป่วยที่กำลัง Admit อยู่ (แก้ไขบรรทัดนี้แล้ว)
     $sql = "
         SELECT 
-            patients.patients_id, patients.patients_hn, patients.patients_firstname, patients.patients_lastname, 
-            patients.patients_dob, patients.patients_congenital_disease,
+            patient.patient_id, patient.patient_hn, patient.patient_firstname, patient.patient_lastname, 
+            patient.patient_dob, patient.patient_congenital_disease,
             admissions.admissions_an, admissions.admit_datetime, admissions.bed_number,
             ward.ward_name,
             doctor.doctor_name
         FROM admissions
-        JOIN patients ON admissions.patients_id = patients.patients_id
+        JOIN patient ON admissions.patient_id = patient.patient_id
         LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         WHERE admissions.discharge_datetime IS NULL
@@ -93,19 +93,19 @@ try {
 
     $stmt = $conn->prepare($sql);
     $stmt->execute();
-    $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $patient = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($patients as $row) {
-        $hn = $row['patients_hn'];
+    foreach ($patient as $row) {
+        $hn = $row['patient_hn'];
         $an = $row['admissions_an'];
 
         // หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
-        $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patients_hn = :hn ORDER BY nutrition_screening_datetime DESC LIMIT 1");
+        $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patient_hn = :hn ORDER BY nutrition_screening_datetime DESC LIMIT 1");
         $stmt_spent->execute([':hn' => $hn]);
         $spent = $stmt_spent->fetch(PDO::FETCH_ASSOC);
 
         // หาข้อมูลการประเมิน (NAF) ล่าสุด
-        $stmt_naf = $conn->prepare("SELECT * FROM nutrition_assessment WHERE patients_hn = :hn ORDER BY nutrition_assessment_datetime DESC LIMIT 1");
+        $stmt_naf = $conn->prepare("SELECT * FROM nutrition_assessment WHERE patient_hn = :hn ORDER BY nutrition_assessment_datetime DESC LIMIT 1");
         $stmt_naf->execute([':hn' => $hn]);
         $naf = $stmt_naf->fetch(PDO::FETCH_ASSOC);
 
@@ -145,16 +145,16 @@ try {
             }
         }
 
-        $patients_data[] = [
-            'id' => $row['patients_id'],
-            'hn' => $row['patients_hn'],
+        $patient_data[] = [
+            'id' => $row['patient_id'],
+            'hn' => $row['patient_hn'],
             'an' => $row['admissions_an'],
-            'name' => $row['patients_firstname'] . ' ' . $row['patients_lastname'],
-            'age' => calculateAge($row['patients_dob']),
+            'name' => $row['patient_firstname'] . ' ' . $row['patient_lastname'],
+            'age' => calculateAge($row['patient_dob']),
             'bed' => $row['bed_number'],
             'ward' => $row['ward_name'],
             'departmentText' => $row['ward_name'],
-            'underlying' => !empty($row['patients_congenital_disease']) ? $row['patients_congenital_disease'] : 'ปฏิเสธโรคประจำตัว',
+            'underlying' => !empty($row['patient_congenital_disease']) ? $row['patient_congenital_disease'] : 'ปฏิเสธโรคประจำตัว',
             'doctor' => $row['doctor_name'],
             'admitDate' => thaiDate($row['admit_datetime']),
             'screenDate' => $screenDate,
@@ -448,11 +448,11 @@ try {
     <script>
         const TODAY = new Date();
 
-        let patients = <?php echo json_encode($patients_data); ?>;
+        let patient = <?php echo json_encode($patient_data); ?>;
 
         // ป้องกันกรณีไม่มีข้อมูล (เป็น null) ให้กำหนดเป็น array ว่าง
-        if (!patients) {
-            patients = [];
+        if (!patient) {
+            patient = [];
         }
 
         let currentSort = {
@@ -481,13 +481,13 @@ try {
             }
         }
         document.addEventListener('DOMContentLoaded', function() {
-            renderTable(patients);
+            renderTable(patient);
 
             const filterIds = ['searchInput', 'wardFilter', 'doctorFilter'];
             filterIds.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
-                    element.addEventListener(id === 'searchInput' ? 'input' : 'change', filterPatients);
+                    element.addEventListener(id === 'searchInput' ? 'input' : 'change', filterpatient);
                 }
             });
         });
@@ -501,7 +501,7 @@ try {
                 currentSort.direction = 'asc';
             }
             updateSortIcons(column, currentSort.direction);
-            filterPatients();
+            filterpatient();
         }
 
         function updateSortIcons(activeColumn, direction) {
@@ -696,13 +696,13 @@ try {
             });
         }
 
-        function filterPatients() {
+        function filterpatient() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const ward = document.getElementById('wardFilter').value;
             const doctor = document.getElementById('doctorFilter').value;
 
             // กรองข้อมูลผู้ป่วยตามเงื่อนไข
-            let result = patients.filter(p => {
+            let result = patient.filter(p => {
                 const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.hn.includes(searchTerm) || p.an.includes(searchTerm) || p.underlying.toLowerCase().includes(searchTerm);
 
                 // กรองหอผู้ป่วย

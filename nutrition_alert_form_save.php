@@ -159,7 +159,7 @@ try {
     // บันทึกข้อมูลหลัก
     $sql_main = "
         INSERT INTO nutrition_assessment (
-            doc_no, naf_seq, admissions_an, patients_hn, nutrition_assessment_datetime,
+            doc_no, naf_seq, admissions_an, patient_hn, nutrition_assessment_datetime,
             initial_diagnosis, info_source, other_source,
             height_measure, body_length, arm_span, height_relative, 
             weight, bmi, bmi_score, is_no_weight,

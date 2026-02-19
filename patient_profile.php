@@ -38,24 +38,24 @@ try {
     // ดึงข้อมูลผู้ป่วย
     $sql_patient = "
         SELECT 
-            patients.patients_hn, 
-            patients.patients_firstname, 
-            patients.patients_lastname, 
-            patients.patients_dob, 
-            patients.patients_phone, 
-            patients.patients_congenital_disease,
+            patient.patient_hn, 
+            patient.patient_firstname, 
+            patient.patient_lastname, 
+            patient.patient_dob, 
+            patient.patient_phone, 
+            patient.patient_congenital_disease,
             admissions.admissions_an, 
             admissions.admit_datetime, 
             admissions.bed_number, 
             ward.ward_name, 
             doctor.doctor_name,
             health_insurance.health_insurance_name
-        FROM patients
-        JOIN admissions ON patients.patients_id = admissions.patients_id
+        FROM patient
+        JOIN admissions ON patient.patient_id = admissions.patient_id
         LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
         LEFT JOIN health_insurance ON admissions.health_insurance_id = health_insurance.health_insurance_id
-        WHERE patients.patients_hn = :hn
+        WHERE patient.patient_hn = :hn
         ORDER BY admissions.admit_datetime DESC 
         LIMIT 1
     ";
@@ -70,8 +70,8 @@ try {
     }
 
     $age = '-';
-    if (!empty($patient['patients_dob'])) {
-        $dob = new DateTime($patient['patients_dob']);
+    if (!empty($patient['patient_dob'])) {
+        $dob = new DateTime($patient['patient_dob']);
         $now = new DateTime();
         $diff = $now->diff($dob);
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน ' . $diff->d . ' วัน';
@@ -93,7 +93,7 @@ try {
             nutrition_screening.created_at as action_datetime 
         FROM nutrition_screening 
         LEFT JOIN nutritionist ON nutrition_screening.nutritionist_id = nutritionist.nutritionist_id 
-        WHERE nutrition_screening.patients_hn = :hn 
+        WHERE nutrition_screening.patient_hn = :hn 
         ORDER BY nutrition_screening.created_at DESC       
     ";
 
@@ -111,7 +111,7 @@ try {
             nutrition_assessment.created_at as action_datetime 
         FROM nutrition_assessment 
         LEFT JOIN nutritionist ON nutrition_assessment.nutritionist_id = nutritionist.nutritionist_id 
-        WHERE patients_hn = :hn 
+        WHERE patient_hn = :hn 
         ORDER BY nutrition_assessment.created_at DESC        
     ";
 
@@ -161,7 +161,7 @@ if ($latest_risky_screening) {
     $target_ref_doc = $latest_screening['doc_no'];
 }
 
-$link_start_spent = "nutrition_screening_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'];
+$link_start_spent = "nutrition_screening_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'];
 
 // กำหนดค่า Default
 $latest_activity = $history_list[0] ?? null;
@@ -174,7 +174,7 @@ $cur_color_class = 'text-muted';
 $status_label = 'ผลการคัดกรอง (SPENT)';
 
 // Link ไปหน้า NAF โดยตรง (กรณีไม่ทราบน้ำหนัก)
-$link_direct_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'];
+$link_direct_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'];
 
 // กรณีไม่ทราบน้ำหนัก
 $next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
@@ -218,7 +218,7 @@ if ($latest_activity) {
             if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_activity['assessment_doc_no'])) {
                 $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
             } else {
-                $link_naf = "nutrition_alert_form.php?hn=" . $patient['patients_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $target_ref_doc;
+                $link_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $target_ref_doc;
 
                 $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
                     <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
@@ -381,20 +381,20 @@ if ($latest_activity) {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_hn']); ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patient_hn']); ?></span></div>
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['admissions_an']); ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_firstname']) . ' ' . htmlspecialchars($patient['patients_lastname']); ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patient_firstname']) . ' ' . htmlspecialchars($patient['patient_lastname']); ?></span></div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($age); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['ward_name'] ?? '-'); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['bed_number'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['doctor_name'] ?? '-'); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($admit_date); ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_phone'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patient_phone'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patients_congenital_disease'] ?? '-'); ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($patient['patient_congenital_disease'] ?? '-'); ?></span>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 mb-3">
@@ -420,7 +420,7 @@ if ($latest_activity) {
                     <div class="bg-light px-3 py-2 border-bottom">
                         <small class="text-uppercase text-muted font-weight-bold" style="font-size: 0.75rem;">เลือกประเภทเอกสาร</small>
                     </div>
-                    <a href="nutrition_screening_form.php?hn=<?php echo htmlspecialchars($patient['patients_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_screening_form.php?hn=<?php echo htmlspecialchars($patient['patient_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;"><i class="fa-solid fa-file-medical fa-lg"></i></div>
                             <div class="w-100">
@@ -429,7 +429,7 @@ if ($latest_activity) {
                             </div>
                         </div>
                     </a>
-                    <a href="nutrition_alert_form.php?hn=<?php echo htmlspecialchars($patient['patients_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>&ref_screening=<?php echo htmlspecialchars($latest_screening['doc_no'] ?? ''); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
+                    <a href="nutrition_alert_form.php?hn=<?php echo htmlspecialchars($patient['patient_hn']); ?>&an=<?php echo htmlspecialchars($patient['admissions_an']); ?>&ref_screening=<?php echo htmlspecialchars($latest_screening['doc_no'] ?? ''); ?>" class="dropdown-item py-3 px-3 menu-action-link border-bottom">
                         <div class="d-flex">
                             <div class="mr-3 d-flex align-items-center justify-content-center icon-box" style="width: 45px; height: 45px; background-color: #f1f8ff; border: 1px solid #d0e2f5; border-radius: 4px; color: #0d47a1;">
                                 <i class="fa-solid fa-clipboard-user fa-lg"></i>

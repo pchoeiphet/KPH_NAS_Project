@@ -31,18 +31,18 @@ try {
             nutrition_screening.*, 
             nutritionist.nutritionist_fullname,
             nutritionist.nutritionist_position,
-            patients.patients_firstname, 
-            patients.patients_lastname, 
-            patients.patients_hn, 
-            patients.patients_dob,
-            patients.patients_gender,
+            patient.patient_firstname, 
+            patient.patient_lastname, 
+            patient.patient_hn, 
+            patient.patient_dob,
+            patient.patient_gender,
             admissions.bed_number, 
             admissions.admit_datetime,
             ward.ward_name, 
             doctor.doctor_name, 
             health_insurance.health_insurance_name
         FROM nutrition_screening
-        JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
+        JOIN patient ON nutrition_screening.patient_hn = patient.patient_hn
         JOIN admissions ON nutrition_screening.admissions_an = admissions.admissions_an
         LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
@@ -61,22 +61,22 @@ try {
     }
 
     $age = '-';
-    if (!empty($data['patients_dob'])) {
-        $diff = (new DateTime())->diff(new DateTime($data['patients_dob']));
+    if (!empty($data['patient_dob'])) {
+        $diff = (new DateTime())->diff(new DateTime($data['patient_dob']));
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน' . ' ' . $diff->d . ' วัน';
     }
 
     $gender = '-';
-    if (!empty($data['patients_gender'])) {
-        if ($data['patients_gender'] == 'ชาย') {
+    if (!empty($data['patient_gender'])) {
+        if ($data['patient_gender'] == 'ชาย') {
             $gender = 'ชาย';
-        } elseif ($data['patients_gender'] == 'หญิง') {
+        } elseif ($data['patient_gender'] == 'หญิง') {
             $gender = 'หญิง';
         }
     }
 
     $score = intval($data['q1_weight_loss'] ?? 0) + intval($data['q2_eat_less'] ?? 0) + intval($data['q3_bmi_abnormal'] ?? 0) + intval($data['q4_critical'] ?? 0);
-    $fullname = ($data['patients_firstname'] ?? '') . ' ' . ($data['patients_lastname'] ?? '');
+    $fullname = ($data['patient_firstname'] ?? '') . ' ' . ($data['patient_lastname'] ?? '');
 
     // ดึงลายเซ็นถ้ามี
     $signature_html = '';
@@ -217,7 +217,7 @@ $html = '
             </tr>
             <tr>
                 <td width="55%" align="left">
-                    <b>HN:</b> ' . htmlspecialchars($data['patients_hn'] ?? '-', ENT_QUOTES, 'UTF-8') . '
+                    <b>HN:</b> ' . htmlspecialchars($data['patient_hn'] ?? '-', ENT_QUOTES, 'UTF-8') . '
                 </td>
                 <td width="45%" align="left">
                     <b>AN:</b> ' . htmlspecialchars($data['admissions_an'] ?? '-', ENT_QUOTES, 'UTF-8') . '

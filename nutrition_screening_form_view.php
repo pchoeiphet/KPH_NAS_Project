@@ -38,19 +38,19 @@ try {
         SELECT 
             nutrition_screening.*, 
             nutritionist.nutritionist_fullname,
-            patients.patients_firstname, 
-            patients.patients_lastname, 
-            patients.patients_hn, 
-            patients.patients_dob,
-            patients.patients_phone, 
-            patients.patients_congenital_disease,
+            patient.patient_firstname, 
+            patient.patient_lastname, 
+            patient.patient_hn, 
+            patient.patient_dob,
+            patient.patient_phone, 
+            patient.patient_congenital_disease,
             admissions.bed_number, 
             admissions.admit_datetime,
             ward.ward_name, 
             doctor.doctor_name, 
             health_insurance.health_insurance_name
         FROM nutrition_screening
-        JOIN patients ON nutrition_screening.patients_hn = patients.patients_hn
+        JOIN patient ON nutrition_screening.patient_hn = patient.patient_hn
         JOIN admissions ON nutrition_screening.admissions_an = admissions.admissions_an
         LEFT JOIN ward ON admissions.ward_id = ward.ward_id
         LEFT JOIN doctor ON admissions.doctor_id = doctor.doctor_id
@@ -72,8 +72,8 @@ try {
 
     // คำนวณอายุ
     $age = '-';
-    if (!empty($data['patients_dob'])) {
-        $dob = new DateTime($data['patients_dob']);
+    if (!empty($data['patient_dob'])) {
+        $dob = new DateTime($data['patient_dob']);
         $now = new DateTime();
         $diff = $now->diff($dob);
         $age = $diff->y . ' ปี ' . $diff->m . ' เดือน ' . $diff->d . ' วัน';
@@ -215,20 +215,20 @@ try {
                             <i class="fa-solid fa-hospital-user mr-2"></i>ข้อมูลผู้ป่วย
                         </h5>
                         <div class="row">
-                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_hn']); ?></span></div>
+                            <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">HN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patient_hn']); ?></span></div>
                             <div class="col-6 col-md-3 col-lg-2 mb-3"><small class="text-muted d-block">AN</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['admissions_an']); ?></span></div>
-                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_firstname']) . ' ' . htmlspecialchars($data['patients_lastname']); ?></span></div>
+                            <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">ชื่อ - นามสกุล</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patient_firstname']) . ' ' . htmlspecialchars($data['patient_lastname']); ?></span></div>
                             <div class="col-6 col-md-4 col-lg-2 mb-3"><small class="text-muted d-block" style="font-size: 0.95rem;">อายุ</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($age); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">หอผู้ป่วย</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['ward_name'] ?? '-'); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เตียง</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['bed_number'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">แพทย์เจ้าของไข้</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['doctor_name'] ?? '-'); ?></span></div>
                             <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">วันที่ Admit</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($admit_date); ?></span></div>
-                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_phone'] ?? '-'); ?></span></div>
+                            <div class="col-6 col-md-6 col-lg-2 mb-3"><small class="text-muted d-block">เบอร์โทรศัพท์</small><span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patient_phone'] ?? '-'); ?></span></div>
 
                             <div class="col-12 col-md-6 col-lg-2 mb-3">
                                 <small class="text-muted d-block">โรคประจำตัว</small>
-                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patients_congenital_disease'] ?? '-'); ?></span>
+                                <span class="font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($data['patient_congenital_disease'] ?? '-'); ?></span>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 mb-3">
@@ -244,7 +244,7 @@ try {
         <div class="d-flex justify-content-between align-items-center mb-3 no-print">
 
             <div>
-                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?php echo htmlspecialchars($data['patients_hn'] ?? ''); ?>&an=<?php echo htmlspecialchars($data['admissions_an'] ?? ''); ?>';">
+                <button type="button" class="btn btn-secondary btn-sm shadow-sm" style="border-radius: 4px;" onclick="window.location.href='patient_profile.php?hn=<?php echo htmlspecialchars($data['patient_hn'] ?? ''); ?>&an=<?php echo htmlspecialchars($data['admissions_an'] ?? ''); ?>';">
                     <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
                 </button>
             </div>
@@ -269,7 +269,7 @@ try {
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
-                        <small class="text-muted">Nutrition Screening Tool for Hospitalized Patients</small>
+                        <small class="text-muted">Nutrition Screening Tool for Kamphaeng Phet Hospital</small>
                     </div>
                     <div class="text-right">
                         <span class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?php echo htmlspecialchars($data['doc_no'] ?? '-'); ?></span>
