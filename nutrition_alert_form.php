@@ -211,7 +211,7 @@ try {
                 <li class="nav-item mx-1">
                     <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
                         href="nutrition_form_history.php">
-                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการทำงานของฉัน
                     </a>
                 </li>
 
@@ -255,7 +255,7 @@ try {
                         <div class="p-2">
                             <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
                                 <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i>
-                                    ประวัติการประเมินของฉัน</span>
+                                    ประวัติการทำงานของฉัน</span>
                             </a>
 
                             <a class="dropdown-item py-2 rounded" href="electronic_sign.php">

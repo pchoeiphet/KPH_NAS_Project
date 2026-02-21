@@ -231,7 +231,7 @@ try {
                 <li class="nav-item mx-1">
                     <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
                         href="nutrition_form_history.php">
-                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการประเมินของฉัน
+                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการทำงานของฉัน
                     </a>
                 </li>
 
