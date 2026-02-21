@@ -283,14 +283,14 @@ $html = '
 <table class="table-content">
     <thead>
         <tr class="text-center bold bg-light">
-            <th width="74%">ประเด็นคำถาม</th>
+            <th width="74%">หัวข้อการคัดกรอง</th>
             <th width="13%">ใช่ (1)</th>
             <th width="13%">ไม่ใช่ (0)</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="padding: 6px;">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจ (ในช่วง 6 เดือนที่ผ่านมา)</td>
+            <td style="padding: 6px;">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจในช่วง 6 เดือนที่ผ่านมาหรือไม่</td>
             <td class="text-center">' . (($data['q1_weight_loss'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q1_weight_loss'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
@@ -305,7 +305,7 @@ $html = '
             <td class="text-center">' . (($data['q3_bmi_abnormal'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>
         <tr>
-            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต</td>
+            <td style="padding: 6px;">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤตร่วมด้วยหรือไม่</td>
             <td class="text-center">' . (($data['q4_critical'] == 1) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
             <td class="text-center">' . (($data['q4_critical'] == 0) ? '<span class="checkbox">&#9745;</span>' : '') . '</td>
         </tr>

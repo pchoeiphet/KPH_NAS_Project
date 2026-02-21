@@ -385,7 +385,7 @@ function isSymChecked($id, $saved_array)
                     </div>
                     <div class="text-right">
                         <span class="badge p-2" style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; font-weight: 500; font-size: 0.85rem;">
-                            No.: <?= htmlspecialchars($doc_no) ?>
+                            เลขที่เอกสาร: <?= htmlspecialchars($doc_no) ?>
                         </span>
                     </div>
                 </div>

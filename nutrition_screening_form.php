@@ -266,7 +266,7 @@ try {
                             <small class="text-muted">Nutrition Screening Tool for Kamphaeng Phet Hospital</small>
                         </div>
                         <div class="text-right">
-                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">No.: <?php echo htmlspecialchars($doc_no_show); ?></span>
+                            <span id="docIdBadge" class="badge badge-info p-2" style="font-size: 0.9rem;">เลขที่เอกสาร: <?php echo htmlspecialchars($doc_no_show); ?></span>
                         </div>
                     </div>
 
@@ -367,7 +367,7 @@ try {
                         <div class="row mt-2">
                             <div class="col-12">
                                 <div class="d-flex align-items-center bg-light p-2 rounded border">
-                                    <span class="mr-3 font-weight-bold text-secondary small">ที่มาของน้ำหนัก: <span class="text-danger">*</span></span>
+                                    <span class="mr-3 font-weight-bold text-secondary small">ประเมินน้ำหนักโดย: <span class="text-danger">*</span></span>
                                     <div class="custom-control custom-radio custom-control-inline">
                                         <input type="radio" id="method1" name="weightMethod" class="custom-control-input" value="ชั่งจริง" checked>
                                         <label class="custom-control-label" for="method1">ชั่งจริง</label>
@@ -392,14 +392,14 @@ try {
                         <table class="table table-bordered table-screening mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 70%; border-bottom: 2px solid #dee2e6;">ประเด็นคำถาม</th>
+                                    <th style="width: 70%; border-bottom: 2px solid #dee2e6;">หัวข้อการคัดกรอง</th>
                                     <th class="text-center text-success" style="width: 15%; border-bottom: 2px solid #dee2e6;">ใช่ (1)</th>
                                     <th class="text-center text-muted" style="width: 15%; border-bottom: 2px solid #dee2e6;">ไม่ใช่ (0)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="align-middle">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจ (ในช่วง 6 เดือนที่ผ่านมา)</td>
+                                    <td class="align-middle">1. ผู้ป่วยน้ำหนักตัวลดลง โดยไม่ได้ตั้งใจในช่วง 6 เดือนที่ผ่านมาหรือไม่</td>
                                     <td class="text-center align-middle">
                                         <div class="custom-control custom-radio"><input type="radio" id="q1_yes" name="q1" class="custom-control-input score-radio" value="1"><label class="custom-control-label" for="q1_yes"></label></div>
                                     </td>
@@ -426,7 +426,7 @@ try {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="align-middle">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤต</td>
+                                    <td class="align-middle">4. ผู้ป่วยมีภาวะโรควิกฤต หรือกึ่งวิกฤตร่วมด้วยหรือไม่</td>
                                     <td class="text-center align-middle">
                                         <div class="custom-control custom-radio"><input type="radio" id="q4_yes" name="q4" class="custom-control-input score-radio" value="1"><label class="custom-control-label" for="q4_yes"></label></div>
                                     </td>
