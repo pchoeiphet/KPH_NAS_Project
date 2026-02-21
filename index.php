@@ -200,7 +200,7 @@ try {
                     onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
-                    <small>Nutrition Alert System (NAS)</small>
+                    <small>Nutrition Assessment System (NAS)</small>
                 </div>
             </a>
 

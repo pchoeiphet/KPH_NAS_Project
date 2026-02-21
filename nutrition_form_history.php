@@ -173,7 +173,7 @@ try {
                 <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
-                    <small>Nutrition Alert System (NAS)</small>
+                    <small>Nutrition Assessment System (NAS)</small>
                 </div>
             </a>
 
