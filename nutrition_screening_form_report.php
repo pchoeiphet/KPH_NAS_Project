@@ -313,7 +313,7 @@ $html = '
 </table>
 
 <div class="section-header">
-    สรุปผลการคัดกรองภาวะโภชนาการ (SPENT)
+    สรุปผลการคัดกรองภาวะโภชนาการ (SPENT Nutrition Screening Tool)
 </div>
 
 

@@ -108,7 +108,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบคัดกรองภาวะโภชนาการ (SPENT) | โรงพยาบาลกำแพงเพชร</title>
+    <title>แบบคัดกรองภาวะโภชนาการ (SPENT Nutrition Screening Tool) | โรงพยาบาลกำแพงเพชร</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -262,7 +262,7 @@ try {
                 <div class="form-header-box">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT)</h4>
+                            <h4 class="mb-1 font-weight-bold text-dark">แบบคัดกรองภาวะโภชนาการ (SPENT Nutrition Screening Tool)</h4>
                             <small class="text-muted">Nutrition Screening Tool for Kamphaeng Phet Hospital</small>
                         </div>
                         <div class="text-right">

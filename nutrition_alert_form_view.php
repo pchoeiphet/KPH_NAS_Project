@@ -380,7 +380,7 @@ function isSymChecked($id, $saved_array)
             <div class="form-header-box">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h4 class="mb-1 font-weight-bold text-dark" style="color: #33691e;">แบบประเมินภาวะโภชนาการ (NAF)</h4>
+                        <h4 class="mb-1 font-weight-bold text-dark" style="color: #33691e;">แบบประเมินภาวะโภชนาการ (Nutrition Alert Form)</h4>
                         <small class="text-muted">Nutrition Alert Form for Kamphaeng Phet Hospital</small>
                     </div>
                     <div class="text-right">

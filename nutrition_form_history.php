@@ -52,7 +52,7 @@ function thaiDateOfficial($datetime)
 }
 
 try {
-    // Query สำหรับประวัติการคัดกรอง (SPENT)
+    // Query สำหรับประวัติการคัดกรอง (SPENT Nutrition Screening Tool)
     $sql_spent = "
         SELECT 
             ns.*, 
@@ -292,13 +292,13 @@ try {
                 <ul class="nav nav-tabs nav-tabs-formal" id="myTab" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link active" id="spent-tab" data-toggle="tab" href="#spent" role="tab" aria-controls="spent" aria-selected="true">
-                            <i class="fas fa-clipboard-list mr-2"></i> ประวัติการคัดกรอง (SPENT)
+                            <i class="fas fa-clipboard-list mr-2"></i> ประวัติการคัดกรอง (SPENT Nutrition Screening Tool)
                             <span class="badge badge-primary ml-1"><?php echo count($history_spent); ?></span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="naf-tab" data-toggle="tab" href="#naf" role="tab" aria-controls="naf" aria-selected="false">
-                            <i class="fas fa-file-medical mr-2"></i> ประวัติการประเมิน (NAF)
+                            <i class="fas fa-file-medical mr-2"></i> ประวัติการประเมิน (Nutrition Alert Form - NAF)
                             <span class="badge badge-primary ml-1"><?php echo count($history_naf); ?></span>
                         </a>
                     </li>
