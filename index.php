@@ -75,7 +75,7 @@ try {
 }
 
 try {
-    // 1. ดึงข้อมูลผู้ป่วยที่กำลัง Admit อยู่ (แก้ไขบรรทัดนี้แล้ว)
+    // ดึงข้อมูลผู้ป่วยที่กำลัง Admit
     $sql = "
         SELECT 
             patient.patient_id, patient.patient_hn, patient.patient_firstname, patient.patient_lastname, 
@@ -98,7 +98,7 @@ try {
     foreach ($patient as $row) {
         $hn = $row['patient_hn'];
         $an = $row['admissions_an'];
-
+        
         // หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
         $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patient_hn = :hn ORDER BY nutrition_screening_datetime DESC LIMIT 1");
         $stmt_spent->execute([':hn' => $hn]);
