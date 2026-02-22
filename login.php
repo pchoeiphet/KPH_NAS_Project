@@ -55,6 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
                     session_regenerate_id(true); 
                     $_SESSION['user_id'] = $row['nutritionist_id'];
                     $_SESSION['user_name'] = $row['nutritionist_fullname'];
+                    $_SESSION['user_code'] = $row['nutritionist_code'];
+                    $_SESSION['user_position'] = $row['nutritionist_position'];
+                    $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
                     $_SESSION['login_time'] = time();
                     
                     header("Location: index.php");
