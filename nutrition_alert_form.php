@@ -287,6 +287,7 @@ try {
             <input type="hidden" name="naf_seq" value="<?= htmlspecialchars($naf_seq) ?>">
             <input type="hidden" name="ref_screening_doc" value="<?= htmlspecialchars($ref_screening ?? $screening_data['doc_no'] ?? '') ?>">
             <input type="hidden" name="screening_id" value="<?= $screening_data['nutrition_screening_id'] ?? '' ?>">
+            <input type="hidden" name="total_score" id="hidden_total_score" value="0">
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -565,6 +566,10 @@ try {
 
                         <div id="labSection" class="hidden-section fade-in">
                             <input type="hidden" name="lab_score" id="hidden_lab_score" value="0">
+
+                            <div class="alert py-2 mb-3" style="background-color: #fff3cd; border-left: 4px solid #ffc107; color: #856404; font-size: 0.9rem;">
+                                <i class="fas fa-exclamation-circle mr-2"></i> <strong>คำแนะนำ:</strong> กรุณาเลือกใช้ผลเลือดอย่างใดอย่างหนึ่ง (Albumin หรือ TLC)
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3 mb-md-0">
@@ -1041,11 +1046,7 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="form-actions-box d-flex justify-content-between mt-4 mb-5">
-                        <button type="button" class="btn btn-secondary shadow-sm px-4"
-                            onclick="window.location.href='patient_profile.php?hn=<?= htmlspecialchars($hn) ?>&an=<?= htmlspecialchars($an) ?>'">
-                            <i class="fa-solid fa-chevron-left mr-2"></i> ยกเลิก / ย้อนกลับ
-                        </button>
+                    <div class="form-actions-box d-flex justify-content-center mt-4 mb-5">
                         <button type="button" class="btn btn-success shadow-sm px-4" style="background-color: #2e7d32; border: none;" onclick="saveData()">
                             <i class="fa-solid fa-floppy-disk mr-2"></i> บันทึกการประเมิน
                         </button>
@@ -1111,7 +1112,7 @@ try {
                 } else if (bmi >= 30.0) {
                     bmiScore = 1;
                 } else {
-                    bmiScore = 0; // 18.1 - 29.9 (รวมถึง 30 เป๊ะๆ ถ้าอิงตามตรรกะ >30)
+                    bmiScore = 0; // 18.1 - 29.9 
                 }
 
                 // แสดงคะแนนและอัปเดต Hidden Input
@@ -1152,7 +1153,7 @@ try {
                 weightSec.style.display = 'block'; // แสดงส่วนน้ำหนัก
 
                 labSec.classList.add('hidden-section');
-                labSec.style.display = 'none'; // <--- เพิ่มบรรทัดนี้ เพื่อบังคับซ่อนส่วนผลเลือด
+                labSec.style.display = 'none';
 
                 // Reset คะแนน Lab เป็น 0
                 document.getElementById('hidden_lab_score').value = 0;
@@ -1287,13 +1288,19 @@ try {
             calculateScore();
         }
 
-        //คำนวณคะแนนรวม
         function calculateScore() {
             let total = 0;
 
-            // รวมคะแนนจาก Radio/Checkbox
-            const inputs = document.querySelectorAll('.score-calc:checked');
-            inputs.forEach(el => {
+            // รวมคะแนนจาก Radio buttons (เช่น รูปร่าง, น้ำหนักเปลี่ยน, ลักษณะอาหาร)
+            const radioInputs = document.querySelectorAll('input[type="radio"].score-calc:checked');
+            radioInputs.forEach(el => {
+                const sc = parseInt(el.getAttribute('data-score'));
+                if (!isNaN(sc)) total += sc;
+            });
+
+            // รวมคะแนนจาก Checkbox (เช่น อาการ, โรค)
+            const checkInputs = document.querySelectorAll('input[type="checkbox"].score-calc:checked');
+            checkInputs.forEach(el => {
                 const sc = parseInt(el.getAttribute('data-score'));
                 if (!isNaN(sc)) total += sc;
             });
@@ -1314,6 +1321,8 @@ try {
             // แสดงผลรวม
             document.getElementById('totalScore').innerText = total;
             updateNafResult(total);
+
+            document.getElementById('hidden_total_score').value = total;
         }
 
         // อัปเดต UI ผลลัพธ์ (NAF Level)

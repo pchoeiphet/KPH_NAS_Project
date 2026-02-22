@@ -246,16 +246,30 @@ try {
         $stmt_d->execute([':na_id' => $nutrition_assessment_id, ':d_id' => NULL, ':d_name' => $disease_other_severe_text, ':d_type' => 'โรคที่มีความรุนแรงมาก', ':d_score' => 6]);
     }
 
+    $sum_symptom_score = 0;
+
     // บันทึกอาการ
     if (!empty($symptom_ids) && is_array($symptom_ids)) {
         $sql_symptom = "INSERT INTO symptom_problem_saved (nutrition_assessment_id, symptom_problem_id, symptom_problem_score) VALUES (:na_id, :s_id, :s_score)";
         $stmt_s = $conn->prepare($sql_symptom);
+
         foreach ($symptom_ids as $sid) {
             if (!is_numeric($sid)) continue;
             $s_score = getScore($conn, 'symptom_problem', 'symptom_problem_id', $sid);
+
+            // เอาคะแนนมาบวกสะสมไว้สำหรับอัปเดต total_score ในภายหลัง
+            $sum_symptom_score += $s_score;
+
             $stmt_s->execute([':na_id' => $nutrition_assessment_id, ':s_id' => $sid, ':s_score' => $s_score]);
         }
     }
+
+    $sql_update_total = "UPDATE nutrition_assessment SET total_score = total_score + :sym_score WHERE nutrition_assessment_id = :na_id";
+    $stmt_up = $conn->prepare($sql_update_total);
+    $stmt_up->execute([
+        ':sym_score' => $sum_symptom_score,
+        ':na_id' => $nutrition_assessment_id
+    ]);
 
     // Update Status
     if (!empty($ref_screening_doc)) {
