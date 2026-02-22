@@ -871,7 +871,7 @@ function isSymChecked($id, $saved_array)
                     <div class="row no-gutters">
                         <div class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
                             <h6 class="text-muted font-weight-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
-                                TOTAL SCORE
+                                คะแนนรวม (Total Score)
                             </h6>
                             <div class="d-flex align-items-baseline">
                                 <h1 class="display-3 font-weight-bold text-dark mb-0" style="line-height: 1;">
