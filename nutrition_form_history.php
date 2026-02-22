@@ -238,7 +238,7 @@ try {
     <div class="container-fluid px-lg-5 mt-4 mb-5">
 
         <div class="d-flex justify-content-center align-items-center mb-3 position-relative">
-            <a href="index.php" class="btn btn-sm btn-outline-secondary position-absolute" style="left: 0;" title="ย้อนกลับ">
+            <a href="index.php" class="btn btn-sm btn-secondary position-absolute" style="left: 0;" title="ย้อนกลับ">
                 <i class="fas fa-arrow-left mr-2"></i> ย้อนกลับ
             </a>
             <h3 class="text-dark font-weight-bold mb-0">
