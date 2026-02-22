@@ -350,7 +350,7 @@ $html = '
 
 <div class="info-box" style="padding: 0;">
     <div style="background-color: #f2f2f2; border-bottom: 1px solid #000; padding: 3px 10px; font-weight: bold; font-size: 14pt;">
-        ส่วนที่ 1: ข้อมูลการเข้ารับบริการ (Admission Information)
+        ส่วนที่ 1: ข้อมูลแรกรับและการวินิจฉัย (Admission & Clinical Data)
     </div>
     
     <div style="padding: 8px;">
@@ -472,7 +472,7 @@ $html = '
             </div>
             
             <div>ตำแหน่ง ' . $position_show . '</div>
-            
+            <div style="margin-top: 5px; font-size: 12pt;">วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.</div>
             </td>
     </tr>
 </table>
@@ -480,8 +480,8 @@ $html = '
 <div style="position: absolute; bottom: 5px; width: 100%; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt;">
     <table width="100%">
         <tr>
-            <td width="40%">วันที่พิมพ์: ' . date('d/m/Y H:i') . ' น. </td>
-            <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
+            <td width="40%">เลขที่ใบงาน: ' . htmlspecialchars($doc_no) . '</td>
+            <td width="60%" align="right">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
         </tr>
     </table>
 </div>
@@ -519,8 +519,8 @@ $html = '
 <div style="position: absolute; bottom: 5px; width: 100%; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt;">
     <table width="100%">
         <tr>
-            <td width="40%">วันที่พิมพ์: ' . date('d/m/Y H:i') . ' น. </td>
-            <td width="10%" class="text-left">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
+            <td width="40%">เลขที่ใบงาน: ' . htmlspecialchars($doc_no) . '</td>
+            <td width="60%" align="right">ฝ่ายโภชนศึกษาและโภชนบำบัด โรงพยาบาลกำแพงเพชร</td>
         </tr>
     </table>
 </div>
