@@ -394,7 +394,6 @@ $html = '
             </div>
             
             <div style="margin-top: 5px;">ลงชื่อ................................................................ ผู้คัดกรอง</div>
-            
             <div style="margin-top: 5px;">( ' . htmlspecialchars($assessor_show, ENT_QUOTES, 'UTF-8') . ' )</div>
             <div>ตำแหน่ง ' . htmlspecialchars($position_show, ENT_QUOTES, 'UTF-8') . '</div>
             <div style="margin-top: 5px; font-size: 12pt;">วันที่พิมพ์: ' . date('d/m/') . (date('Y') + 543) . date(' H:i') . ' น.</div>
