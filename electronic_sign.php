@@ -277,7 +277,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <i class="fas fa-arrow-left mr-2"></i> ย้อนกลับ
             </a>
             <h3 class="text-dark font-weight-bold mb-0">
-                <i class="fas fa-pen-fancy mr-2"></i>ลายเซ็นอิเล็กทรอนิกส์
+            ลายเซ็นอิเล็กทรอนิกส์
             </h3>
         </div>
 
