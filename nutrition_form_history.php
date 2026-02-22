@@ -313,7 +313,7 @@ try {
                                     <tr>
                                         <th width="15%">เลขที่เอกสาร</th>
                                         <th width="15%">วัน-เวลา ที่คัดกรอง</th>
-                                        <th width="20%">ชื่อ-นามสกุล</th>
+                                        <th width="20%">ชื่อ - สกุล</th>
                                         <th width="15%">หอผู้ป่วย</th>
                                         <th width="20%" class="text-center">ผลการคัดกรอง</th>
                                         <th width="15%" class="text-center">การจัดการ</th>
@@ -369,7 +369,7 @@ try {
                                     <tr>
                                         <th width="15%">เลขที่เอกสาร</th>
                                         <th width="15%">วัน-เวลา ที่ประเมิน</th>
-                                        <th width="20%">ชื่อ-นามสกุล</th>
+                                        <th width="20%">ชื่อ - สกุล</th>
                                         <th width="15%">หอผู้ป่วย</th>
                                         <th width="20%" class="text-center">ผลการประเมิน</th>
                                         <th width="15%" class="text-center">การจัดการ</th>

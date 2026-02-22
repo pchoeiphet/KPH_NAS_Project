@@ -328,7 +328,7 @@ $html = '
     <div style="border: 1px solid #000; padding: 8px 12px; border-radius: 5px; background-color: #fafafa; width: 260px; display: inline-block;">
         <table width="100%" style="font-size: 14pt; line-height: 1.2;">
             <tr>
-                <td colspan="2" align="left"><b>ชื่อ-สกุล:</b> ' . htmlspecialchars($patient_full_name) . '</td>
+                <td colspan="2" align="left"><b>ชื่อ - สกุล:</b> ' . htmlspecialchars($patient_full_name) . '</td>
             </tr>
             <tr>
                 <td width="55%" align="left"><b>HN:</b> ' . htmlspecialchars($assessment['patient_hn'] ?? '-') . '</td>

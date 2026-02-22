@@ -313,7 +313,7 @@ try {
                                 </span>
                             </div>
                             <input type="text" class="form-control border-left-0" id="searchInput"
-                                placeholder="ชื่อ-สกุล, HN, AN...">
+                                placeholder="ชื่อ - สกุล, HN, AN...">
                         </div>
                     </div>
 
@@ -370,7 +370,7 @@ try {
                                 <th class="text-center" onclick="handleSort('hn')">HN <i class="fas fa-sort sort-icon" id="sort-hn"></i>
                                 </th>
                                 <th class="text-center" style="width: 12%;" onclick="handleSort('name')">
-                                    ชื่อ-นามสกุล <i class="fas fa-sort sort-icon" id="sort-name"></i>
+                                    ชื่อ - สกุล <i class="fas fa-sort sort-icon" id="sort-name"></i>
                                 </th>
                                 <th class="text-center" onclick="handleSort('age')">อายุ <i
                                         class="fas fa-sort sort-icon" id="sort-age"></i></th>

@@ -212,7 +212,7 @@ $html = '
         <table width="100%" style="font-size: 14pt; border-collapse: collapse; line-height: 1.2;">
             <tr>
                 <td colspan="2" align="left">
-                    <b>ชื่อ-สกุล:</b> ' . htmlspecialchars($fullname, ENT_QUOTES, 'UTF-8') . '
+                    <b>ชื่อ - สกุล:</b> ' . htmlspecialchars($fullname, ENT_QUOTES, 'UTF-8') . '
                 </td>
             </tr>
             <tr>
