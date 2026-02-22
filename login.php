@@ -11,7 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 // ตั้งค่า login attempt limit
 $max_attempts = 5;
-$lockout_time = 900; // 15 นาที
+$lockout_time = 1800; // ล็อก 30 นาที
 
 // ตรวจสอบ login attempts
 if (!isset($_SESSION['login_attempts'])) {
@@ -31,7 +31,6 @@ if ($_SESSION['login_attempts'] >= $max_attempts) {
 
 // ตรวจสอบการส่ง POST request และ CSRF token
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
-
     // ตรวจสอบ CSRF token
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
@@ -53,25 +52,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$error_msg) {
                 if ($row && (password_verify($password, $row['nutritionist_password']) || $password == $row['nutritionist_password'])) {
                     // ล็อกอินสำเร็จ
                     $_SESSION['login_attempts'] = 0;
-                    session_regenerate_id(true); // Regenerate session ID
-
+                    session_regenerate_id(true); 
                     $_SESSION['user_id'] = $row['nutritionist_id'];
                     $_SESSION['user_name'] = $row['nutritionist_fullname'];
-                    $_SESSION['user_position'] = !empty($row['nutritionist_position']) ? $row['nutritionist_position'] : 'นักโภชนาการ';
-                    $_SESSION['user_code'] = $row['nutritionist_code'];
-                    $_SESSION['hospital'] = "Kamphaeng Phet Hospital";
                     $_SESSION['login_time'] = time();
-
-                    $_SESSION['is_admin'] = $row['is_admin'];
-
-                    if ($row['is_admin'] == 1) {
-
-                        // ถ้าเป็น Admin -> ไป Dashboard
-                        header("Location: admin/admin_dashboard.php");
-                    } else {
-                        // ถ้าไม่ใช่ Admin ส่งไปหน้า index
-                        header("Location: index.php");
-                    }
+                    
+                    header("Location: index.php");
                     exit();
                 } else {
                     $error_msg = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
