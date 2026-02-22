@@ -392,46 +392,46 @@ $html = '
     <tbody>
         <tr>
             <td class="col-topic">1. ส่วนสูง/ ความยาวตัว/ Arm span</td>
-            <td class="col-detail">' . htmlspecialchars($height_detail) . '</td>
+            <td class="col-detail">' . ($height_detail) . '</td>
             <td class="col-score">-</td>
         </tr>
         <tr>
             <td class="col-topic">2. น้ำหนักและค่าดัชนีมวลกาย (BMI)<br><small style="font-weight:normal;">(หรือใช้ผลเลือด Albumin/TLC หากไม่ทราบน้ำหนัก)</small></td>
-            <td class="col-detail">' . htmlspecialchars($q2_detail) . '</td>
-            <td class="col-score">' . htmlspecialchars($q2_score) . '</td>
+            <td class="col-detail">' . ($q2_detail) . '</td>
+            <td class="col-score">' . ($q2_score) . '</td>
         </tr>
         <tr>
             <td class="col-topic">3. รูปร่างของผู้ป่วย</td>
-            <td class="col-detail">' . htmlspecialchars($assessment['patient_shape_label'] ?? '-') . '</td>
-            <td class="col-score">' . htmlspecialchars($assessment['patient_shape_score'] ?? 0) . '</td>
+            <td class="col-detail">' . ($assessment['patient_shape_label'] ?? '-') . '</td>
+            <td class="col-score">' . ($assessment['patient_shape_score'] ?? 0) . '</td>
         </tr>
         <tr>
             <td class="col-topic">4. น้ำหนักเปลี่ยนใน 4 สัปดาห์</td>
-            <td class="col-detail">' . htmlspecialchars($assessment['weight_change_4_weeks_label'] ?? '-') . '</td>
-            <td class="col-score">' . htmlspecialchars($assessment['weight_change_4_weeks_score'] ?? 0) . '</td>
+            <td class="col-detail">' . ($assessment['weight_change_4_weeks_label'] ?? '-') . '</td>
+            <td class="col-score">' . ($assessment['weight_change_4_weeks_score'] ?? 0) . '</td>
         </tr>
         <tr>
             <td class="col-topic">5. อาหารที่กินในช่วง 2 สัปดาห์ที่ผ่านมา</td>
             <td class="col-detail">
-                <b>ลักษณะ:</b> ' . htmlspecialchars($assessment['food_type_label'] ?? '-') . '<br/>
-                <b>ปริมาณ:</b> ' . htmlspecialchars($assessment['food_amount_label'] ?? '-') . '
+                <b>ลักษณะ:</b> ' . ($assessment['food_type_label'] ?? '-') . '<br/>
+                <b>ปริมาณ:</b> ' . ($assessment['food_amount_label'] ?? '-') . '
             </td>
-            <td class="col-score">' . htmlspecialchars(($assessment['food_type_score'] ?? 0) + ($assessment['food_amount_score'] ?? 0)) . '</td>
+            <td class="col-score">' . (($assessment['food_type_score'] ?? 0) + ($assessment['food_amount_score'] ?? 0)) . '</td>
         </tr>
         <tr>
             <td class="col-topic">6. อาการต่อเนื่อง > 2 สัปดาห์ที่ผ่านมา</td>
-            <td class="col-detail">' . htmlspecialchars($symptom_detail) . '</td>
-            <td class="col-score">' . htmlspecialchars($symptom_score_total) . '</td>
+            <td class="col-detail">' . ($symptom_detail) . '</td>
+            <td class="col-score">' . ($symptom_score_total) . '</td>
         </tr>
         <tr>
             <td class="col-topic">7. ความสามารถในการเข้าถึงอาหาร</td>
-            <td class="col-detail">' . htmlspecialchars($assessment['food_access_label'] ?? '-') . '</td>
-            <td class="col-score">' . htmlspecialchars($assessment['food_access_score'] ?? 0) . '</td>
+            <td class="col-detail">' . ($assessment['food_access_label'] ?? '-') . '</td>
+            <td class="col-score">' . ($assessment['food_access_score'] ?? 0) . '</td>
         </tr>
         <tr>
             <td class="col-topic">8. โรคที่เป็นอยู่</td>
-            <td class="col-detail">' . htmlspecialchars($disease_detail) . '</td>
-            <td class="col-score">' . htmlspecialchars($disease_score_total) . '</td>
+            <td class="col-detail">' . ($disease_detail) . '</td>
+            <td class="col-score">' . ($disease_score_total) . '</td>
         </tr>
     </tbody>
 </table>
