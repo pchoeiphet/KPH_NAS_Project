@@ -253,7 +253,7 @@ try {
             <form method="GET" action="nutrition_form_history.php">
                 <div class="row align-items-end">
                     <div class="col-md-3 mb-2 mb-md-0">
-                        <label class="filter-label">ค้นหาข้อมูล</label>
+                        <label class="filter-label">ค้นหาผู้ป่วย</label>
                         <input type="text" class="form-control form-control-sm" name="search" placeholder="HN, AN, ชื่อ, นามสกุล" value="<?php echo htmlspecialchars($search); ?>">
                     </div>
                     <div class="col-md-3 mb-2 mb-md-0">
