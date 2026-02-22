@@ -27,12 +27,26 @@ $error_msg = '';
 $success_msg = '';
 $current_doc = null;
 
-// Handle signature submission
+// 1. ตรวจสอบก่อนว่า "มีลายเซ็นในระบบแล้วหรือยัง" (ย้ายขึ้นมาเช็คก่อนประมวลผล POST)
+$has_signature = false;
+try {
+    $stmt_sig = $conn->prepare("SELECT nutritionist_signature_id FROM nutritionist_signature WHERE nutritionist_id = :nutritionist_id LIMIT 1");
+    $stmt_sig->execute([':nutritionist_id' => $nutritionist_id]);
+    $sig_data = $stmt_sig->fetch(PDO::FETCH_ASSOC);
+    $has_signature = !empty($sig_data);
+} catch (PDOException $e) {
+    error_log("Error checking signature: " . $e->getMessage());
+}
+
+// 2. Handle signature submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // CSRF validation
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         error_log("CSRF token validation failed for user: " . $_SESSION['user_id']);
         $error_msg = "ข้อผิดพลาด: โทเคนไม่ถูกต้อง";
+    } elseif ($has_signature) {
+        // *** บล็อคฝั่งเซิร์ฟเวอร์: ถ้ามีลายเซ็นแล้ว ห้ามทำงานต่อเด็ดขาด ***
+        $error_msg = "ข้อผิดพลาด: คุณได้บันทึกลายเซ็นไปแล้ว ไม่สามารถบันทึกซ้ำได้";
     } else {
 
         $sign_method = $_POST['sign_method'] ?? 'canvas';
@@ -40,9 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $signature_type_db = 'canvas';
 
         if ($sign_method === 'upload') {
-            // --- กรณีอัปโหลดไฟล์ ---
+            // --- กรณีอัปโหลดไฟล์ (ใช้โค้ดเดิมของคุณ) ---
             $signature_type_db = 'upload';
-
             if (isset($_FILES['signature_file']) && $_FILES['signature_file']['error'] === UPLOAD_ERR_OK) {
                 $file_tmp = $_FILES['signature_file']['tmp_name'];
                 $file_size = $_FILES['signature_file']['size'];
@@ -65,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
         } else {
-            // --- กรณีวาดผ่าน Canvas ---
+            // --- กรณีวาดผ่าน Canvas (ใช้โค้ดเดิมของคุณ) ---
             $signature_type_db = 'canvas';
             $signature_data_input = trim($_POST['signature_data'] ?? '');
 
@@ -75,9 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!preg_match('/^data:image\/png;base64,/', $signature_data_input)) {
                     $error_msg = "ข้อผิดพลาด: รูปแบบลายเซ็นไม่ถูกต้อง";
                 } else {
-                    // ตัด Header ออก
                     $signature_data_to_save = str_replace('data:image/png;base64,', '', $signature_data_input);
-
                     if (!base64_decode($signature_data_to_save, true)) {
                         $error_msg = "ข้อผิดพลาด: ข้อมูลลายเซ็นเสียหาย";
                     }
@@ -90,65 +101,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             try {
                 $conn->beginTransaction();
 
-                // *** แก้ชื่อตารางตรงนี้เป็น nutritionist_signature ***
-                $stmt_check_sig = $conn->prepare("SELECT nutritionist_signature_id FROM nutritionist_signature WHERE nutritionist_id = :nutritionist_id");
-                $stmt_check_sig->execute([':nutritionist_id' => $nutritionist_id]);
-                $existing_sig = $stmt_check_sig->fetch(PDO::FETCH_ASSOC);
-
-                if ($existing_sig) {
-                    // Update
-                    $stmt_update = $conn->prepare("
-                        UPDATE nutritionist_signature 
-                        SET signature_type = :sig_type,
-                            signature_data = :sig_data,
-                            signed_datetime = NOW()
-                        WHERE nutritionist_id = :nutritionist_id
-                    ");
-                    $stmt_update->execute([
-                        ':sig_type' => $signature_type_db,
-                        ':sig_data' => $signature_data_to_save,
-                        ':nutritionist_id' => $nutritionist_id
-                    ]);
-                } else {
-                    // Insert
-                    $stmt_insert = $conn->prepare("
-                        INSERT INTO nutritionist_signature (nutritionist_id, signature_type, signature_data, signed_datetime)
-                        VALUES (:nutritionist_id, :sig_type, :sig_data, NOW())
-                    ");
-                    $stmt_insert->execute([
-                        ':nutritionist_id' => $nutritionist_id,
-                        ':sig_type' => $signature_type_db,
-                        ':sig_data' => $signature_data_to_save
-                    ]);
-                }
+                // *** ตัด UPDATE ทิ้ง เพราะเราไม่ให้บันทึกซ้ำแล้ว ใช้ INSERT อย่างเดียว ***
+                $stmt_insert = $conn->prepare("
+                    INSERT INTO nutritionist_signature (nutritionist_id, signature_type, signature_data, signed_datetime)
+                    VALUES (:nutritionist_id, :sig_type, :sig_data, NOW())
+                ");
+                $stmt_insert->execute([
+                    ':nutritionist_id' => $nutritionist_id,
+                    ':sig_type' => $signature_type_db,
+                    ':sig_data' => $signature_data_to_save
+                ]);
 
                 $conn->commit();
-                $success_msg = "บันทึกลายเซ็นสำเร็จ! ลายเซ็นของคุณจะปรากฏบน PDF รายงานทั้งหมด";
-
-                // เพื่อความชัวร์ ให้เคลียร์ค่า POST ทิ้งเพื่อป้องกันการ submit ซ้ำ
-                // header("Location: " . $_SERVER['PHP_SELF']); 
-                // exit;
+                $success_msg = "บันทึกลายเซ็นสำเร็จ! ลายเซ็นของคุณถูกล็อกไว้แล้ว";
+                $has_signature = true; // ตั้งค่าเป็น true เพื่อให้ฟอร์มด้านล่างซ่อนทันที
 
             } catch (PDOException $e) {
                 $conn->rollBack();
                 error_log("Database error in e-sign: " . $e->getMessage());
-                // แสดง Error จริงออกมาเพื่อ Debug (ลบออกเมื่อใช้งานจริง)
                 $error_msg = "ข้อผิดพลาด DB: " . $e->getMessage();
             }
         }
     }
-}
-
-// Check if current user has signature
-$has_signature = false;
-try {
-    // *** แก้ชื่อตารางตรงนี้ด้วย ***
-    $stmt_sig = $conn->prepare("SELECT nutritionist_signature_id FROM nutritionist_signature WHERE nutritionist_id = :nutritionist_id LIMIT 1");
-    $stmt_sig->execute([':nutritionist_id' => $_SESSION['user_id']]);
-    $sig_data = $stmt_sig->fetch(PDO::FETCH_ASSOC);
-    $has_signature = !empty($sig_data);
-} catch (PDOException $e) {
-    error_log("Error checking signature: " . $e->getMessage());
 }
 ?>
 
@@ -342,71 +316,83 @@ try {
 
                             <hr>
 
-                            <div class="method-selector">
-                                <label class="mb-3 text-primary font-weight-bold">เลือกวิธีการลงนาม:</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="custom-control custom-radio mb-2">
-                                            <input type="radio" id="methodUpload" name="sign_method" value="upload" class="custom-control-input" checked>
-                                            <label class="custom-control-label" for="methodUpload">
-                                                <i class="fas fa-upload mr-1"></i> อัปโหลดรูปภาพ (แนะนำ)
-                                            </label>
-                                            <small class="d-block text-muted ml-4">เหมาะสำหรับผู้ที่มีไฟล์รูปลายเซ็น หรือสแกนเก็บไว้แล้ว</small>
+                            <?php if (!$has_signature): ?>
+                                <div class="method-selector">
+                                    <label class="mb-3 text-primary font-weight-bold">เลือกวิธีการลงนาม:</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="custom-control custom-radio mb-2">
+                                                <input type="radio" id="methodUpload" name="sign_method" value="upload" class="custom-control-input" checked>
+                                                <label class="custom-control-label" for="methodUpload">
+                                                    <i class="fas fa-upload mr-1"></i> อัปโหลดรูปภาพ (แนะนำ)
+                                                </label>
+                                                <small class="d-block text-muted ml-4">เหมาะสำหรับผู้ที่มีไฟล์รูปลายเซ็น หรือสแกนเก็บไว้แล้ว</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="methodCanvas" name="sign_method" value="canvas" class="custom-control-input">
+                                                <label class="custom-control-label" for="methodCanvas">
+                                                    <i class="fas fa-pen mr-1"></i> วาดบนหน้าจอ
+                                                </label>
+                                                <small class="d-block text-muted ml-4">ใช้นิ้วหรือเมาส์วาดลายเซ็นสด</small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="custom-control custom-radio">
-                                            <input type="radio" id="methodCanvas" name="sign_method" value="canvas" class="custom-control-input">
-                                            <label class="custom-control-label" for="methodCanvas">
-                                                <i class="fas fa-pen mr-1"></i> วาดบนหน้าจอ
-                                            </label>
-                                            <small class="d-block text-muted ml-4">ใช้นิ้วหรือเมาส์วาดลายเซ็นสด</small>
+                                </div>
+
+                                <div id="section-upload" class="signature-section">
+                                    <label><i class="fas fa-image"></i> <strong>เลือกไฟล์รูปลายเซ็น</strong></label>
+                                    <div class="custom-file mb-2">
+                                        <input type="file" class="custom-file-input" id="signatureFile" name="signature_file" accept="image/png, image/jpeg">
+                                        <label class="custom-file-label" for="signatureFile">เลือกไฟล์ PNG หรือ JPG...</label>
+                                    </div>
+                                    <small class="text-danger">* แนะนำให้ใช้ไฟล์ <strong>.PNG พื้นหลังโปร่งใส (Transparent)</strong> เพื่อความสวยงามในเอกสาร</small>
+                                    <small class="text-muted d-block">ขนาดไฟล์ไม่เกิน 2 MB</small>
+
+                                    <div class="mt-2">
+                                        <label>ตัวอย่างลายเซ็นที่จะปรากฏ:</label>
+                                        <div class="preview-container">
+                                            <img id="imagePreview" src="#" alt="ตัวอย่างลายเซ็น" style="display: none;">
+                                            <span id="previewText" class="text-muted small">ตัวอย่างลายเซ็นจะแสดงที่นี่</span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div id="section-upload" class="signature-section">
-                                <label><i class="fas fa-image"></i> <strong>เลือกไฟล์รูปลายเซ็น</strong></label>
-                                <div class="custom-file mb-2">
-                                    <input type="file" class="custom-file-input" id="signatureFile" name="signature_file" accept="image/png, image/jpeg">
-                                    <label class="custom-file-label" for="signatureFile">เลือกไฟล์ PNG หรือ JPG...</label>
-                                </div>
-                                <small class="text-danger">* แนะนำให้ใช้ไฟล์ <strong>.PNG พื้นหลังโปร่งใส (Transparent)</strong> เพื่อความสวยงามในเอกสาร</small>
-                                <small class="text-muted d-block">ขนาดไฟล์ไม่เกิน 2 MB</small>
-
-                                <div class="mt-2">
-                                    <label>ตัวอย่างลายเซ็นที่จะปรากฏ:</label>
-                                    <div class="preview-container">
-                                        <img id="imagePreview" src="#" alt="ตัวอย่างลายเซ็น" style="display: none;">
-                                        <span id="previewText" class="text-muted small">ตัวอย่างลายเซ็นจะแสดงที่นี่</span>
+                                <div id="section-canvas" class="signature-section" style="display:none;">
+                                    <label><i class="fas fa-paint-brush"></i> <strong>วาดลงในกรอบด้านล่าง</strong></label>
+                                    <div class="d-flex flex-column align-items-center">
+                                        <canvas id="signatureCanvas" width="500" height="180" style="border: 2px solid #000; cursor: crosshair; touch-action: none; background: #fff;"></canvas>
                                     </div>
+                                    <div class="mt-3 text-center">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearCanvas()">
+                                            <i class="fas fa-eraser"></i> ล้างข้อมูล
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted text-center mt-2">ใช้เมาส์หรือนิ้วลากเพื่อลงนาม</small>
                                 </div>
-                            </div>
 
-                            <div id="section-canvas" class="signature-section" style="display:none;">
-                                <label><i class="fas fa-paint-brush"></i> <strong>วาดลงในกรอบด้านล่าง</strong></label>
-                                <div class="d-flex flex-column align-items-center">
-                                    <canvas id="signatureCanvas" width="500" height="180" style="border: 2px solid #000; cursor: crosshair; touch-action: none; background: #fff;"></canvas>
-                                </div>
-                                <div class="mt-3 text-center">
-                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearCanvas()">
-                                        <i class="fas fa-eraser"></i> ล้างข้อมูล
+                                <div class="form-group mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm">
+                                        <i class="fas fa-save"></i> บันทึกลายเซ็น
                                     </button>
                                 </div>
-                                <small class="form-text text-muted text-center mt-2">ใช้เมาส์หรือนิ้วลากเพื่อลงนาม</small>
-                            </div>
 
-                            <div class="form-group mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm">
-                                    <i class="fas fa-save"></i> บันทึกลายเซ็น
-                                </button>
-                            </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle"></i> <strong>หมายเหตุ:</strong>
+                                    ลายเซ็นของคุณจะถูกนำไปใช้ในเอกสาร PDF (SPENT และ NAF) โดยอัตโนมัติ
+                                </div>
 
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i> <strong>หมายเหตุ:</strong>
-                                ลายเซ็นของคุณจะถูกนำไปใช้ในเอกสาร PDF (SPENT และ NAF) โดยอัตโนมัติ
-                            </div>
+                            <?php else: ?>
+                                <div class="text-center py-5">
+                                    <div class="mb-3">
+                                        <i class="fas fa-lock text-success" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5 class="text-dark font-weight-bold">ระบบได้ล็อกลายเซ็นของคุณไว้แล้ว</h5>
+                                    <p class="text-muted">เพื่อป้องกันการปลอมแปลงและรักษาความถูกต้องของเอกสาร<br>หากต้องการเปลี่ยนแปลงลายเซ็น กรุณาติดต่อผู้ดูแลระบบ</p>
+                                </div>
+                            <?php endif; ?>
+
                         </form>
                     </div>
                 </div>
@@ -530,11 +516,7 @@ try {
                 document.getElementById('signatureData').value = signatureData;
             } else if (method === 'upload') {
                 const fileInput = document.getElementById('signatureFile');
-                // ถ้าไม่มีไฟล์ และไม่มีลายเซ็นเก่า (อันนี้ตรวจสอบฝั่ง PHP เพิ่มด้วย)
-                if (fileInput.files.length === 0) {
-                    // อนุญาตให้ผ่านได้ถ้ามีลายเซ็นเดิมอยู่แล้ว (Logic PHP จะจัดการ)
-                    // แต่ถ้าจะ Strict ฝั่ง JS ก็ทำได้
-                }
+                if (fileInput.files.length === 0) {}
             }
         });
 
