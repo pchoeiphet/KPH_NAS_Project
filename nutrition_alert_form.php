@@ -1012,6 +1012,12 @@ try {
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-lg mb-4 overflow-hidden">
+                        <div class="card-header bg-white border-bottom pt-3 pb-3">
+                            <h5 class="font-weight-bold text-dark mb-0">
+                                <label class="section-label">สรุปผลคะแนน (Score Summary)</label>
+                            </h5>
+                        </div>
+
                         <div class="row no-gutters">
                             <div class="col-md-4 bg-light d-flex flex-column justify-content-center align-items-center p-4 border-right">
                                 <h6 class="text-muted font-weight-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
