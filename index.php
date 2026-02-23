@@ -536,6 +536,17 @@ try {
             return new Date(y, m, d, h, min).getTime();
         }
 
+        // แปลง Timestamp กลับเป็นข้อความวันที่แบบไทย
+        function formatThaiDateFromTs(ts) {
+            const d = new Date(ts);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear() + 543;
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes} น.`;
+        }
+
         function getDaysDiff(dateStr) {
             if (!dateStr || dateStr === '-') return 0;
 
@@ -637,7 +648,7 @@ try {
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
                         nextActionDisplay = 'คัดกรองซ้ำ (เกินกำหนด)';
-                        nextActionClass = 'text-action-urgentม text-center';
+                        nextActionClass = 'text-action-urgent text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
                         actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
@@ -652,9 +663,67 @@ try {
                         actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {
-                    nextActionDisplay = 'ติดตามผล';
-                    nextActionClass = 'text-action-muted text-center';
-                    actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                    // --- เพิ่ม Logic ของ NAF ตรงนี้ ---
+                    const nafScore = parseInt(p.nafScore) || 0;
+                    const assessTs = parseThaiDateForSort(p.assessDate); // แปลงเป็น ms
+                    let intervalMs = 0;
+
+                    if (nafScore >= 11) { // NAF C
+                        intervalMs = 24 * 60 * 60 * 1000; // 24 ชั่วโมง
+                    } else if (nafScore >= 6) { // NAF B
+                        intervalMs = 3 * 24 * 60 * 60 * 1000; // 3 วัน
+                    } else { // NAF A
+                        intervalMs = 7 * 24 * 60 * 60 * 1000; // 7 วัน
+                    }
+
+                    const nextAssessTs = assessTs + intervalMs;
+                    const nowTs = new Date().getTime();
+                    const diffMs = nextAssessTs - nowTs;
+                    const nextDateStr = formatThaiDateFromTs(nextAssessTs);
+
+                    if (diffMs <= 0) {
+                        // ถึงกำหนดประเมินซ้ำ
+                        nextActionDisplay = 'ถึงกำหนดประเมิน NAF';
+                        nextActionClass = 'text-center text-danger';
+                        
+                        const overdueHours = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+                        const overdueDays = Math.floor(overdueHours / 24);
+                        let overdueText = '';
+                        if (overdueDays > 0) {
+                            overdueText = `เกินกำหนด ${overdueDays} วัน`;
+                        } else if (overdueHours > 0) {
+                            overdueText = `เกินกำหนด ${overdueHours} ชม.`;
+                        } else {
+                            overdueText = `ครบกำหนดแล้ว`;
+                        }
+
+                        countdownDisplay = `
+                            <div class="text-danger font-weight-bold" style="font-size: 0.85rem;">${overdueText}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">(กำหนด: ${nextDateStr})</div>
+                        `;
+                        // แสดงปุ่มประเมินซ้ำ
+                        actionBtn = `<button class="btn btn-sm btn-danger shadow-sm" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-clipboard-user"></i> ประเมินซ้ำ</button>`;
+                    } else {
+                        // ยังไม่ถึงเวลาประเมิน
+                        nextActionDisplay = 'ติดตามผล (NAF)';
+                        nextActionClass = 'text-center';
+                        
+                        const waitHours = Math.floor(diffMs / (1000 * 60 * 60));
+                        const waitDays = Math.floor(waitHours / 24);
+                        let waitText = '';
+                        if (waitDays > 0) {
+                            waitText = `ประเมินรอบใหม่ใน ${waitDays} วัน`;
+                        } else {
+                            waitText = `ประเมินรอบใหม่ใน ${waitHours} ชม.`;
+                        }
+
+                        countdownDisplay = `
+                            <div class="text-info font-weight-bold" style="font-size: 0.85rem;">${waitText}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">(${nextDateStr})</div>
+                        `;
+                        // ให้ปุ่มเป็นดูข้อมูลปกติไปก่อน
+                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
+                    }
                 }
 
                 // สร้าง HTML แถว

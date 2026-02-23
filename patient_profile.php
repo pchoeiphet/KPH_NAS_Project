@@ -244,21 +244,61 @@ if ($latest_activity) {
         $cur_score = $latest_activity['total_score'];
         $naf_level = $latest_activity['naf_level'];
 
+        // ดึงเวลาที่ประเมินล่าสุดมาแปลงเป็น Timestamp
+        $action_ts = strtotime($latest_activity['action_datetime']);
+        $next_ts = 0;
+        $interval_text = '';
+
+        // ตั้งค่าและคำนวณวันประเมินรอบถัดไป
         if ($naf_level == 'NAF C') {
             $cur_title = 'NAF C: Severe Malnutrition';
             $cur_desc = 'ภาวะทุพโภชนาการระดับรุนแรง (Severe Malnutrition)';
             $cur_color_class = 'text-danger';
-            $next_action_html = '<div class="alert alert-danger mb-0 p-3" style="border-left: 4px solid #dc3545; background-color: #ffebee;"><h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-user-doctor mr-2"></i>การจัดการเร่งด่วน</h6><small class="text-dark">แจ้งแพทย์/นักโภชนาการเพื่อดูแลภายใน 24 ชม.</small></div>';
+            $next_ts = $action_ts + (24 * 60 * 60); // +24 ชั่วโมง
+            $interval_text = '24 ชั่วโมง';
         } elseif ($naf_level == 'NAF B') {
             $cur_title = 'NAF B: Moderate Malnutrition';
             $cur_desc = 'ภาวะทุพโภชนาการระดับปานกลาง (Moderate Malnutrition)';
             $cur_color_class = 'text-warning';
-            $next_action_html = '<div class="alert alert-warning mb-0 p-3" style="border-left: 4px solid #ffc107; background-color: #fff3cd;"><h6 class="font-weight-bold mb-1 text-dark"><i class="fa-solid fa-user-nurse mr-2"></i>การจัดการ</h6><small class="text-dark">แจ้งแพทย์/นักโภชนาการเพื่อดูแลภายใน 3 วัน</small></div>';
+            $next_ts = $action_ts + (3 * 24 * 60 * 60); // +3 วัน
+            $interval_text = '3 วัน';
         } else {
             $cur_title = 'NAF A: Normal-Mild Malnutrition';
             $cur_desc = 'ภาวะโภชนาการปกติ หรือเสี่ยงต่ำ (Normal/Mild)';
             $cur_color_class = 'text-success';
-            $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำ</h6><small class="text-dark">ประเมินซ้ำตามระยะเวลาที่กำหนด (7 วัน)</small></div>';
+            $next_ts = $action_ts + (7 * 24 * 60 * 60); // +7 วัน
+            $interval_text = '7 วัน';
+        }
+
+        // แปลงเวลาถัดไปเป็นภาษาไทย
+        $next_date_th = date('d/m/', $next_ts) . (date('Y', $next_ts) + 543) . ' เวลา ' . date('H:i', $next_ts) . ' น.';
+
+        $current_ts = time();
+        $link_reassess_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'];
+
+        // เช็คว่าถึงเวลาประเมินหรือยัง
+        if ($current_ts >= $next_ts) {
+            // ถึงเวลา/เลยกำหนดเวลาประเมินแล้ว -> แสดงปุ่มให้ประเมินใหม่
+            $next_action_html = '
+                <div class="alert alert-danger mb-0 p-3 shadow-sm" style="border-left: 4px solid #dc3545; background-color: #fff5f5;">
+                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-bell mr-2"></i>ถึงกำหนดประเมินซ้ำ</h6>
+                    <p class="mb-2 small text-dark">ครบกำหนดประเมินรอบถัดไปแล้ว (ทุกๆ ' . $interval_text . ')</p>
+                    <a href="' . $link_reassess_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
+                        <i class="fa-solid fa-clipboard-user mr-1"></i> ทำแบบประเมิน NAF รอบใหม่
+                    </a>
+                </div>';
+        } else {
+            // ยังไม่ถึงเวลา -> แสดงวันที่แนะนำให้ประเมินรอบถัดไป พร้อมคำแนะนำ
+            $bg_color = ($naf_level == 'NAF C') ? '#ffebee' : (($naf_level == 'NAF B') ? '#fff3cd' : '#f0fff4');
+            $border_color = ($naf_level == 'NAF C') ? '#dc3545' : (($naf_level == 'NAF B') ? '#ffc107' : '#28a745');
+            $text_color = ($naf_level == 'NAF C') ? 'text-danger' : (($naf_level == 'NAF B') ? 'text-warning' : 'text-success');
+
+            $next_action_html = '
+                <div class="alert mb-0 p-3 shadow-sm" style="border-left: 4px solid ' . $border_color . '; background-color: ' . $bg_color . ';">
+                    <h6 class="font-weight-bold mb-2 ' . $text_color . '"><i class="fa-regular fa-calendar-check mr-2"></i>กำหนดประเมินรอบถัดไป</h6>
+                    <small class="text-dark d-block mb-1">รอบการประเมิน: ทุก ' . $interval_text . '</small>
+                    <strong class="' . $text_color . '" style="font-size: 0.95rem;"><i class="fa-regular fa-clock mr-1"></i> ' . $next_date_th . '</strong>
+                </div>';
         }
     }
 }
