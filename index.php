@@ -98,7 +98,7 @@ try {
     foreach ($patient as $row) {
         $hn = $row['patient_hn'];
         $an = $row['admissions_an'];
-        
+
         // หาข้อมูลการคัดกรอง (SPENT) ล่าสุด
         $stmt_spent = $conn->prepare("SELECT * FROM nutrition_screening WHERE patient_hn = :hn ORDER BY nutrition_screening_datetime DESC LIMIT 1");
         $stmt_spent->execute([':hn' => $hn]);
@@ -359,35 +359,36 @@ try {
                     <table class="table table-bordered table-hover mb-0">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 50px;" onclick="handleSort('id')">
+                                <th class="text-center" style="width: 4%;" onclick="handleSort('id')">
                                     # <i class="fas fa-sort sort-icon" id="sort-id"></i>
                                 </th>
-                                <th class="text-center" style="width: 80px;" onclick="handleSort('bed')">
+                                <th class="text-center" style="width: 6%;" onclick="handleSort('bed')">
                                     เตียง <i class="fas fa-sort sort-icon" id="sort-bed"></i>
                                 </th>
-                                <th class="text-center" onclick="handleSort('an')">AN <i class="fas fa-sort sort-icon" id="sort-an"></i>
+                                <th class="text-center" style="width: 8%;" onclick="handleSort('an')">
+                                    AN <i class="fas fa-sort sort-icon" id="sort-an"></i>
                                 </th>
-                                <th class="text-center" onclick="handleSort('hn')">HN <i class="fas fa-sort sort-icon" id="sort-hn"></i>
+                                <th class="text-center" style="width: 8%;" onclick="handleSort('hn')">
+                                    HN <i class="fas fa-sort sort-icon" id="sort-hn"></i>
                                 </th>
-                                <th class="text-center" style="width: 12%;" onclick="handleSort('name')">
+                                <th class="text-center" style="width: 16%;" onclick="handleSort('name')">
                                     ชื่อ - สกุล <i class="fas fa-sort sort-icon" id="sort-name"></i>
                                 </th>
-                                <th class="text-center" onclick="handleSort('age')">อายุ <i
-                                        class="fas fa-sort sort-icon" id="sort-age"></i></th>
-
-                                <th style="width: 12%;" onclick="handleSort('doctor')">แพทย์เจ้าของไข้ <i
-                                        class="fas fa-sort sort-icon" id="sort-doctor"></i></th>
-                                <th style="width: 12%;" onclick="handleSort('admitDate')">วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon"
-                                        id="sort-admitDate"></i></th>
-
-                                <th class="text-center" style="width: 13%;">
+                                <th class="text-center" style="width: 5%;" onclick="handleSort('age')">
+                                    อายุ <i class="fas fa-sort sort-icon" id="sort-age"></i>
+                                </th>
+                                <th class="text-center" style="width: 14%;" onclick="handleSort('doctor')">
+                                    แพทย์เจ้าของไข้ <i class="fas fa-sort sort-icon" id="sort-doctor"></i>
+                                </th>
+                                <th class="text-center" style="width: 11%;" onclick="handleSort('admitDate')">
+                                    วัน/เวลาที่ Admit <i class="fas fa-sort sort-icon" id="sort-admitDate"></i>
+                                </th>
+                                <th class="text-center" style="width: 15%;">
                                     สถานะทางโภชนาการ
                                 </th>
-                                <th class="text-center" style="width: 12%;">
+                                <th class="text-center" style="width: 13%;">
                                     การดำเนินการ
                                 </th>
-
-                                <th class="text-center no-sort" style="width: 130px;">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="patientTableBody">
@@ -450,7 +451,6 @@ try {
 
         let patient = <?php echo json_encode($patient_data); ?>;
 
-        // ป้องกันกรณีไม่มีข้อมูล (เป็น null) ให้กำหนดเป็น array ว่าง
         if (!patient) {
             patient = [];
         }
@@ -463,23 +463,23 @@ try {
         let selectedHn = '';
         let selectedAn = '';
 
-        // ฟังก์ชันเรียก Modal (ผูกกับปุ่มในตาราง)
+        // ฟังก์ชันเรียก Modal
         function openScreeningModal(hn, an) {
             selectedHn = hn;
             selectedAn = an;
             $('#screeningChoiceModal').modal('show');
         }
 
-        // ฟังก์ชันเมื่อกดเลือกปุ่มใน Modal
-        function confirmScreening(isNoWeight) {
-            if (isNoWeight == 1) {
-                // กรณีชั่งน้ำหนักไม่ได้ -> ข้ามไปหน้าแบบประเมิน (NAF)
-                window.location.href = `nutrition_alert_form.php?hn=${selectedHn}&an=${selectedAn}`;
-            } else {
-                // กรณีชั่งน้ำหนักได้ -> ไปหน้าคัดกรอง (SPENT)
-                window.location.href = `nutrition_screening_form.php?hn=${selectedHn}&an=${selectedAn}&no_weight=0`;
-            }
-        }
+        // // ฟังก์ชันเมื่อกดเลือกปุ่มใน Modal
+        // function confirmScreening(isNoWeight) {
+        //     if (isNoWeight == 1) {
+        //         // กรณีชั่งน้ำหนักไม่ได้ -> ข้ามไปหน้าแบบประเมิน (NAF)
+        //         window.location.href = `nutrition_alert_form.php?hn=${selectedHn}&an=${selectedAn}`;
+        //     } else {
+        //         // กรณีชั่งน้ำหนักได้ -> ไปหน้าคัดกรอง (SPENT)
+        //         window.location.href = `nutrition_screening_form.php?hn=${selectedHn}&an=${selectedAn}&no_weight=0`;
+        //     }
+        // }
         document.addEventListener('DOMContentLoaded', function() {
             renderTable(patient);
 
@@ -640,27 +640,22 @@ try {
 
                 if (p.status === 'wait_screen') {
                     nextActionDisplay = 'คัดกรองเบื้องต้น';
-                    actionBtn = `<button class="btn btn-sm btn-outline-primary" style="min-width: 100px;" onclick="openScreeningModal('${p.hn}', '${p.an}')"><i class="fas fa-clipboard-check"></i> คัดกรอง</button>`;
                 } else if (p.status === 'wait_assess') {
                     nextActionDisplay = 'ต้องประเมิน NAF';
                     nextActionClass = 'text-action-urgent text-center';
-                    actionBtn = `<button class="btn btn-sm btn-warning" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}&ref_screening=${p.target_doc_no}'"><i class="fas fa-user-md"></i> ประเมิน</button>`;
                 } else if (p.status === 'normal') {
                     if (daysRemaining < 0) {
                         nextActionDisplay = 'คัดกรองซ้ำ (เกินกำหนด)';
                         nextActionClass = 'text-action-urgent text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">เกินกำหนด ${Math.abs(daysRemaining)} วัน</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else if (daysRemaining === 0) {
                         nextActionDisplay = 'คัดกรองซ้ำ (วันนี้)';
                         nextActionClass = 'text-action-warning text-center';
                         countdownDisplay = `<div class="text-danger font-weight-bold">ครบกำหนดวันนี้</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-outline-danger" style="min-width: 100px;" onclick="window.location.href='nutrition_screening_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-redo"></i> กรองซ้ำ</button>`;
                     } else {
                         nextActionDisplay = 'ติดตามผล';
                         nextActionClass = 'text-action-muted text-center';
                         countdownDisplay = `<div class="text-muted">คัดกรองซ้ำ ใน ${daysRemaining} วัน</div>`;
-                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 } else if (p.status === 'assessed') {
                     // --- เพิ่ม Logic ของ NAF ตรงนี้ ---
@@ -685,7 +680,7 @@ try {
                         // ถึงกำหนดประเมินซ้ำ
                         nextActionDisplay = 'ถึงกำหนดประเมิน NAF';
                         nextActionClass = 'text-center text-danger';
-                        
+
                         const overdueHours = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
                         const overdueDays = Math.floor(overdueHours / 24);
                         let overdueText = '';
@@ -701,13 +696,11 @@ try {
                             <div class="text-danger font-weight-bold" style="font-size: 0.85rem;">${overdueText}</div>
                             <div class="text-muted" style="font-size: 0.75rem;">(กำหนด: ${nextDateStr})</div>
                         `;
-                        // แสดงปุ่มประเมินซ้ำ
-                        actionBtn = `<button class="btn btn-sm btn-danger shadow-sm" style="min-width: 100px;" onclick="window.location.href='nutrition_alert_form.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-clipboard-user"></i> ประเมินซ้ำ</button>`;
                     } else {
                         // ยังไม่ถึงเวลาประเมิน
                         nextActionDisplay = 'ติดตามผล (NAF)';
                         nextActionClass = 'text-center';
-                        
+
                         const waitHours = Math.floor(diffMs / (1000 * 60 * 60));
                         const waitDays = Math.floor(waitHours / 24);
                         let waitText = '';
@@ -721,8 +714,6 @@ try {
                             <div class="text-info font-weight-bold" style="font-size: 0.85rem;">${waitText}</div>
                             <div class="text-muted" style="font-size: 0.75rem;">(${nextDateStr})</div>
                         `;
-                        // ให้ปุ่มเป็นดูข้อมูลปกติไปก่อน
-                        actionBtn = `<button class="btn btn-sm btn-light border" style="min-width: 100px;" onclick="window.location.href='patient_profile.php?hn=${p.hn}&an=${p.an}'"><i class="fas fa-search"></i> ดูข้อมูล</button>`;
                     }
                 }
 
@@ -757,8 +748,6 @@ try {
                                 <span class="font-weight-bold">${nextActionDisplay}</span>
                                 ${countdownDisplay}
                             </td>
-    
-                            <td class="text-center">${actionBtn}</td>
                         </tr>
                     `;
                 tbody.insertAdjacentHTML('beforeend', row);
