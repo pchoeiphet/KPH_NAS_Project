@@ -177,22 +177,12 @@ $status_label = 'ผลการคัดกรอง (SPENT)';
 $link_direct_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'];
 
 // กรณีไม่ทราบน้ำหนัก
-$next_action_html = '<div class="alert alert-secondary mb-0 p-3 text-center" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
-    <h6 class="font-weight-bold mb-2 text-secondary"><i class="fa-solid fa-circle-info mr-2"></i>ยังไม่มีข้อมูล</h6>
-    
-    <div class="d-flex justify-content-center">
-        <a href="' . $link_start_spent . '" class="btn btn-sm btn-primary px-3 shadow-sm mr-2">
-            <i class="fa-solid fa-play mr-1"></i> เริ่มคัดกรอง SPENT
-        </a>
-
-        <a href="' . $link_direct_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm" title="ไปประเมิน NAF ทันที">
-            <i class="fa-solid fa-weight-scale mr-1"></i> ไม่ทราบน้ำหนักผู้ป่วย
-        </a>
-    </div>
-    
-    <div class="mt-2 text-muted" style="font-size: 0.9rem;">
-        *หากไม่สามารถชั่งน้ำหนักได้ ให้เลือกปุ่มสีแดง
-    </div>
+// 1. กรณีที่ยังไม่มีประวัติการคัดกรองใดๆ เลย (ข้อมูลว่างเปล่า)
+$next_action_html = '
+<div class="alert alert-secondary mb-0 p-3 text-center shadow-sm" style="background-color: #f8f9fa; border: 1px dashed #ced4da;">
+    <h6 class="font-weight-bold mb-2 text-primary"><i class="fa-solid fa-circle-info mr-2"></i>ต้องดำเนินการคัดกรอง</h6>
+    <p class="text-dark small mb-0">กรุณาคลิก <b>"เพิ่มไฟล์เอกสารใหม่"</b> ด้านบน เพื่อเริ่มทำแบบคัดกรอง <b>SPENT</b></p>
+    <p class="text-danger small mt-1 mb-0">*หากผู้ป่วยชั่งน้ำหนักไม่ได้ ให้เลือกทำแบบประเมิน <b>NAF</b> แทน</p>
 </div>';
 
 if ($latest_activity) {
@@ -201,7 +191,7 @@ if ($latest_activity) {
         ? $latest_activity['nutritionist_fullname']
         : ($latest_activity['assessor_name'] ?? '-');
 
-    // กรณีล่าสุดเป็น SPENT
+    // 2. กรณีล่าสุดเป็น SPENT
     if ($latest_activity['form_type'] == 'SPENT') {
 
         $status_label = 'ผลการคัดกรอง (SPENT)';
@@ -216,28 +206,49 @@ if ($latest_activity) {
             $cur_color_class = 'text-danger';
 
             if (strpos($cur_status_db, 'ประเมินต่อแล้ว') !== false || !empty($latest_activity['assessment_doc_no'])) {
-                $next_action_html = '<div class="alert alert-info mb-0 p-3" style="border-left: 4px solid #17a2b8;"><h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6><small class="text-muted">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small></div>';
+                // ประเมิน NAF แล้ว
+                $next_action_html = '
+                <div class="alert alert-info mb-0 p-3 shadow-sm" style="border-left: 4px solid #17a2b8; background-color: #e1f5fe;">
+                    <h6 class="font-weight-bold mb-1 text-info"><i class="fa-solid fa-clipboard-check mr-2"></i>ประเมิน NAF แล้ว</h6>
+                    <small class="text-dark">ติดตามผลการประเมินภาวะโภชนาการตามแผนการรักษา</small>
+                </div>';
             } else {
-                $link_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'] . "&ref_screening=" . $target_ref_doc;
-
-                $next_action_html = '<div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
-                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการ</h6>
-                    <p class="mb-2 small text-dark">ควรประเมินภาวะโภชนาการ (NAF) ต่อทันที</p>
-                    <a href="' . $link_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
-                        <i class="fa-solid fa-arrow-right mr-1"></i> ไปที่แบบประเมิน NAF
-                    </a>
+                // ต้องประเมิน NAF ต่อ (เอาปุ่มออก เปลี่ยนเป็นข้อความ)
+                $next_action_html = '
+                <div class="alert alert-warning mb-0 p-3 shadow-sm" style="border-left: 4px solid #ffc107; background-color: #fff3cd;">
+                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ต้องดำเนินการประเมินภาวะโภชนาการ (NAF)</h6>
+                    <p class="mb-0 small text-dark">ผู้ป่วยมีความเสี่ยง กรุณาคลิกปุ่ม <b>"เพิ่มไฟล์เอกสารใหม่"</b> และเลือก <b>แบบประเมินภาวะโภชนาการ (NAF)</b> ต่อทันที</p>
                 </div>';
             }
         } else {
             $cur_title = 'ภาวะโภชนาการปกติ (Normal)';
             $cur_desc = 'ไม่พบความเสี่ยงในขณะนี้';
             $cur_color_class = 'text-success';
+
+            // คำนวณวันครบกำหนดคัดกรองซ้ำ (7 วัน)
             $next_rescreen_ts = strtotime($latest_activity['action_datetime']) + (7 * 24 * 60 * 60);
             $next_rescreen_date = date('d/m/', $next_rescreen_ts) . (date('Y', $next_rescreen_ts) + 543);
-            $next_action_html = '<div class="alert alert-success mb-0 p-3" style="border-left: 4px solid #28a745; background-color: #f0fff4;"><h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6><small class="text-dark">ควรทำการคัดกรองซ้ำในอีก 7 วัน</small><br><strong class="text-success" style="font-size: 0.9rem;">(วันที่ ' . $next_rescreen_date . ')</strong></div>';
+            $current_ts = time();
+
+            if ($current_ts >= $next_rescreen_ts) {
+                // กรณี: เกินกำหนดคัดกรองซ้ำแล้ว (โชว์สีแดงเตือน)
+                $next_action_html = '
+                <div class="alert alert-danger mb-0 p-3 shadow-sm" style="border-left: 4px solid #dc3545; background-color: #fff5f5;">
+                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-bell mr-2"></i>เกินกำหนดคัดกรองซ้ำ</h6>
+                    <p class="mb-1 small text-dark">ผู้ป่วยถึงรอบที่ต้องคัดกรองความเสี่ยงซ้ำ (ทุก 7 วัน)</p>
+                    <p class="mb-0 small text-danger font-weight-bold">กรุณาคลิก <b>"เพิ่มไฟล์เอกสารใหม่"</b> และเลือก <b>แบบคัดกรอง (SPENT)</b></p>
+                </div>';
+            } else {
+                // กรณี: ยังไม่ถึงกำหนด (โชว์สีเขียวปกติ)
+                $next_action_html = '
+                <div class="alert alert-success mb-0 p-3 shadow-sm" style="border-left: 4px solid #28a745; background-color: #f0fff4;">
+                    <h6 class="font-weight-bold mb-1 text-success"><i class="fa-regular fa-calendar-check mr-2"></i>ข้อแนะนำถัดไป</h6>
+                    <small class="text-dark d-block">ติดตามผล ควรคัดกรอง SPENT ซ้ำในวันที่ <strong class="text-success">' . $next_rescreen_date . '</strong></small>
+                </div>';
+            }
         }
     }
-    // กรณีล่าสุดเป็น NAF
+    // 3. กรณีล่าสุดเป็น NAF
     elseif ($latest_activity['form_type'] == 'NAF') {
 
         $status_label = 'ผลการประเมิน (NAF)';
@@ -274,19 +285,16 @@ if ($latest_activity) {
         $next_date_th = date('d/m/', $next_ts) . (date('Y', $next_ts) + 543) . ' เวลา ' . date('H:i', $next_ts) . ' น.';
 
         $current_ts = time();
-        $link_reassess_naf = "nutrition_alert_form.php?hn=" . $patient['patient_hn'] . "&an=" . $patient['admissions_an'];
 
         // เช็คว่าถึงเวลาประเมินหรือยัง
         if ($current_ts >= $next_ts) {
-            // ถึงเวลา/เลยกำหนดเวลาประเมินแล้ว -> แสดงปุ่มให้ประเมินใหม่
+            // ถึงเวลา/เลยกำหนดเวลาประเมินแล้ว (เอาปุ่มออก เปลี่ยนเป็นข้อความ)
             $next_action_html = '
-                <div class="alert alert-danger mb-0 p-3 shadow-sm" style="border-left: 4px solid #dc3545; background-color: #fff5f5;">
-                    <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-bell mr-2"></i>ถึงกำหนดประเมินซ้ำ</h6>
-                    <p class="mb-2 small text-dark">ครบกำหนดประเมินรอบถัดไปแล้ว (ทุกๆ ' . $interval_text . ')</p>
-                    <a href="' . $link_reassess_naf . '" class="btn btn-sm btn-danger px-3 shadow-sm">
-                        <i class="fa-solid fa-clipboard-user mr-1"></i> ทำแบบประเมิน NAF รอบใหม่
-                    </a>
-                </div>';
+            <div class="alert alert-danger mb-0 p-3 shadow-sm" style="border-left: 4px solid #dc3545; background-color: #fff5f5;">
+                <h6 class="font-weight-bold mb-1 text-danger"><i class="fa-solid fa-bell mr-2"></i>ถึงกำหนดประเมิน NAF ซ้ำ</h6>
+                <p class="mb-1 small text-dark">ครบกำหนดประเมินรอบถัดไปแล้ว (ทุกๆ ' . $interval_text . ')</p>
+                <p class="mb-0 small text-danger font-weight-bold">กรุณาคลิก <b>"เพิ่มไฟล์เอกสารใหม่"</b> และเลือก <b>แบบประเมิน NAF</b> เพื่อดำเนินการ</p>
+            </div>';
         } else {
             // ยังไม่ถึงเวลา -> แสดงวันที่แนะนำให้ประเมินรอบถัดไป พร้อมคำแนะนำ
             $bg_color = ($naf_level == 'NAF C') ? '#ffebee' : (($naf_level == 'NAF B') ? '#fff3cd' : '#f0fff4');
@@ -294,11 +302,11 @@ if ($latest_activity) {
             $text_color = ($naf_level == 'NAF C') ? 'text-danger' : (($naf_level == 'NAF B') ? 'text-warning' : 'text-success');
 
             $next_action_html = '
-                <div class="alert mb-0 p-3 shadow-sm" style="border-left: 4px solid ' . $border_color . '; background-color: ' . $bg_color . ';">
-                    <h6 class="font-weight-bold mb-2 ' . $text_color . '"><i class="fa-regular fa-calendar-check mr-2"></i>กำหนดประเมินรอบถัดไป</h6>
-                    <small class="text-dark d-block mb-1">รอบการประเมิน: ทุก ' . $interval_text . '</small>
-                    <strong class="' . $text_color . '" style="font-size: 0.95rem;"><i class="fa-regular fa-clock mr-1"></i> ' . $next_date_th . '</strong>
-                </div>';
+            <div class="alert mb-0 p-3 shadow-sm" style="border-left: 4px solid ' . $border_color . '; background-color: ' . $bg_color . ';">
+                <h6 class="font-weight-bold mb-2 ' . $text_color . '"><i class="fa-regular fa-calendar-check mr-2"></i>กำหนดประเมินรอบถัดไป</h6>
+                <small class="text-dark d-block mb-1">รอบการประเมินซ้ำ: ทุก ' . $interval_text . '</small>
+                <strong class="' . $text_color . '" style="font-size: 0.95rem;"><i class="fa-regular fa-clock mr-1"></i> ' . $next_date_th . '</strong>
+            </div>';
         }
     }
 }
