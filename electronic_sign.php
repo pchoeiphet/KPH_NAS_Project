@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // *** ตัด UPDATE ทิ้ง เพราะเราไม่ให้บันทึกซ้ำแล้ว ใช้ INSERT อย่างเดียว ***
                 $stmt_insert = $conn->prepare("
-                    INSERT INTO nutritionist_signature (nutritionist_id, signature_type, signature_data, signed_datetime)
+                    INSERT INTO nutritionist_signature (nutritionist_id, nutritionist_signature_type, nutritionist_signature_data, nutritionist_signature_datetime)
                     VALUES (:nutritionist_id, :sig_type, :sig_data, NOW())
                 ");
                 $stmt_insert->execute([
@@ -319,7 +319,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="custom-control custom-radio mb-2">
                                                 <input type="radio" id="methodUpload" name="sign_method" value="upload" class="custom-control-input" checked>
                                                 <label class="custom-control-label" for="methodUpload">
-                                                    <i class="fas fa-upload mr-1"></i> อัปโหลดรูปภาพ (แนะนำ)
+                                                    <i class="fas fa-upload mr-1"></i> อัปโหลดรูปภาพ
                                                 </label>
                                                 <small class="d-block text-muted ml-4">เหมาะสำหรับผู้ที่มีไฟล์รูปลายเซ็น หรือสแกนเก็บไว้แล้ว</small>
                                             </div>
