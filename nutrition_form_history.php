@@ -170,7 +170,8 @@ try {
     <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom border-bottom">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo" onerror="this.style.display='none'">
+                <img src="img/logo_kph.jpg" class="brand-logo mr-2 d-none d-sm-block" alt="Logo"
+                    onerror="this.style.display='none'">
                 <div class="brand-text">
                     <h1>ระบบประเมินภาวะโภชนาการ</h1>
                     <small>Nutrition Assessment System (NAS)</small>
@@ -178,23 +179,31 @@ try {
             </a>
 
             <ul class="navbar-nav ml-auto align-items-center d-none d-md-flex">
+
                 <li class="nav-item mx-1">
-                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>" href="index.php">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'index.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="index.php">
                         <i class="fa-solid fa-home mr-1"></i> รายชื่อผู้ป่วยใน
                     </a>
                 </li>
+
                 <li class="nav-item mx-1">
-                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>" href="nutrition_form_history.php">
+                    <a class="nav-link px-3 <?php echo ($currentPage == 'nutrition_form_history.php') ? 'active text-primary' : 'text-dark'; ?>"
+                        href="nutrition_form_history.php">
                         <i class="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติการทำงานของฉัน
                     </a>
                 </li>
+
             </ul>
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="min-width: 290px;">
+                    <a class="nav-link p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="min-width: 290px;">
                         <div class="user-profile-btn">
-                            <div class="user-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+                            <div class="user-avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
                             <div class="user-info d-none d-md-block" style="flex-grow: 1;">
                                 <div class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></div>
                                 <div class="user-role"><?php echo htmlspecialchars($_SESSION['user_position']); ?></div>
@@ -203,32 +212,39 @@ try {
                         </div>
                     </a>
 
-                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2 pb-0" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 250px; overflow: hidden;">
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0 mt-2 pb-0" aria-labelledby="userDropdown"
+                        style="border-radius: 12px; min-width: 250px; overflow: hidden;">
+
                         <div class="dropdown-header bg-light border-bottom py-3">
                             <div class="d-flex align-items-center px-2">
-                                <div class="user-avatar mr-3 bg-white border" style="width: 45px; height: 45px; font-size: 1.3rem; color: #2c3e50;">
+                                <div class="user-avatar mr-3 bg-white border"
+                                    style="width: 45px; height: 45px; font-size: 1.3rem; color: #2c3e50;">
                                     <i class="fa-solid fa-user-doctor"></i>
                                 </div>
                                 <div style="line-height: 1.3;">
                                     <h6 class="font-weight-bold text-dark mb-0"><?php echo htmlspecialchars($_SESSION['user_name']); ?></h6>
-                                    <small class="text-muted d-block"><?php echo isset($_SESSION['hospital']) ? htmlspecialchars($_SESSION['hospital']) : 'โรงพยาบาลกำแพงเพชร'; ?></small>
-                                    <span class="badge badge-info mt-1 font-weight-normal px-2">License: <?php echo isset($_SESSION['user_code']) ? htmlspecialchars($_SESSION['user_code']) : '-'; ?></span>
+                                    <small class="text-muted d-block"><?php echo htmlspecialchars($_SESSION['hospital']); ?></small>
+                                    <span class="badge badge-info mt-1 font-weight-normal px-2">
+                                        License: <?php echo htmlspecialchars($_SESSION['user_code'] ?? '-'); ?>
+                                    </span>
                                 </div>
                             </div>
                         </div>
+
                         <div class="p-2">
-                            <a class="dropdown-item py-2 rounded mb-1" href="nutrition_form_history.php">
-                                <span><i class="fa-solid fa-clock-rotate-left mr-2 text-primary" style="width:20px;"></i> ประวัติการทำงานของฉัน</span>
-                            </a>
                             <a class="dropdown-item py-2 rounded" href="electronic_sign.php">
-                                <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i> ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
+                                <span><i class="fa-solid fa-file-signature mr-2 text-success" style="width:20px;"></i>
+                                    ลายเซ็นอิเล็กทรอนิกส์ (E-Sign)</span>
                             </a>
                         </div>
+
                         <div class="bg-light border-top p-2">
-                            <a class="dropdown-item py-2 rounded text-danger font-weight-bold" href="#" onclick="confirmLogout()">
+                            <a class="dropdown-item py-2 rounded text-danger font-weight-bold" href="#"
+                                onclick="confirmLogout()">
                                 <i class="fa-solid fa-right-from-bracket mr-2" style="width:20px;"></i> ออกจากระบบ
                             </a>
                         </div>
+
                     </div>
                 </li>
             </ul>
