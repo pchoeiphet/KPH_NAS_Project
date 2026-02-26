@@ -724,6 +724,251 @@ Assessment:     NAF-[HN]-[SEQ]
 
 ---
 
+## 💾 Database Tables Complete - All 19 Tables
+
+### **Core Tables** (5 tables)
+
+#### 1️⃣ `nutritionist` - ข้อมูลนักโภชนาการ
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| nutritionist_id | INT | รหัสลำดับ (PK) |
+| nutritionist_code | VARCHAR(50) | เลขที่ใบประกอบวิชาชีพ |
+| nutritionist_fullname | VARCHAR(255) | ชื่อ-นามสกุล |
+| nutritionist_gender | ENUM | เพศ (ชาย/หญิง) |
+| nutritionist_position | VARCHAR(100) | ตำแหน่ง |
+| nutritionist_username | VARCHAR(100) | ชื่อผู้ใช้ (UK) |
+| nutritionist_password | VARCHAR(255) | รหัสผ่าน Hash |
+| nutritionist_email | VARCHAR(100) | อีเมล |
+| nutritionist_phone | VARCHAR(20) | โทรศัพท์ |
+| is_active | TINYINT(1) | สถานะบัญชี (1=ใช้งาน) |
+| is_admin | TINYINT(1) | สิทธิแอดมิน (1=แอดมิน) |
+| created_at | TIMESTAMP | วันเวลาสร้าง |
+
+#### 2️⃣ `patient` - ข้อมูลผู้ป่วย
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| patient_id | INT | รหัสลำดับ (PK) |
+| patient_hn | VARCHAR(20) | รหัส HN (UK) |
+| patient_id_card | VARCHAR(13) | เลขประจำตัว 13 หลัก |
+| patient_firstname | VARCHAR(100) | ชื่อจริง |
+| patient_lastname | VARCHAR(100) | นามสกุล |
+| patient_gender | ENUM | เพศ (ชาย/หญิง) |
+| patient_dob | DATE | วันเดือนปีเกิด |
+| patient_phone | VARCHAR(20) | เบอร์โทรศัพท์ |
+| patient_drug_allergy | TEXT | ประวัติแพ้ยา |
+| patient_congenital_disease | TEXT | โรคประจำตัว |
+
+#### 3️⃣ `admissions` - บันทึกการเข้ารักษา
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| admissions_id | INT | รหัสลำดับ (PK) |
+| admissions_an | VARCHAR(20) | เลขที่ผู้ป่วยใน (UK) |
+| patient_id | INT | รหัสผู้ป่วย (FK) |
+| health_insurance_id | INT | สิทธิการรักษา (FK) |
+| admit_datetime | DATETIME | วันเวลารับเข้า |
+| discharge_datetime | DATETIME | วันเวลาจำหน่าย |
+| ward_id | INT | หอผู้ป่วย (FK) |
+| bed_number | VARCHAR(10) | หมายเลขเตียง |
+| doctor_id | INT | แพทย์เจ้าของไข้ (FK) |
+| status | VARCHAR(50) | สถานะ (Admitted/Discharged) |
+| created_at | DATETIME | วันเวลาสร้าง |
+
+#### 4️⃣ `nutrition_screening` - การคัดกรองโภชนาการ
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| nutrition_screening_id | INT | รหัสลำดับ (PK) |
+| doc_no | VARCHAR(20) | เลขที่เอกสาร (UK) |
+| admissions_an | VARCHAR(20) | รหัส AN (FK) |
+| patient_hn | VARCHAR(20) | รหัส HN |
+| nutritionist_id | INT | นักโภชนาการ (FK) |
+| nutrition_screening_datetime | DATETIME | วันเวลาคัดกรอง |
+| nutrition_screening_seq | INT | ลำดับ |
+| initial_diagnosis | VARCHAR(255) | การวินิจฉัยเบื้องต้น |
+| present_weight | DECIMAL(5,2) | น้ำหนักปัจจุบัน |
+| normal_weight | DECIMAL(5,2) | น้ำหนักปกติ |
+| height | DECIMAL(5,2) | ส่วนสูง (cm) |
+| bmi | DECIMAL(5,2) | ค่า BMI |
+| weight_method | VARCHAR(100) | วิธีการชั่ง |
+| q1_weight_loss | INT | คะแนน Q1 (น้ำหนักลด) |
+| q2_eat_less | INT | คะแนน Q2 (กินน้อยลง) |
+| q3_bmi_abnormal | INT | คะแนน Q3 (BMI ต่ำ) |
+| q4_critical | INT | คะแนน Q4 (ภาวะวิกฤต) |
+| nutrition_screening_result | VARCHAR(50) | ผลการคัดกรอง |
+| notes | TEXT | หมายเหตุ |
+| screening_status | VARCHAR(50) | สถานะ (ปกติ/มีความเสี่ยง) |
+| has_assessment | TINYINT(1) | มีการทำ NAF (1=มี) |
+| assessment_doc_no | VARCHAR(20) | เลขที่เอกสาร NAF |
+| created_at | DATETIME | วันเวลาสร้าง |
+
+#### 5️⃣ `nutrition_assessment` - ประเมินภาวะโภชนาการแบบละเอียด (NAF)
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| nutrition_assessment_id | INT | รหัสลำดับ (PK) |
+| doc_no | VARCHAR(20) | เลขที่เอกสาร NAF (UK) |
+| naf_seq | INT | ลำดับการประเมิน |
+| admissions_an | VARCHAR(20) | รหัส AN (FK) |
+| patient_hn | VARCHAR(20) | รหัส HN |
+| nutrition_screening_id | INT | ใบคัดกรอง (FK) |
+| nutritionist_id | INT | นักโภชนาการ (FK) |
+| nutrition_assessment_datetime | DATETIME | วันเวลาประเมิน |
+| initial_diagnosis | TEXT | การวินิจฉัย |
+| info_source | VARCHAR(50) | แหล่งที่มาข้อมูล |
+| other_source | VARCHAR(100) | แหล่งอื่นๆ |
+| height_measure | DECIMAL(5,2) | ส่วนสูงที่วัด |
+| body_length | DECIMAL(5,2) | ความยาวลำตัว |
+| arm_span | DECIMAL(5,2) | ความยาวช่วงแขน |
+| height_relative | DECIMAL(5,2) | ส่วนสูงจากญาติ |
+| weight | DECIMAL(5,2) | น้ำหนัก (kg) |
+| bmi | DECIMAL(5,2) | ค่า BMI |
+| bmi_score | INT | คะแนน BMI |
+| is_no_weight | TINYINT(1) | ชั่งไม่ได้ (1=ไม่ได้) |
+| lab_method | VARCHAR(50) | วิธี Lab (Albumin/TLC) |
+| albumin_val | DECIMAL(4,2) | ค่า Albumin |
+| tlc_val | DECIMAL(10,2) | ค่า TLC |
+| lab_score | INT | คะแนน Lab |
+| weight_option_id | INT | วิธีการชั่ง (FK) |
+| patient_shape_id | INT | ลักษณะรูปร่าง (FK) |
+| weight_change_4_weeks_id | INT | การเปลี่ยนน้ำหนัก (FK) |
+| food_type_id | INT | ประเภทอาหาร (FK) |
+| food_amount_id | INT | ปริมาณอาหาร (FK) |
+| food_access_id | INT | การเข้าถึงอาหาร (FK) |
+| total_score | INT | คะแนนรวม |
+| naf_level | VARCHAR(50) | ระดับ NAF (A/B/C) |
+| ref_screening_doc_no | VARCHAR(20) | เลขที่คัดกรองอ้างอิง |
+| created_at | DATETIME | วันเวลาสร้าง |
+
+---
+
+### **Association Tables** (2 tables)
+
+#### 6️⃣ `disease_saved` - บันทึกโรคที่ผู้ป่วยเป็น
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| disease_saved_id | INT | รหัสลำดับ (PK) |
+| nutrition_assessment_id | INT | ใบประเมิน (FK) |
+| disease_id | INT | โรค (FK) |
+| disease_other_name | VARCHAR(255) | ชื่อโรคอื่น |
+| disease_type | VARCHAR(50) | ระดับความรุนแรง |
+| disease_score | INT | คะแนนโรค |
+
+#### 7️⃣ `symptom_problem_saved` - บันทึกอาการ/ปัญหา
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| symptom_problem_saved_id | INT | รหัสลำดับ (PK) |
+| nutrition_assessment_id | INT | ใบประเมิน (FK) |
+| symptom_problem_id | INT | อาการ/ปัญหา (FK) |
+| symptom_problem_score | INT | คะแนนอาการ |
+
+---
+
+### **Master Data Tables** (5 tables)
+
+#### 8️⃣ `food_type` - ประเภทอาหาร
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| food_type_id | INT | รหัส (PK) |
+| food_type_label | VARCHAR(255) | คำอธิบาย (อาหารน้ำๆ/เหลวๆ/นุ่ม/ปกติ) |
+| food_type_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน (1=ใช้) |
+
+#### 9️⃣ `food_amount` - ปริมาณอาหาร
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| food_amount_id | INT | รหัส (PK) |
+| food_amount_label | VARCHAR(255) | คำอธิบาย (น้อยมาก/น้อย/มากขึ้น/ปกติ) |
+| food_amount_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+#### 🔟 `food_access` - การเข้าถึงอาหาร
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| food_access_id | INT | รหัส (PK) |
+| food_access_label | VARCHAR(255) | คำอธิบาย (นอนติดเตียง/ต้องมีผู้ช่วย/นั่งหรือนอน/ปกติ) |
+| food_access_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+#### 1️⃣1️⃣ `disease` - รายเอกสารโรค
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| disease_id | INT | รหัส (PK) |
+| disease_name | VARCHAR(255) | ชื่อโรค |
+| disease_type | ENUM | (โรคน้อยถึงปานกลาง/โรครุนแรง) |
+| disease_score | INT | คะแนน (3 หรือ 6) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+#### 1️⃣2️⃣ `symptom_problem` - รายเอกสารอาการ/ปัญหา
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| symptom_problem_id | INT | รหัส (PK) |
+| symptom_problem_name | VARCHAR(255) | ชื่ออาการ (สำลัก/ท้องเสีย/อาเจียน/ปกติ) |
+| symptom_problem_type | VARCHAR(255) | หมวดหมู่ (เคี้ยว/ระบบทางเดิน/ระหว่างกิน) |
+| symptom_problem_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+##### **Additional Master Data Tables:**
+
+#### 1️⃣3️⃣ `patient_shape` - ลักษณะรูปร่าง
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| patient_shape_id | INT | รหัส (PK) |
+| patient_shape_label | VARCHAR(255) | (ผอมมาก/ผอม/อ้วนมาก/ปกติ) |
+| patient_shape_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+#### 1️⃣4️⃣ `weight_option` - วิธีการชั่งน้ำหนัก
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| weight_option_id | INT | รหัส (PK) |
+| weight_option_label | VARCHAR(255) | คำอธิบาย |
+| weight_option_score | INT | คะแนน |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+#### 1️⃣5️⃣ `weight_change_4_weeks` - การเปลี่ยนแปลงน้ำหนัก 4 สัปดาห์
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| weight_change_4_weeks_id | INT | รหัส (PK) |
+| weight_change_4_weeks_label | VARCHAR(255) | (ลดลง/เพิ่มขึ้น/ไม่ทราบ/คงเดิม) |
+| weight_change_4_weeks_score | INT | คะแนน (0-2) |
+| is_active | TINYINT(1) | เปิดใช้งาน |
+
+---
+
+### **Hospital Data Tables** (3 tables)
+
+#### 1️⃣6️⃣ `doctor` - ข้อมูลแพทย์
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| doctor_id | INT | รหัส (PK) |
+| doctor_name | VARCHAR(100) | ชื่อแพทย์ |
+| doctor_specialty | VARCHAR(100) | ความเชี่ยวชาญ/แผนก |
+
+#### 1️⃣7️⃣ `ward` - ข้อมูลหอผู้ป่วย
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| ward_id | INT | รหัส (PK) |
+| ward_name | VARCHAR(100) | ชื่อหอ |
+
+#### 1️⃣8️⃣ `health_insurance` - ข้อมูลสิทธิการรักษา
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| health_insurance_id | INT | รหัส (PK) |
+| health_insurance_name | VARCHAR(100) | ชื่อสิทธิ (บัตรทอง/ประกันสังคม/ชำระเอง) |
+
+---
+
+### **Audit & Signature Table** (1 table)
+
+#### 1️⃣9️⃣ `nutritionist_signature` - ลายเซ็นดิจิทัล
+| Column | Data Type | Description |
+|--------|-----------|-------------|
+| nutritionist_signature_id | INT | รหัส (PK) |
+| nutritionist_id | INT | นักโภชนาการ (FK) |
+| nutritionist_signature_type | VARCHAR(50) | ประเภทลายเซ็น |
+| nutritionist_signature_data | LONGTEXT | ข้อมูลลายเซ็น (base64) |
+| nutritionist_signature_datetime | DATETIME | วันเวลาลงนาม |
+
+---
+
 ## 💾 PHP Entity Classes (19 Tables - Complete)
 
 ```mermaid
