@@ -722,6 +722,259 @@ Assessment:     NAF-[HN]-[SEQ]
 
 ---
 
+---
+
+## 💾 PHP Entity Classes (19 Tables - Complete)
+
+```mermaid
+classDiagram
+    direction TB
+    
+    %% Core Classes
+    class Nutritionist {
+        +int nutritionist_id PK
+        +string nutritionist_code
+        +string nutritionist_username UK
+        +string nutritionist_fullname
+        +enum nutritionist_gender
+        +string nutritionist_position
+        +string nutritionist_password
+        +string nutritionist_email
+        +string nutritionist_phone
+        +boolean is_active
+        +boolean is_admin
+        +datetime created_at
+    }
+    
+    class Patient {
+        +int patient_id PK
+        +string patient_hn UK
+        +string patient_id_card
+        +string patient_firstname
+        +string patient_lastname
+        +enum patient_gender
+        +date patient_dob
+        +string patient_phone
+        +text patient_drug_allergy
+        +text patient_congenital_disease
+    }
+    
+    class Admissions {
+        +int admissions_id PK
+        +string admissions_an UK
+        +int patient_id FK
+        +string bed_number
+        +datetime admit_datetime
+        +datetime discharge_datetime
+        +enum status
+        +int ward_id FK
+        +int doctor_id FK
+        +int health_insurance_id FK
+        +datetime created_at
+    }
+    
+    class NutritionScreening {
+        +int nutrition_screening_id PK
+        +string doc_no UK
+        +string admissions_an FK
+        +string patient_hn
+        +int nutritionist_id FK
+        +int nutrition_screening_seq
+        +datetime nutrition_screening_datetime
+        +string initial_diagnosis
+        +decimal present_weight
+        +decimal normal_weight
+        +decimal height
+        +decimal bmi
+        +string weight_method
+        +int q1_weight_loss
+        +int q2_eat_less
+        +int q3_bmi_abnormal
+        +int q4_critical
+        +string nutrition_screening_result
+        +text notes
+        +string screening_status
+        +boolean has_assessment
+        +string assessment_doc_no
+        +datetime created_at
+    }
+    
+    class NutritionAssessment {
+        +int nutrition_assessment_id PK
+        +string doc_no UK
+        +string admissions_an FK
+        +string patient_hn
+        +int nutrition_screening_id FK
+        +int nutritionist_id FK
+        +int naf_seq
+        +datetime nutrition_assessment_datetime
+        +string initial_diagnosis
+        +string info_source
+        +string other_source
+        +decimal height_measure
+        +decimal body_length
+        +decimal arm_span
+        +decimal height_relative
+        +decimal weight
+        +decimal bmi
+        +int bmi_score
+        +boolean is_no_weight
+        +string lab_method
+        +decimal albumin_val
+        +decimal tlc_val
+        +int lab_score
+        +int weight_option_id FK
+        +int patient_shape_id FK
+        +int weight_change_4_weeks_id FK
+        +int food_type_id FK
+        +int food_amount_id FK
+        +int food_access_id FK
+        +int total_score
+        +string naf_level
+        +string ref_screening_doc_no
+        +datetime created_at
+    }
+    
+    class DiseaseSaved {
+        +int disease_saved_id PK
+        +int nutrition_assessment_id FK
+        +int disease_id FK
+        +string disease_other_name
+        +string disease_type
+        +int disease_score
+    }
+    
+    class Disease {
+        +int disease_id PK
+        +string disease_name
+        +enum disease_type
+        +int disease_score
+        +boolean is_active
+    }
+    
+    class SymptomProblemSaved {
+        +int symptom_problem_saved_id PK
+        +int nutrition_assessment_id FK
+        +int symptom_problem_id FK
+        +int symptom_problem_score
+    }
+    
+    class SymptomProblem {
+        +int symptom_problem_id PK
+        +string symptom_problem_name
+        +string symptom_problem_type
+        +int symptom_problem_score
+        +boolean is_active
+    }
+    
+    class NutritionistSignature {
+        +int nutritionist_signature_id PK
+        +int nutritionist_id FK
+        +enum nutritionist_signature_type
+        +longtext nutritionist_signature_data
+        +datetime nutritionist_signature_datetime
+    }
+    
+    %% Master Data Classes
+    class FoodType {
+        +int food_type_id PK
+        +string food_type_label
+        +int food_type_score
+        +boolean is_active
+    }
+    
+    class FoodAmount {
+        +int food_amount_id PK
+        +string food_amount_label
+        +int food_amount_score
+        +boolean is_active
+    }
+    
+    class FoodAccess {
+        +int food_access_id PK
+        +string food_access_label
+        +int food_access_score
+        +boolean is_active
+    }
+    
+    class PatientShape {
+        +int patient_shape_id PK
+        +string patient_shape_label
+        +int patient_shape_score
+        +boolean is_active
+    }
+    
+    class WeightOption {
+        +int weight_option_id PK
+        +string weight_option_label
+        +int weight_option_score
+        +boolean is_active
+    }
+    
+    class WeightChange4Weeks {
+        +int weight_change_4_weeks_id PK
+        +string weight_change_4_weeks_label
+        +int weight_change_4_weeks_score
+        +boolean is_active
+    }
+    
+    %% Hospital Data Classes
+    class Doctor {
+        +int doctor_id PK
+        +string doctor_name
+        +string doctor_specialty
+    }
+    
+    class Ward {
+        +int ward_id PK
+        +string ward_name
+        +string department
+    }
+    
+    class HealthInsurance {
+        +int health_insurance_id PK
+        +string health_insurance_name
+    }
+    
+    %% Relationships - Core Business Logic
+    Nutritionist "1" --> "*" NutritionScreening : creates
+    Nutritionist "1" --> "*" NutritionAssessment : performs
+    Nutritionist "1" --> "*" NutritionistSignature : owns
+    
+    Patient "1" --> "*" Admissions : has
+    Admissions "1" --> "*" NutritionScreening : contains
+    Admissions "1" --> "*" NutritionAssessment : contains
+    
+    NutritionScreening "1" --> "*" NutritionAssessment : leads_to
+    NutritionAssessment "1" --> "*" DiseaseSaved : uses
+    NutritionAssessment "1" --> "*" SymptomProblemSaved : records
+    
+    %% Relationships - Master Data
+    Disease "1" --> "*" DiseaseSaved : referenced_in
+    SymptomProblem "1" --> "*" SymptomProblemSaved : referenced_in
+    
+    FoodType "1" --> "*" NutritionAssessment : used_in
+    FoodAmount "1" --> "*" NutritionAssessment : used_in
+    FoodAccess "1" --> "*" NutritionAssessment : used_in
+    PatientShape "1" --> "*" NutritionAssessment : documents
+    WeightOption "1" --> "*" NutritionAssessment : used_in
+    WeightChange4Weeks "1" --> "*" NutritionAssessment : measures
+    
+    %% Relationships - Hospital Data
+    Doctor "1" --> "*" Admissions : assigned_to
+    Ward "1" --> "*" Admissions : located_in
+    HealthInsurance "1" --> "*" Admissions : covered_by
+```
+
+**Legend:**
+- **PK** = Primary Key (ชื่อเฉพาะของแต่ละแถว)
+- **FK** = Foreign Key (เชื่อมต่อไปยังตารางอื่น)
+- **UK** = Unique Key (ค่าต้องไม่ซ้ำ แต่ไม่ใช่ PK)
+- **1** = One (หนึ่ง)
+- **\*** = Many (หลายรายการ)
+
+---
+
 ## 🔗 Module Dependencies
 
 ```
