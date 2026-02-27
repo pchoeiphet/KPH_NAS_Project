@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 26, 2026 at 07:56 AM
+-- Generation Time: Feb 27, 2026 at 03:55 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -366,10 +366,9 @@ CREATE TABLE `nutritionist` (
 --
 
 INSERT INTO `nutritionist` (`nutritionist_id`, `nutritionist_code`, `nutritionist_fullname`, `nutritionist_gender`, `nutritionist_position`, `nutritionist_username`, `nutritionist_password`, `nutritionist_email`, `nutritionist_phone`, `is_active`, `is_admin`, `created_at`) VALUES
-(1, 'DT-66099', 'เพชรลดา เชยเพ็ชร', 'หญิง', 'นักโภชนาการ', 'phetrada', 'phetrada2616', 'phetrada.2646@gmail.com', '0970579246', 1, 0, '2026-01-27 03:50:53'),
-(2, 'DT-66088', 'นักโภชนาการ คนที่ 2', 'ชาย', 'นักโภชนาการ', 'pheythay', 'pheythay0026', 'pheythay@gmail.com', '095222345', 1, 0, '2026-01-28 02:33:23'),
-(4, 'DT-66066', 'นักโภชนาการ คนที่ 3', 'ชาย', 'นักโภชนาการ', 'porpor', 'porpor2626', 'porpor26@gmail.com', '098456879', 1, 0, '2026-01-28 02:33:54'),
-(5, 'DT-66077', 'แอดมิน ทดสอบระบบ', 'ชาย', 'นักโภชนาการ', 'admin', 'admin2616', 'admin@gmail.com', '088777555', 1, 1, '2026-02-04 06:53:53');
+(1, 'DT-66099', 'นักโภชนาการ คนที่ 1', 'หญิง', 'นักโภชนาการ', 'user1', 'user1001', 'nutritionist01@gmail.com', '0970579246', 1, 0, '2026-01-27 03:50:53'),
+(2, 'DT-66088', 'นักโภชนาการ คนที่ 2', 'ชาย', 'นักโภชนาการ', 'user2', 'user1002', 'nutritionist02@gmail.com', '095222345', 1, 0, '2026-01-28 02:33:23'),
+(4, 'DT-66066', 'นักโภชนาการ คนที่ 3', 'ชาย', 'นักโภชนาการ', 'user3', 'user1003', 'nutritionist03@gmail.com', '098456879', 1, 0, '2026-01-28 02:33:54');
 
 -- --------------------------------------------------------
 
